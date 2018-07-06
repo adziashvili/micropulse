@@ -4,6 +4,7 @@
   "description": "Simple pulse analytics",
   "main": "app.js",
   "scripts": {
+    "start": "babel-node src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/adziashvili/micropulse/issues"
   },
-  "homepage": "https://github.com/adziashvili/micropulse#readme"
+  "homepage": "https://github.com/adziashvili/micropulse#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0"
+  },
+  "dependencies": {}
 }
