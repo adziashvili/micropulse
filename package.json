@@ -1,0 +1,19 @@
+{
+  "name": "micropulse",
+  "version": "1.0.0",
+  "description": "Simple pulse analytics",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adziashvili/micropulse.git"
+  },
+  "author": "IA",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adziashvili/micropulse/issues"
+  },
+  "homepage": "https://github.com/adziashvili/micropulse#readme"
+}
