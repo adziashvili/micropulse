@@ -1,5 +1,11 @@
-import DataManager from './dataManager'
+import StoreManager from './StoreManager'
+import Utilizations from './Utilizations'
+import UtilizationRecord from './UtilizationRecord'
+import UtilizationStore from './UtilizationStore'
 
 export {
-    DataManager,
+    StoreManager,
+    Utilizations,
+    UtilizationRecord,
+    UtilizationStore
 }
