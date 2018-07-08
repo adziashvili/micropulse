@@ -17,8 +17,7 @@ export default class StoreManager {
             {
                 "key": UTIL_STORE_KEY,
                 "store": new UtilizationStore(),
-                "path": STORAGE_BASE_PATH + "/utilizationDB.json",
-                "loadPath": "../../" + STORAGE_BASE_PATH + "/utilizationDB.json"
+                "path": STORAGE_BASE_PATH + "/utilizationDB.json",                
             }
         ]
     }
@@ -32,7 +31,7 @@ export default class StoreManager {
     initialise() {
         for ( let key of this.keys ) {
             let storeEntry = this.getStore( key, true )
-            storeEntry.store.initialise( require( storeEntry.loadPath ) )
+            storeEntry.store.initialise( require( "../../" + storeEntry.path ) )
         }
     }
 
