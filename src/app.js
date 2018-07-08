@@ -22,4 +22,4 @@ console.log( store.getRecords( UtilizationRecord.TYPE_YTD, "APAC" ) )
 console.log( "\nGetting latest APAC records for 1995 December" )
 console.log( store.getLatest( UtilizationRecord.TYPE_YTD, "APAC", 1995, 12 ) )
 
-sm.saveAll()
+// sm.saveAll()
