@@ -1,4 +1,3 @@
-import Utilizations from './utilizations'
 
 /**
  * Types of utilization records
@@ -12,7 +11,8 @@ export default class UtilizationRecord {
         this.type = type
         this.name = name
         this.date = date
-        this.utilizations = new Utilizations( billableUtilization, investmentUtilization )
+        this.billable = billableUtilization
+        this.investment = investmentUtilization
     }
 
     static get TYPES() {
@@ -71,11 +71,21 @@ export default class UtilizationRecord {
         return this._date
     }
 
-    set utilizations( utilizations ) {
-        this._utilizations = utilizations
+    set billable( billableUtilization ) {
+        this._b = billableUtilization
+    }
+    get billable() {
+        return this._b
     }
 
-    get utilizations() {
-        return this._utilizations
+    set investment( investmentUtilization ) {
+        this._i = investmentUtilization
+    }
+    get investment() {
+        return this._i
+    }
+
+    get total() {
+        return this.billable + this.investment
     }
 }
