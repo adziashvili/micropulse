@@ -6,6 +6,13 @@ export default class UtilizationStore {
         this.initialise()
     }
 
+    /**
+     * Initialises the store.
+     *
+     * @param {Array} store Records to add to store. If undefined, store is initilised to empty array.
+     *
+     * @return {void} Nothing
+     */
     initialise( store ) {
 
         if ( !store ) {
@@ -13,51 +20,86 @@ export default class UtilizationStore {
             return
         }
 
-        for ( let record of store._store ) {            
+        for ( let record of store._store ) {
             this.addRecord( new UtilizationRecord( record._type, record._name, record._date, record._b, record._i ) )
         }
+
+        console.log( "[SUCCESS] Utilization store initialised (%d records).".green, this._store.length );
     }
 
+    /**
+     * Returns a reference to the utilization store.
+     *
+     * @return {Array} Array of records consistuting the store.
+     */
     get store() {
         return this._store
     }
 
+    /**
+     * Return a sorted list of record names (distinct)
+     *
+     * @return {Array} Names in store
+     */
+    get names() {
+
+        let names = []
+
+        this.store.forEach( ( record ) => {
+            if ( !names.includes( record.name ) ) {
+                names.push( record.name )
+            }
+        } )
+
+        return names.sort()
+
+    }
+
+    /**
+     * Adds a record to the utilization store.
+     *
+     * @param {UtilizationRecord} record UtilizationRecord to add
+     */
     addRecord( record ) {
         this.store.push( record )
     }
 
+
+    /**
+     * [getRecords description]
+     *
+     * @param {[type]} type [description]
+     * @param {[type]} name [description]
+     *
+     * @return {[type]} [description]
+     */
     getRecords( type, name ) {
 
-        let tmp = this.store.filter( ( r ) => {
-            return r.type === type
+        return this.store.filter( ( r ) => {
+            return r.type === type && r.name === name
         } )
-
-        tmp = tmp.filter( ( r ) => {
-            return r.name === name
-        } )
-
-        return tmp
     }
 
+    /**
+     * [getLatest description]
+     *
+     * @param {[type]} type  [description]
+     * @param {[type]} name  [description]
+     * @param {[type]} year  [description]
+     * @param {[type]} month [description]
+     *
+     * @return {[type]} [description]
+     */
     getLatest( type, name, year, month ) {
 
-        // Which month are looking for?
-        let strMonth = month < 10
-            ? "0" + month
-            : "" + month
-
-        let strDate = year + "-" + strMonth + "-01T00:00:00"
-
-        let monthDate = new Date( strDate )
-
-        console.log( strDate );
+        let monthDate = new Date( year, month )
 
         // get the records for type and name
         let records = this.getRecords( type, name )
 
-        // filter the reocrds that are above the threshhold
+        // filter the reocrds for the relevant month
         records = records.filter( ( r ) => {
-            return r.date.getYear() == monthDate.getYear() && r.date.getMonth() == monthDate.getMonth()
+            return r.date.getFullYear() == monthDate.getFullYear() && r.date.getMonth() == monthDate.getMonth()
         } )
 
         if ( records.length > 0 ) {

@@ -8,7 +8,6 @@ const _UT_TYPES = [ "MONTHLY", "YTD" ]
 export default class UtilizationRecord {
 
     constructor( type, name, date, billableUtilization, investmentUtilization ) {
-
         this.type = type
         this.name = name
         this.date = date
@@ -75,6 +74,7 @@ export default class UtilizationRecord {
     set billable( billableUtilization ) {
         this._b = billableUtilization
     }
+
     get billable() {
         return this._b
     }
@@ -82,6 +82,7 @@ export default class UtilizationRecord {
     set investment( investmentUtilization ) {
         this._i = investmentUtilization
     }
+
     get investment() {
         return this._i
     }
