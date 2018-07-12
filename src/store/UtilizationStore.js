@@ -1,9 +1,15 @@
+const assert = require( 'assert' )
 import UtilizationRecord from './UtilizationRecord'
 
 export default class UtilizationStore {
 
     constructor() {
-        this.initialise()
+        this._store = []
+        this._types = [ "Billable", "Investment", "Total" ]
+        this._monthly = []
+        this._ytd = []
+        this._names = []
+        this.date = null
     }
 
     /**
@@ -15,16 +21,97 @@ export default class UtilizationStore {
      */
     initialise( store ) {
 
-        if ( !store ) {
-            this._store = []
-            return
-        }
-
         for ( let record of store._store ) {
             this.addRecord( new UtilizationRecord( record._type, record._name, record._date, record._b, record._i ) )
         }
 
-        console.log( "[SUCCESS] Utilization store initialised (%d records).".green, this._store.length );
+        console.log( "[MICROPULSE] Utilization store loaded %d records.".green, this._store.length );
+    }
+
+    build( names, date ) {
+
+        this._names = names
+        this._date = date
+
+        this.monthly = this.buildModel( UtilizationRecord.TYPE_MONTHLY )
+        this.ytd = this.buildModel( UtilizationRecord.TYPE_YTD )
+    }
+
+    buildModel( uType ) {
+
+        let model = []
+
+        this.names.forEach( ( name ) => {
+            this.types.forEach( ( type ) => {
+                if ( !model[ name ] ) {
+                    model[ name ] = {}
+                }
+                model[ name ][ type ] = []
+
+                for ( let m = 0; m < this.date.getMonth(); m++ ) {
+                    let records = this.getLatest( uType, name, this.date.getFullYear(), m )
+                    assert( records.length <= 1 )
+
+                    let utilization = records.length === 0
+                        ? 0
+                        : type === "Billable"
+                            ? records[ 0 ].billable
+                            : type === "Investment"
+                                ? records[ 0 ].investment
+                                : records[ 0 ].total
+
+                    model[ name ][ type ][ m ] = Math.round( utilization * 1000 ) / 1000
+                }
+            } )
+
+            model[ name ][ "MoM" ] = [ 1 ]
+
+            let changes = model[ name ][ "MoM" ]
+            let values = model[ name ].Total
+
+            for ( let i = 1; i < values.length; i++ ) {
+                let change = values[ i ] / (
+                    values[i - 1] === 0
+                        ? 1
+                        : values[i - 1]
+                )
+                changes.push( values[ i ] / values[i - 1] )
+            }
+        } )
+
+        return model
+    }
+
+    get monthly() {
+        return this._monthly
+    }
+
+    set monthly( model ) {
+        this._monthly = model
+    }
+
+    get types() {
+        return this._types
+    }
+
+    get names() {
+        return this._names
+    }
+
+    set date( d ) {
+        this._date = null
+    }
+
+    get date() {
+        return this._date
+    }
+
+    get ytd() {
+        return this._ytd
+    }
+
+    set ytd( model ) {
+        this._ytd = model
     }
 
     /**
@@ -37,11 +124,11 @@ export default class UtilizationStore {
     }
 
     /**
-     * Return a sorted list of record names (distinct)
+     * Return a sorted list of record names (distinct) as listed in the data.
      *
      * @return {Array} Names in store
      */
-    get names() {
+    listNames() {
 
         let names = []
 
@@ -52,7 +139,6 @@ export default class UtilizationStore {
         } )
 
         return names.sort()
-
     }
 
     /**
@@ -63,7 +149,6 @@ export default class UtilizationStore {
     addRecord( record ) {
         this.store.push( record )
     }
-
 
     /**
      * [getRecords description]

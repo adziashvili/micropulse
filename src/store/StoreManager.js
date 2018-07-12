@@ -17,7 +17,7 @@ export default class StoreManager {
             {
                 "key": UTIL_STORE_KEY,
                 "store": new UtilizationStore(),
-                "path": STORAGE_BASE_PATH + "/utilizationDB.json",                
+                "path": STORAGE_BASE_PATH + "/utilizationDB.json"
             }
         ]
     }
@@ -56,6 +56,10 @@ export default class StoreManager {
 
     get stores() {
         return this._stores
+    }
+
+    get names() {
+        return this._names
     }
 
     getStore( key, isGetEntry = false ) {

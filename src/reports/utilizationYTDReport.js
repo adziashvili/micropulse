@@ -1,131 +1,50 @@
-const assert = require( 'assert' )
-
 import { UtilizationRecord } from '../store'
 import { StringHelper, DateHelper } from '../common'
+import { ReportHelper } from '../reports'
+
+const DEVIDER = "---------------------------------------------------------------"
+
+const UP = "\u25B4".green
+const DOWN = "\u25Be".red
 
 export default class UtilizationYTDReport {
 
     constructor( store, names ) {
-        this.utils = []
-        this.names = names
         this.store = store
-
-        this.types = [ "Billable", "Investment", "Total" ]
+        this.reportName = "MONTHLY UTILIZATION | YTD"
+        this.rh = new ReportHelper( this.reportName, store.date )
     }
 
     report() {
 
-        let today = new Date( Date.now() )
-        let dh = new DateHelper( today )
+        let deviderName = [ "APAC", "APJ" ]
 
-        console.log( "\n%s\n%s", "Utilization YTD".bold, dh.localeDateString.grey );
-        console.log( "---------------------------------------------------------------".grey );
+        this.rh.addReportTitle()
+        // print report title
 
-        let titleString = StringHelper.padOrTrim( "", 12 )
-        for ( let month = 0; month < today.getMonth(); month++ ) {
-            titleString += "\t" + DateHelper.getMonthName( month )
-        }
-        // print col titles
-
-        console.log( "\n%s".bold, titleString )
+        this.rh.addHeaderAsMonths()
         // print title
 
-        this.names.forEach( ( name ) => {
-            if ( [ "APAC", "APJ" ].includes( name ) ) {
-                console.log( "---------------------------------------------------------------".grey );
-            }
-            console.log( "%s".bold, name )
-            this.types.forEach( ( type ) => {
-                this.addUtilization( name, type, today )
-                this.reportUtilization( this.utils[name], type )
+        this.store.names.forEach( ( name ) => {
 
+            this.rh.addDevider( name, deviderName )
+            // ---
+            console.log( "%s".bold, name )
+            this.store.types.forEach( ( type ) => {
+                this.reportUtilization( this.store.monthly[name], this.store.ytd[name], type )
             } )
             this.reportMom( name )
-            this.reportInsights( this.utils[ name ][ "MoM" ] )
-            if ( [ "APAC", "APJ" ].includes( name ) ) {
-                console.log( "---------------------------------------------------------------\n".grey );
-            }
+            console.log( "" );
+            this.reportAverages( this.store.monthly[ name ]["MoM"], this.store.ytd[ name ][ "MoM" ] )
+            console.log( "" );
+            // ---
+            this.rh.addDevider( name, deviderName, true )
+
         } )
-        // report basics
-
-        console.log( "RAISE THE BAR (TRIPLE GREEN) LEADERBOARD".green )
-
-        console.log( "ABOVE THE BAR (>60%) LEADERBOARD".green )
-
-        console.log( "STEADY (REPEATS)".green )
-
+        // report
     }
 
-    reportMom( name ) {
-
-        this.utils[ name ][ "MoM" ] = [ 1 ]
-
-        let changes = this.utils[ name ][ "MoM" ]
-        let values = this.utils[ name ].Total
-
-        for ( let i = 1; i < values.length; i++ ) {
-            let change = values[ i ] / (
-                values[i - 1] === 0
-                    ? 1
-                    : values[i - 1]
-            )
-            changes.push( values[ i ] / values[i - 1] )
-        }
-
-        let uStr = ( StringHelper.padOrTrim( "  MoM", 12 ) ).grey + "\t"
-
-        changes.forEach( ( v ) => {
-            uStr += (
-                v === 1
-                    ? "  -  ".grey
-                    : v > 1
-                        ? "\u25B2".green + ( " " + ( ( v - 1 ) * 100 ).toFixed(
-                            v - 1 > 0.1
-                                ? 0
-                                : 1
-                        ) + "%" ).grey
-                        : "\u25BC".red + ( " " + ( ( 1 - v ) * 100 ).toFixed(
-                            Math.abs( 1 - v ) > 0.1
-                                ? 0
-                                : 1
-                        ) + "%" ).grey
-            ) + "\t"
-        } )
-
-        console.log( uStr );
-    }
-
-    reportInsights( series ) {
-
-        let twoMonthChange = this.trailingAverage( series, 2 )
-        let threeMonthChange = this.trailingAverage( series, 3 )
-        let sixMonthChange = this.trailingAverage( series, 6 )
-
-        console.log( "\t\t\t\t6 months avg. change:\t %s%".grey, ( sixMonthChange * 100 ).toFixed( 1 ) )
-        console.log( "\t\t\t\t3 months avg. change:\t %s%".grey, ( threeMonthChange * 100 ).toFixed( 1 ) )
-        console.log( "\t\t\t\t2 months avg. change:\t %s%".grey, ( twoMonthChange * 100 ).toFixed( 1 ) )
-    }
-
-    trailingAverage( series, size ) {
-        let i = 1,
-            sum = 0,
-            len = series.length
-
-        do {
-            sum += this.absChange( series[len - i] )
-            i++
-        } while ( i <= size )
-
-        return sum / size
-    }
-
-    absChange( change ) {
-        return ( change - 1 ) >= 0
-            ? change - 1
-            : 1 - change
-    }
-
-    reportUtilization( u, type ) {
+    reportUtilization( u, ytd, type ) {
 
         let uStr = ( StringHelper.padOrTrim( "  " + type, 12 ) ).grey + "\t"
 
@@ -133,43 +52,77 @@ export default class UtilizationYTDReport {
             uStr += this.format( type, v ) + "\t"
         } )
 
+        uStr += "| " + this.format( type, ytd[ type ][ytd[ type ].length - 1] )
+
         if ( type === "Total" ) {
             console.log( "%s".bold, uStr );
         } else {
             console.log( uStr );
         }
+    }
+
+    reportMom( name ) {
+
+        let uStr = ( StringHelper.padOrTrim( "  MoM", 12 ) ).grey + "\t"
+
+        this.store.monthly[ name ][ "MoM" ].forEach( ( v ) => {
+            uStr += this.change( v ) + "\t"
+        } )
+
+        uStr += "| " + this.change( this.store.ytd[ name ][ "MoM" ][this.store.ytd[ name ][ "MoM" ].length - 1] )
+
+        console.log( uStr );
+    }
+
+    change( v ) {
+        return v === 1
+            ? "  -  ".grey
+            : v > 1
+                ? UP + ( " " + ( ( v - 1 ) * 100 ).toFixed(
+                    v - 1 > 0.1
+                        ? 0
+                        : 1
+                ) + "%" ).grey
+                : DOWN + ( " " + ( ( 1 - v ) * 100 ).toFixed(
+                    Math.abs( 1 - v ) > 0.1
+                        ? 0
+                        : 1
+                ) + "%" ).grey
 
     }
 
-    addUtilization( name, valueType, today ) {
+    reportAverages( series, ytd ) {
 
-        if ( !this.utils[ name ] ) {
-            this.utils[ name ] = {}
+        let strPrefix = ""
+        let iPrefix = 0
+
+        while ( iPrefix++ < ( series.length - 2 ) + 1 ) {
+            strPrefix += "\t"
         }
 
-        this.utils[ name ][ valueType ] = []
-
-        for ( let m = 0; m < today.getMonth(); m++ ) {
-            let records = this.store.getLatest( UtilizationRecord.TYPE_MONTHLY, name, today.getFullYear(), m )
-            assert( records.length <= 1 )
-
-            let utilization = records.length === 0
-                ? 0
-                : valueType === "Billable"
-                    ? records[ 0 ].billable
-                    : valueType === "Investment"
-                        ? records[ 0 ].investment
-                        : records[ 0 ].total
-
-            this.utils[ name ][ valueType ][ m ] = Math.round( utilization * 1000 ) / 1000
-        }
+        console.log( "%s5 months avg.:\t%s\t| %s".grey, strPrefix, this.format( "C", this.trailingAverage( series, 5 ), 0, false ), this.format( "C", this.trailingAverage( ytd, 5 ), 0, false ) )
+        console.log( "%s3 months avg.:\t%s\t| %s".grey, strPrefix, this.format( "C", this.trailingAverage( series, 3 ), 0, false ), this.format( "C", this.trailingAverage( ytd, 3 ), 0, false ) )
+        console.log( "%s2 months avg.:\t%s\t| %s".grey, strPrefix, this.format( "C", this.trailingAverage( series, 2 ), 0, false ), this.format( "C", this.trailingAverage( ytd, 2 ), 0, false ) )
     }
 
-    format( valueType, value ) {
+    trailingAverage( series, periods ) {
+        let count = periods,
+            sum = 0,
+            len = series.length
 
-        let valueString = ( value * 100 ).toFixed( 2 ) + "%"
+        while ( count > 0 ) {
+            sum += series[len - count] - 1
+            count--
+        }
 
-        valueString = valueString.length < 6
+        return sum / periods
+    }
+
+    format( valueType, value, digits = 1, bPad = true, bSymbol ) {
+
+        let valueString = ( Math.abs( value ) * 100 ).toFixed( digits ) + "%"
+
+        valueString = valueString.length < 5 && bPad
             ? "0" + valueString
             : valueString
 
@@ -180,8 +133,11 @@ export default class UtilizationYTDReport {
             case "Investment":
                 return this.trafficLights( value, valueString, 0.2, 0.2 * 0.8 )
                 break
-            default:
+            case "Total":
                 return this.trafficLights( value, valueString, 0.6, 0.6 * 0.8 )
+                break
+            default:
+                return this.addSymbol( value, this.changeLights( value, valueString ) )
         }
     }
 
@@ -191,5 +147,21 @@ export default class UtilizationYTDReport {
             : value >= ameberThreahold
                 ? valueString.yellow
                 : valueString.red
+    }
+
+    changeLights( value, valueString ) {
+        return value > 0
+            ? valueString.green
+            : value < 0
+                ? valueString.red
+                : valueString.grey
+    }
+
+    addSymbol( v, vStr ) {
+        return v > 0
+            ? UP + " " + vStr
+            : v < 0
+                ? DOWN + " " + vStr
+                : vStr
     }
 }
