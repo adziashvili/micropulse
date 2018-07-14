@@ -22,11 +22,15 @@ export default class ReportHelper {
     }
 
     get UP() {
-        return ""+ "\u25B4".green
+        return "\u25B4".green
     }
 
     get DOWN() {
         return "\u25Be".red
+    }
+
+    get NO_CHANGE() {
+        return "-".grey
     }
 
     addChangeSymbol( v, vStr ) {
@@ -34,7 +38,24 @@ export default class ReportHelper {
             ? this.UP + " " + vStr
             : v < 0
                 ? this.DOWN + " " + vStr
-                : vStr
+                : this.NO_CHANGE + " " + vStr
+    }
+
+    addChangeColor( value, valueString ) {
+        return value > 0
+            ? valueString.green
+            : value < 0
+                ? valueString.red
+                : valueString.grey
+    }
+
+    addTrafficLights( value, valueString, target, goYellowThreahold ) {
+
+        return value >= target
+            ? valueString.green
+            : value >= target * goYellowThreahold
+                ? valueString.yellow
+                : valueString.red
     }
 
     /**

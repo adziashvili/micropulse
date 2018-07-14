@@ -38,7 +38,7 @@ let reports = [
 ]
 
 reports.forEach( ( report ) => {
-    report.report()
+    report.report( true )
     rh.addWhiteSpece( postReportWhiteSpece )
 } )
 
