@@ -9,7 +9,7 @@ export default class UtilizationAboveSixtyReport {
         this.type = type
         this.leaderboard = []
         this.rounds = this.store.date.getMonth()
-        this.rh = new ReportHelper( "ABOVE 60% LEADERBOARD (" + type + ")", this.store.date )
+        this.rh = new ReportHelper( type + " ABOVE 60% LEADERBOARD", this.store.date )
         this.initialise()
     }
 
@@ -43,8 +43,10 @@ export default class UtilizationAboveSixtyReport {
 
     report() {
         this.rh.addReportTitle()
-        let i = 0,
-            leader = 1
+        this.rh.addSubtitle( "Times " + this.type + " utilization was above 60%" )
+
+        let i = 0
+        let leader = 1
 
         while ( i < this.leaderboard.length && this.leaderboard[ i ].score > 0 ) {
 
@@ -63,6 +65,6 @@ export default class UtilizationAboveSixtyReport {
         let successRatio = leader.score / this.rounds * 100
 
         return StringHelper.padOrTrim( leader.name, 10 ).bold + leader.score + " times" +
-                "\t(" + successRatio.toFixed( 1 ) + "%, " + this.rounds + " rounds)"
+                "\t(" + successRatio.toFixed( 1 ) + "% of " + this.rounds + " rounds)"
     }
 }

@@ -1,11 +1,10 @@
 let colors = require( 'colors' )
 
 import { StoreManager, UtilizationRecord, UtilizationStore } from './store'
-import { UtilizationYTDReport, UtilizationTripleGreenReport, UtilizationAboveSixtyReport, ReportHelper } from './reports'
+import { UtilizationYTDReport, UtilizationTripleGreenReport, UtilizationAboveSixtyReport, ReportHelper, UtilizationTopBottomReport } from './reports'
 import { FSHelper, JSONHelper } from './common'
 
 console.clear()
-console.log( "[MICROPULSE] Start".red );
 
 let names = [
     "ANZ",
@@ -17,21 +16,25 @@ let names = [
     "APJ Shared",
     "APJ"
 ]
+// This allows easy control the order of the report
 
 let today = new Date( Date.now() )
-
 let sm = new StoreManager()
-// data should be loaded to stores
-
 sm.utilizationStore.build( names, today )
-// building the models
+// Unless building the models (indexes) no data will be presented
+
+console.log( "%s %s", "[MICROPULSE]".red, "Based on Jan-June 2018 SalesForce data".grey.italic );
+
+console.log("\n\n\n2018 UTILIZATION... ".bold.cyan);
+new UtilizationYTDReport( sm.utilizationStore ).report()
+// Main report
+
+console.log("2018 LEADERBOARDS... ".bold.cyan);
 
 new UtilizationTripleGreenReport( sm.utilizationStore ).report()
-
 new UtilizationAboveSixtyReport( sm.utilizationStore, UtilizationRecord.TYPE_YTD ).report()
 new UtilizationAboveSixtyReport( sm.utilizationStore, UtilizationRecord.TYPE_MONTHLY ).report()
+new UtilizationTopBottomReport( sm.utilizationStore, UtilizationTopBottomReport.TOP ).report()
+new UtilizationTopBottomReport( sm.utilizationStore, UtilizationTopBottomReport.BOTTOM ).report()
 
-new UtilizationYTDReport( sm.utilizationStore ).report()
-// reporting sm.saveAll()
-
-console.log( "\n[MICROPULSE] End :)\n".red );
+// Deep utilization analysis reporting sm.saveAll()

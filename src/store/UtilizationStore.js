@@ -1,5 +1,6 @@
 const assert = require( 'assert' )
 import UtilizationRecord from './UtilizationRecord'
+import { JSONHelper } from '../common'
 
 export default class UtilizationStore {
 
@@ -8,6 +9,8 @@ export default class UtilizationStore {
         this._types = [ "Billable", "Investment", "Total" ]
         this._monthly = []
         this._ytd = []
+        this._top = []
+        this._bottom = []
         this._names = []
         this.date = null
     }
@@ -35,6 +38,7 @@ export default class UtilizationStore {
 
         this.monthly = this.buildModel( UtilizationRecord.TYPE_MONTHLY )
         this.ytd = this.buildModel( UtilizationRecord.TYPE_YTD )
+        this.buildTop()
     }
 
     buildModel( uType ) {
@@ -80,6 +84,62 @@ export default class UtilizationStore {
         } )
 
         return model
+    }
+
+    buildTop() {
+
+        let topOrBottomSize = 10
+        let tmp = JSONHelper.deepClone( this.store )
+
+        tmp.sort( ( a, b ) => {
+            let at = a._b + a._i
+            let bt = b._b + b._i
+            return bt - at
+        } )
+        // sort by total
+
+        let nonPracticeNames = [ "APJ", "APAC", "APJ Shared" ]
+        tmp = tmp.filter( ( item ) => {
+            return !nonPracticeNames.includes( item._name )
+        } )
+        // remove the  aggregation entries
+
+        for ( let i = 0; i < topOrBottomSize; i++ ) {
+            this.top.push( {
+                name: tmp[ i ]._name,
+                total: ( tmp[ i ]._i + tmp[ i ]._b ).toFixed( 3 ) * 1,
+                date: tmp[ i ]._date,
+                type: tmp[ i ]._type
+            } )
+        }
+        // take top 10
+
+        for (let i = tmp.length; i-- > tmp.length - topOrBottomSize;) {
+            this.bottom.push( {
+
+                name: tmp[ i ]._name,
+                total: ( tmp[ i ]._i + tmp[ i ]._b ).toFixed( 3 ) * 1,
+                date: tmp[ i ]._date,
+                type: tmp[ i ]._type
+            } )
+        }
+        // take bottom 10
+    }
+
+    set bottom( bottom ) {
+        this._bottom = bottom
+    }
+
+    get bottom() {
+        return this._bottom
+    }
+
+    set top( top ) {
+        this._top = top
+    }
+
+    get top() {
+        return this._top
     }
 
     get monthly() {

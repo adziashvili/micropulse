@@ -1,4 +1,4 @@
-import {StringHelper, DateHelper } from '../common'
+import { StringHelper, DateHelper } from '../common'
 
 const DEVIDER = "----------------------------------------------------------------"
 
@@ -16,7 +16,12 @@ export default class ReportHelper {
             ? this.reportName
             : newTitle
 
-        console.log( "\n\n\n%s\n%s", title.bold.underline, this.dh.localeDateString.grey.italic );        
+        // console.log( "\n\n\n%s\n%s", title.bold.underline, this.dh.localeDateString.grey.italic );
+        console.log( "\n\n\n%s", title.bold.underline );
+    }
+
+    addSubtitle( subtitle ) {
+        console.log( "\n%s\n".grey.italic, subtitle );
     }
 
     addDevider( name = "", addForNames = [], bAddNewLine = false ) {
@@ -42,7 +47,7 @@ export default class ReportHelper {
             header += "\t" + DateHelper.getMonthName( month )
         }
 
-        header +="\t| YTD"
+        header += "\t| YTD"
         // print col titles
 
         console.log( "\n%s".bold, header )

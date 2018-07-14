@@ -27,7 +27,20 @@ export default class DateHelper {
     }
 
     get localeDateString() {
-        return this.date.toLocaleDateString( 'de-DE', options )
+        return this.date.toLocaleDateString( 'en-US', options )
+    }
+
+    get monthYear() {
+        return this.monthName + " " + this.year
+    }
+
+    get year() {
+        return this.date.getFullYear()
+    }
+
+    get isNew() {
+        let today = new Date( Date.now() )
+        return this.date.getMonth() === today.getMonth() - 1
     }
 
     get monthName() {

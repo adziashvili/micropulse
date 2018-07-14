@@ -37,7 +37,11 @@ export default class UtilizationTripleGreenReport {
 
     report() {
         this.rh.addReportTitle()
-        let i = 0, leader = 1
+        let green = "Green".green.italic
+        this.rh.addSubtitle( "Practice is " + green +  " on Billable, Investment and Total Utilization".grey.italic )
+
+        let i = 0,
+            leader = 1
 
         while ( i < this.leaderboard.length && this.leaderboard[ i ].score > 0 ) {
 
@@ -56,6 +60,6 @@ export default class UtilizationTripleGreenReport {
         let successRatio = leader.score / this.rounds * 100
 
         return StringHelper.padOrTrim( leader.name, 10 ).bold + leader.score + " times" +
-                "\t(" + successRatio.toFixed( 1 ) + "%, " + this.rounds + " rounds)"
+                "\t(" + successRatio.toFixed( 1 ) + "% of " + this.rounds + " rounds)"
     }
 }
