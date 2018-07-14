@@ -21,6 +21,22 @@ export default class ReportHelper {
         this.date = date
     }
 
+    get UP() {
+        return ""+ "\u25B4".green
+    }
+
+    get DOWN() {
+        return "\u25Be".red
+    }
+
+    addChangeSymbol( v, vStr ) {
+        return v > 0
+            ? this.UP + " " + vStr
+            : v < 0
+                ? this.DOWN + " " + vStr
+                : vStr
+    }
+
     /**
      * Prints a bold underline title string as passed in the constructor reportName
      *

@@ -2,11 +2,6 @@ import { UtilizationRecord } from '../store'
 import { StringHelper, DateHelper } from '../common'
 import { ReportHelper } from '../reports'
 
-const DEVIDER = "---------------------------------------------------------------"
-
-const UP = "\u25B4".green
-const DOWN = "\u25Be".red
-
 export default class UtilizationYTDReport {
 
     constructor( store, names ) {
@@ -39,7 +34,6 @@ export default class UtilizationYTDReport {
             console.log( "" );
             // ---
             this.rh.addDevider( name, deviderName, true )
-
         } )
         // report
     }
@@ -63,6 +57,8 @@ export default class UtilizationYTDReport {
 
     reportMom( name ) {
 
+        console.log( "" );
+
         let uStr = ( StringHelper.padOrTrim( "  MoM", 12 ) ).grey + "\t"
 
         this.store.monthly[ name ][ "MoM" ].forEach( ( v ) => {
@@ -75,15 +71,16 @@ export default class UtilizationYTDReport {
     }
 
     change( v ) {
+
         return v === 1
             ? "  -  ".grey
             : v > 1
-                ? UP + ( " " + ( ( v - 1 ) * 100 ).toFixed(
+                ? this.rh.UP + ( " " + ( ( v - 1 ) * 100 ).toFixed(
                     v - 1 > 0.1
                         ? 0
                         : 1
                 ) + "%" ).grey
-                : DOWN + ( " " + ( ( 1 - v ) * 100 ).toFixed(
+                : this.rh.DOWN + ( " " + ( ( 1 - v ) * 100 ).toFixed(
                     Math.abs( 1 - v ) > 0.1
                         ? 0
                         : 1
@@ -136,8 +133,8 @@ export default class UtilizationYTDReport {
             case "Total":
                 return this.trafficLights( value, valueString, 0.6, 0.6 * 0.8 )
                 break
-            default:
-                return this.addSymbol( value, this.changeLights( value, valueString ) )
+            default:                
+                return this.rh.addChangeSymbol( value, this.changeLights( value, valueString ) )
         }
     }
 
@@ -155,13 +152,5 @@ export default class UtilizationYTDReport {
             : value < 0
                 ? valueString.red
                 : valueString.grey
-    }
-
-    addSymbol( v, vStr ) {
-        return v > 0
-            ? UP + " " + vStr
-            : v < 0
-                ? DOWN + " " + vStr
-                : vStr
     }
 }

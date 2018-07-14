@@ -56,7 +56,7 @@ export default class UtilizationTopBottomReport {
             this.newEntrentAlert = true
         }
 
-        if ( record.total > 0.7 ) {
+        if ( record.total > 0.75 ) {
             str += " " + BURNOUT_FLAG
             this.burnoutAlert = true
         }
