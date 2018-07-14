@@ -27,8 +27,6 @@ export default class UtilizationStore {
         for ( let record of store._store ) {
             this.addRecord( new UtilizationRecord( record._type, record._name, record._date, record._b, record._i ) )
         }
-
-        console.log( "[MICROPULSE] Utilization store loaded %d records.".green, this._store.length );
     }
 
     build( names, date ) {
