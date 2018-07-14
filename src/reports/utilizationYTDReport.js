@@ -22,14 +22,14 @@ export default class UtilizationYTDReport {
         this.rh.addReportTitle()
         // print report title
 
-        this.rh.addHeaderAsMonths()
-        // print title
-
         this.store.names.forEach( ( name ) => {
 
             this.rh.addDevider( name, deviderName )
             // ---
-            console.log( "%s".bold, name )
+
+            this.rh.addHeaderAsMonths( name )
+            // print headers
+
             this.store.types.forEach( ( type ) => {
                 this.reportUtilization( this.store.monthly[name], this.store.ytd[name], type )
             } )
