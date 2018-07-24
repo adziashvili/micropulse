@@ -1,8 +1,12 @@
-import UtilizationStore from './UtilizationStore'
+const path = require( 'path' )
 
+import UtilizationStore from './UtilizationStore'
 import { FSHelper, JSONHelper } from '../common'
 
 const STORAGE_BASE_PATH = "./data"
+const STORAGE_BASE_PATH_ABS = path.join( __dirname, "../../data" )
+const NEW_DATA_FILE = "in.xlsx"
+const NEW_DATA_FILE_WARINING = "in.xls"
 const UTIL_STORE_KEY = "UtilizationStore"
 
 export default class StoreManager {
@@ -20,6 +24,33 @@ export default class StoreManager {
                 "path": STORAGE_BASE_PATH + "/utilizationDB.json"
             }
         ]
+    }
+
+    static getDataDiretory() {
+        return STORAGE_BASE_PATH_ABS
+    }
+
+    static path( fileName ) {
+        return path.join( STORAGE_BASE_PATH_ABS, fileName )
+    }
+
+    static utilizationStorePath() {
+        return path.join( STORAGE_BASE_PATH_ABS, "utilizationDB.json" )
+    }
+
+    static isNewInputFile() {
+
+        let dir = FSHelper.listdirectory( STORAGE_BASE_PATH_ABS )
+
+        if ( dir.includes( NEW_DATA_FILE_WARINING ) ) {
+            console.log( "[MP] If you would like process %s, convert it to .xlsx file and try again" );
+        }
+
+        return dir.includes( NEW_DATA_FILE )
+    }
+
+    static newInputFilePath() {
+        return path.join( STORAGE_BASE_PATH_ABS, NEW_DATA_FILE )
     }
 
     get keys() {

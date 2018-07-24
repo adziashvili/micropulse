@@ -4,7 +4,7 @@ import { ReportHelper } from '../reports'
 
 const TGT_BILLABLE = 0.4
 const TGT_INVESTMENT = 0.2
-const TGT_TOTAL = TGT_BILLABLE + TGT_INVESTMENT
+const TGT_TOTAL = ( TGT_BILLABLE + TGT_INVESTMENT ).toFixed( 3 ) * 1
 const YELLOW_THRESHOLD = 0.8
 
 /**
@@ -49,9 +49,11 @@ export default class UtilizationYTDReport {
             this.reportUtilization( this.store.monthly[name], this.store.ytd[name], "Total", "Monthly" )
             this.reportMom( this.store.monthly[ name ]["MoM"], "MoM" )
 
+            console.log( "" )
+            this.reportUtilization( this.store.ytd[name], this.store.ytd[name], "Total", "YTD" )
+
             if ( isVerbose ) {
-                console.log( "" )
-                this.reportUtilization( this.store.ytd[name], this.store.ytd[name], "Total", "YTD" )
+
                 this.reportMom( this.store.ytd[ name ]["MoM"], "MoM" )
 
                 console.log( "" )
@@ -109,7 +111,8 @@ export default class UtilizationYTDReport {
             uStr += this.formatMom( v ) + "\t"
         } )
 
-        uStr += "| " + this.formatAverageMom( this.trailingAverage( series, 5 ) )
+        uStr += "| " + this.formatAverageMom( this.trailingAverage( series, 5 ) ) +
+                " On Avg.".grey.italic
 
         console.log( uStr );
     }

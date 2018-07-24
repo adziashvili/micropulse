@@ -1,6 +1,6 @@
 import { StringHelper, DateHelper } from '../common'
 
-const DEVIDER = "----------------------------------------------------------------"
+const DEVIDER = "------------------------------------------------------------------------"
 // Report devider
 
 /**

@@ -1,8 +1,11 @@
-let colors = require( 'colors' )
+const path = require( 'path' )
+const colors = require( 'colors' )
 
-import { StoreManager, UtilizationRecord, UtilizationStore } from './store'
-import { UtilizationYTDReport, UtilizationTripleGreenReport, UtilizationAboveSixtyReport, ReportHelper, UtilizationTopBottomReport } from './reports'
+import { StoreManager, UtilizationRecord, UtilizationStore, UtilizationReader } from './store'
+import { UtilizationPulse } from './reports'
 import { FSHelper, JSONHelper } from './common'
+
+const REPORT_DATE = new Date( 2018, 7, 30 )
 
 console.clear()
 
@@ -16,30 +19,23 @@ let names = [
     "APJ Shared",
     "APJ"
 ]
-// This allows easy control the order of the report
-
-let today = new Date( Date.now() )
-let rh = new ReportHelper( "", today )
-let postReportWhiteSpece = 2
 
 let sm = new StoreManager()
-sm.utilizationStore.build( names, today )
-// Unless building the models (indexes) no data will be presented
+sm.utilizationStore.build( names, REPORT_DATE )
 
-console.log( "%s %s (%s records)", "[MICROPULSE]".red, "Jan-June 2018 SalesForce data".grey.italic, sm.utilizationStore.store.length );
+function micropulse() {
+    new UtilizationPulse( sm.utilizationStore, REPORT_DATE ).run()
+}
 
-let reports = [
-    new UtilizationYTDReport( sm.utilizationStore ),
-    new UtilizationTripleGreenReport( sm.utilizationStore ),
-    new UtilizationAboveSixtyReport( sm.utilizationStore, UtilizationRecord.TYPE_YTD ),
-    new UtilizationAboveSixtyReport( sm.utilizationStore, UtilizationRecord.TYPE_MONTHLY ),
-    new UtilizationTopBottomReport( sm.utilizationStore, UtilizationTopBottomReport.TOP ),
-    new UtilizationTopBottomReport( sm.utilizationStore, UtilizationTopBottomReport.BOTTOM )
-]
+// Here we start
 
-reports.forEach( ( report ) => {
-    report.report( true )
-    rh.addWhiteSpece( postReportWhiteSpece )
-} )
+if ( StoreManager.isNewInputFile() ) {
+    // let's resolve new input
+    console.log( '[MP] New input file detect. Reconciling ...'.yellow );
+    sm.utilizationStore.processNewData( micropulse )
 
-// Deep utilization analysis reporting sm.saveAll()
+} else {
+    micropulse()
+}
+
+// sm.saveAll()

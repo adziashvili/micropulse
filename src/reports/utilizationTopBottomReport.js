@@ -51,7 +51,7 @@ export default class UtilizationTopBottomReport {
         let str = ( "#" + ++this.position + ". " + pad + record.name ).bold + "  \t" +
                 score + "\t" + dh.monthYear
 
-        if ( dh.isNew  ) {
+        if ( dh.isNew ) {
             str += " " + this.newEntrentSymbole()
             this.newEntrentAlert = true
         }
@@ -71,6 +71,7 @@ export default class UtilizationTopBottomReport {
     }
 
     report() {
+
         this.rh.addReportTitle()
         let qualifier = this.type === UtilizationTopBottomReport.TOP
             ? " best ".green

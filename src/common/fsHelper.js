@@ -6,8 +6,8 @@ import JSONHelper from './jsonHelper'
 export default class FSHelper {
     constructor() {}
 
- /**
-  * Checks if a provided apth is either a file or a directory
+    /**
+  * Checks if a provided path is either a file or a directory
   *
   * @param {string} path A string to test for being a valid Path
   * @return {Boolean} true if yes; false otherwise
@@ -98,6 +98,22 @@ export default class FSHelper {
                     fileName
                 )
             } )
+        }
+    }
+
+    static rename( fileName, newFileName, verbose = false ) {
+
+        if ( !newFileName ) {
+            throw new Error( 'newFileName is undefined' )
+        } else if ( !fileName ) {
+            throw new Error( 'fileName is undefined' )
+        } else if ( !fs ) {
+            throw new Error( 'System error. fs is undefined' )
+        } else {
+            fs.renameSync( fileName, newFileName )
+            if ( verbose ) {
+                console.log( "Renamed %s -> %s".italic.grey, fileName, newFileName );
+            }
         }
     }
 }

@@ -1,5 +1,8 @@
 const assert = require( 'assert' )
 import UtilizationRecord from './UtilizationRecord'
+import UtilizationReader from './UtilizationReader'
+import UtilizationReconciler from './UtilizationReconciler'
+
 import { JSONHelper } from '../common'
 
 export default class UtilizationStore {
@@ -13,6 +16,7 @@ export default class UtilizationStore {
         this._bottom = []
         this._names = []
         this.date = null
+        this._reader = new UtilizationReader()
     }
 
     /**
@@ -24,11 +28,38 @@ export default class UtilizationStore {
      */
     initialise( store ) {
 
-        for ( let record of store._store ) {
-            this.addRecord( new UtilizationRecord( record._type, record._name, record._date, record._b, record._i ) )
-        }
+        let records = store._store.map( ( record ) => {
+            return new UtilizationRecord( record._type, record._name, record._date, record._b, record._i )
+        } )
+
+        this.store = records
     }
 
+    /**
+     * Returns a reference to the utilization store.
+     *
+     * @return {Array} Array of records consistuting the store.
+     */
+    get store() {
+        return this._store
+    }
+
+    set store( records ) {
+        this._store = records
+    }
+
+    rebuild() {
+        this.build( this.names, this.date )
+    }
+
+    /**
+     * Builds all models based on records in store.
+     *
+     * @param {[type]} names [description]
+     * @param {[type]} date  [description]
+     *
+     * @return {[type]} [description]
+     */
     build( names, date ) {
 
         this._names = names
@@ -52,6 +83,7 @@ export default class UtilizationStore {
 
                 for ( let m = 0; m < this.date.getMonth(); m++ ) {
                     let records = this.getLatest( uType, name, this.date.getFullYear(), m )
+
                     assert( records.length <= 1 )
 
                     let utilization = records.length === 0
@@ -86,6 +118,9 @@ export default class UtilizationStore {
 
     buildTop() {
 
+        this.bottom = []
+        this.top = []
+
         let topOrBottomSize = 10
         let tmp = JSONHelper.deepClone( this.store )
 
@@ -100,7 +135,7 @@ export default class UtilizationStore {
         tmp = tmp.filter( ( item ) => {
             return !nonPracticeNames.includes( item._name )
         } )
-        // remove the  aggregation entries
+        // remove the aggregation entries
 
         for ( let i = 0; i < topOrBottomSize; i++ ) {
             this.top.push( {
@@ -122,6 +157,25 @@ export default class UtilizationStore {
             } )
         }
         // take bottom 10
+    }
+
+    get reader() {
+        return this._reader
+    }
+
+    set reader( reader ) {
+        this._reader = reader
+    }
+
+    processNewData( onDataProcessComplete ) {
+        this.onDataProcessComplete = onDataProcessComplete
+        UtilizationReader.read( "./data/in.xlsx", this )
+    }
+
+    reconcile() {
+        let reconciler = new UtilizationReconciler( this )
+        reconciler.reconcile()
+        this.onDataProcessComplete()
     }
 
     set bottom( bottom ) {
@@ -172,13 +226,8 @@ export default class UtilizationStore {
         this._ytd = model
     }
 
-    /**
-     * Returns a reference to the utilization store.
-     *
-     * @return {Array} Array of records consistuting the store.
-     */
-    get store() {
-        return this._store
+    get size() {
+        return this._store.length
     }
 
     /**

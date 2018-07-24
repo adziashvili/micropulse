@@ -1,4 +1,3 @@
-
 /**
  * Types of utilization records
  * @type {Array}
@@ -89,5 +88,13 @@ export default class UtilizationRecord {
 
     get total() {
         return this.billable + this.investment
+    }
+
+    toString() {
+        return `[${ this.type}] [${ this.date.getMonth() + 1}-${ this.date.getFullYear()}] ${ this.name}  b:${ this.billable} i:${ this.investment }`
+    }
+
+    clone() {
+        return new UtilizationRecord( this.type, this.name, this.date, this.billable, this.investment )
     }
 }
