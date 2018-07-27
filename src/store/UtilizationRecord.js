@@ -28,9 +28,11 @@ export default class UtilizationRecord {
 
     set type( type ) {
         if ( !UtilizationRecord.TYPES.includes( type ) ) {
-            console.log( "Utilization Record must be either '%s' or '%s'", UtilizationRecord.TYPE_MONTHLY, UtilizationRecord.TYPE_YTD )
+            console.log( "Utilization Record must be either '%s' or '%s'",
+                UtilizationRecord.TYPE_MONTHLY, UtilizationRecord.TYPE_YTD
+            )
             throw "DataValidationError: '" + type +
-                    "' is an invalid utilization record type"
+                "' is an invalid utilization record type"
 
         }
 
@@ -45,7 +47,7 @@ export default class UtilizationRecord {
 
         if ( !name ) {
             throw "DataValidationError: Utilization record must be associated with a name. '" +
-                    name + "' is invalid"
+                name + "' is invalid"
         }
         this._name = name
     }
@@ -58,9 +60,9 @@ export default class UtilizationRecord {
         if ( !date ) {
             date = new Date( Date.now() )
         } else {
-            let timeInMili = "string" === typeof( date )
-                ? Date.parse( date )
-                : date
+            let timeInMili = "string" === typeof ( date ) ?
+                Date.parse( date ) :
+                date
             date = new Date( timeInMili )
         }
         this._date = date
@@ -95,6 +97,7 @@ export default class UtilizationRecord {
     }
 
     clone() {
-        return new UtilizationRecord( this.type, this.name, this.date, this.billable, this.investment )
+        return new UtilizationRecord( this.type, this.name, this.date, this
+            .billable, this.investment )
     }
 }

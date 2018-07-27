@@ -24,12 +24,12 @@ export default class UtilizationPulse {
     run() {
         let postReportWhiteSpece = 2
 
-        console.log( "%s %s (%s records)", "[MICROPULSE]".red, "Jan-June 2018 SalesForce data".grey.italic, this.store.size );
+        console.log( "%s %s (%s records)", "[MICROPULSE]".red, "Jan 01 - Jul 25, 2018 SalesForce data".grey.italic, this.store.size );
         this.reports.forEach( ( report ) => {
             report.report( false )
             this.rh.addWhiteSpece( this.postReportWhiteSpece )
         } )
 
-        this.reports[ 0 ].report( true )
+        // this.reports[ 0 ].report( true )
     }
 }

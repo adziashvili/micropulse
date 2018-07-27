@@ -20,8 +20,8 @@ export default class JSONHelper {
      * @return {[type]}  [description]
      */
     static stringify( obj, pretty = true ) {
-        return pretty
-            ? JSON.stringify( JSON.parse( JSON.stringify( obj ) ), null, 2 )
-            : JSON.stringify( obj )
+        return pretty ?
+            JSON.stringify( JSON.parse( JSON.stringify( obj ) ), null, 2 ) :
+            JSON.stringify( obj )
     }
 }

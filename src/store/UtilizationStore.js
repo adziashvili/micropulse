@@ -3,7 +3,9 @@ import UtilizationRecord from './UtilizationRecord'
 import UtilizationReader from './UtilizationReader'
 import UtilizationReconciler from './UtilizationReconciler'
 
-import { JSONHelper } from '../common'
+import {
+    JSONHelper
+} from '../common'
 
 export default class UtilizationStore {
 
@@ -29,7 +31,8 @@ export default class UtilizationStore {
     initialise( store ) {
 
         let records = store._store.map( ( record ) => {
-            return new UtilizationRecord( record._type, record._name, record._date, record._b, record._i )
+            return new UtilizationRecord( record._type, record._name,
+                record._date, record._b, record._i )
         } )
 
         this.store = records
@@ -82,19 +85,22 @@ export default class UtilizationStore {
                 model[ name ][ type ] = []
 
                 for ( let m = 0; m < this.date.getMonth(); m++ ) {
-                    let records = this.getLatest( uType, name, this.date.getFullYear(), m )
+                    let records = this.getLatest( uType,
+                        name, this.date.getFullYear(),
+                        m )
 
                     assert( records.length <= 1 )
 
-                    let utilization = records.length === 0
-                        ? 0
-                        : type === "Billable"
-                            ? records[ 0 ].billable
-                            : type === "Investment"
-                                ? records[ 0 ].investment
-                                : records[ 0 ].total
+                    let utilization =
+                        records.length === 0 ? 0 :
+                        type === "Billable" ?
+                        records[ 0 ].billable :
+                        type === "Investment" ?
+                        records[ 0 ].investment :
+                        records[ 0 ].total
 
-                    model[ name ][ type ][ m ] = Math.round( utilization * 1000 ) / 1000
+                    model[ name ][ type ][ m ] = Math.round(
+                        utilization * 1000 ) / 1000
                 }
             } )
 
@@ -105,11 +111,11 @@ export default class UtilizationStore {
 
             for ( let i = 1; i < values.length; i++ ) {
                 let change = values[ i ] / (
-                    values[i - 1] === 0
-                        ? 1
-                        : values[i - 1]
+                    values[ i - 1 ] === 0 ?
+                    1 :
+                    values[ i - 1 ]
                 )
-                changes.push( values[ i ] / values[i - 1] )
+                changes.push( values[ i ] / values[ i - 1 ] )
             }
         } )
 
@@ -140,18 +146,22 @@ export default class UtilizationStore {
         for ( let i = 0; i < topOrBottomSize; i++ ) {
             this.top.push( {
                 name: tmp[ i ]._name,
-                total: ( tmp[ i ]._i + tmp[ i ]._b ).toFixed( 3 ) * 1,
+                total: ( tmp[ i ]._i + tmp[ i ]._b )
+                    .toFixed( 3 ) *
+                    1,
                 date: tmp[ i ]._date,
                 type: tmp[ i ]._type
             } )
         }
         // take top 10
 
-        for (let i = tmp.length; i-- > tmp.length - topOrBottomSize;) {
+        for ( let i = tmp.length; i-- > tmp.length - topOrBottomSize; ) {
             this.bottom.push( {
 
                 name: tmp[ i ]._name,
-                total: ( tmp[ i ]._i + tmp[ i ]._b ).toFixed( 3 ) * 1,
+                total: ( tmp[ i ]._i + tmp[ i ]._b )
+                    .toFixed( 3 ) *
+                    1,
                 date: tmp[ i ]._date,
                 type: tmp[ i ]._type
             } )
@@ -291,7 +301,8 @@ export default class UtilizationStore {
 
         // filter the reocrds for the relevant month
         records = records.filter( ( r ) => {
-            return r.date.getFullYear() == monthDate.getFullYear() && r.date.getMonth() == monthDate.getMonth()
+            return r.date.getFullYear() == monthDate.getFullYear() &&
+                r.date.getMonth() == monthDate.getMonth()
         } )
 
         if ( records.length > 0 ) {

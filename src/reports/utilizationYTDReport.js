@@ -4,7 +4,8 @@ import { ReportHelper } from '../reports'
 
 const TGT_BILLABLE = 0.4
 const TGT_INVESTMENT = 0.2
-const TGT_TOTAL = ( TGT_BILLABLE + TGT_INVESTMENT ).toFixed( 3 ) * 1
+const TGT_TOTAL = ( TGT_BILLABLE + TGT_INVESTMENT )
+    .toFixed( 3 ) * 1
 const YELLOW_THRESHOLD = 0.8
 
 /**
@@ -44,20 +45,44 @@ export default class UtilizationYTDReport {
             this.rh.addHeaderAsMonths( name )
             // print headers
 
-            this.reportUtilization( this.store.monthly[name], this.store.ytd[name], "Billable" )
-            this.reportUtilization( this.store.monthly[name], this.store.ytd[name], "Investment" )
-            this.reportUtilization( this.store.monthly[name], this.store.ytd[name], "Total", "Monthly" )
-            this.reportMom( this.store.monthly[ name ]["MoM"], "MoM" )
+            this.reportUtilization(
+                this.store.monthly[ name ],
+                this.store.ytd[ name ],
+                "Billable" )
+
+            this.reportUtilization(
+                this.store.monthly[ name ],
+                this.store.ytd[ name ],
+                "Investment" )
+
+            this.reportUtilization(
+                this.store.monthly[ name ],
+                this.store.ytd[ name ],
+                "Total",
+                "Monthly" )
+
+            this.reportMom(
+                this.store.monthly[ name ][ "MoM" ],
+                "MoM" )
 
             console.log( "" )
-            this.reportUtilization( this.store.ytd[name], this.store.ytd[name], "Total", "YTD" )
+            this.reportUtilization(
+                this.store.ytd[ name ],
+                this.store.ytd[ name ],
+                "Total", "YTD" )
 
             if ( isVerbose ) {
 
-                this.reportMom( this.store.ytd[ name ]["MoM"], "MoM" )
+                this.reportMom(
+                    this.store.ytd[ name ][ "MoM" ],
+                    "MoM" )
 
                 console.log( "" )
-                this.reportAverages( this.store.monthly[ name ]["MoM"], this.store.ytd[ name ][ "MoM" ] )
+
+                this.reportAverages(
+                    this.store.monthly[ name ][ "MoM" ],
+                    this.store.ytd[ name ][ "MoM" ] )
+
                 console.log( "" )
             }
             // ---
@@ -77,17 +102,20 @@ export default class UtilizationYTDReport {
      */
     reportUtilization( series, ytd, type, title ) {
 
-        title = !title
-            ? type
-            : title
+        title = !title ?
+            type :
+            title
 
-        let uStr = ( StringHelper.padOrTrim( "  " + title, 12 ) ).grey + "\t"
+        let uStr = ( StringHelper.exact( "  " + title, 12 ) )
+            .grey + "\t"
 
         series[ type ].forEach( ( v ) => {
             uStr += this.format( type, v ) + "\t"
         } )
 
-        uStr += "| " + this.format( type, ytd[ type ][ytd[ type ].length - 1] )
+        uStr += "| " + this.format(
+            type,
+            ytd[ type ][ ytd[ type ].length - 1 ] )
 
         if ( type === "Total" ) {
             console.log( "%s".bold, uStr );
@@ -105,20 +133,23 @@ export default class UtilizationYTDReport {
 
         // let momYTD = this.store.ytd[ name ][ "MoM" ]
 
-        let uStr = ( StringHelper.padOrTrim( "  " + title, 12 ) ).grey + "\t"
+        let uStr = ( StringHelper.exact( "  " + title, 12 ) )
+            .grey + "\t"
 
         series.forEach( ( v ) => {
             uStr += this.formatMom( v ) + "\t"
         } )
 
-        uStr += "| " + this.formatAverageMom( this.trailingAverage( series, 5 ) ) +
-                " On Avg.".grey.italic
+        uStr += "| " + this.formatAverageMom( this.trailingAverage( series,
+                5 ) ) +
+            " On Avg.".grey.italic
 
         console.log( uStr );
     }
 
     formatAverageMom( avg ) {
-        let formated = "" + ( avg * 100 ).toFixed( 0 ) + "%"
+        let formated = "" + ( avg * 100 )
+            .toFixed( 0 ) + "%"
 
         formated = formated.grey
 
@@ -134,19 +165,23 @@ export default class UtilizationYTDReport {
      */
     formatMom( v ) {
 
-        return v === 1
-            ? "  -  ".grey
-            : v > 1
-                ? this.rh.UP + ( " " + ( ( v - 1 ) * 100 ).toFixed(
-                    v - 1 > 0.1
-                        ? 0
-                        : 1
-                ) + "%" ).grey
-                : this.rh.DOWN + ( " " + ( ( 1 - v ) * 100 ).toFixed(
-                    Math.abs( 1 - v ) > 0.1
-                        ? 0
-                        : 1
-                ) + "%" ).grey
+        return v === 1 ?
+            "  -  ".grey :
+            v > 1 ?
+            this.rh.UP + ( " " + ( ( v - 1 ) * 100 )
+                .toFixed(
+                    v - 1 > 0.1 ?
+                    0 :
+                    1
+                ) + "%" )
+            .grey :
+            this.rh.DOWN + ( " " + ( ( 1 - v ) * 100 )
+                .toFixed(
+                    Math.abs( 1 - v ) > 0.1 ?
+                    0 :
+                    1
+                ) + "%" )
+            .grey
 
     }
 
@@ -165,8 +200,14 @@ export default class UtilizationYTDReport {
             strPrefix += "\t"
         }
 
-        console.log( "%s4 months avg. change (motnhly | YTD):\t%s\t| %s".grey, strPrefix, this.format( "C", this.trailingAverage( monthly, 4 ), 0, false ), this.format( "C", this.trailingAverage( ytd, 4 ), 0, false ) )
-        console.log( "%s2 months avg. change (motnhly | YTD):\t%s\t| %s".grey, strPrefix, this.format( "C", this.trailingAverage( monthly, 2 ), 0, false ), this.format( "C", this.trailingAverage( ytd, 2 ), 0, false ) )
+        console.log( "%s4 months avg. change (motnhly | YTD):\t%s\t| %s".grey,
+            strPrefix, this.format( "C", this.trailingAverage( monthly,
+                4 ), 0, false ), this.format( "C", this.trailingAverage(
+                ytd, 4 ), 0, false ) )
+        console.log( "%s2 months avg. change (motnhly | YTD):\t%s\t| %s".grey,
+            strPrefix, this.format( "C", this.trailingAverage( monthly,
+                2 ), 0, false ), this.format( "C", this.trailingAverage(
+                ytd, 2 ), 0, false ) )
     }
 
     /**
@@ -184,7 +225,7 @@ export default class UtilizationYTDReport {
             len = series.length
 
         while ( count > 0 ) {
-            sum += series[len - count] - 1
+            sum += series[ len - count ] - 1
             count--
         }
 
@@ -203,24 +244,29 @@ export default class UtilizationYTDReport {
      */
     format( valueType, value, digits = 1, bPad = true ) {
 
-        let valueString = ( Math.abs( value ) * 100 ).toFixed( digits ) + "%"
+        let valueString = ( Math.abs( value ) * 100 )
+            .toFixed( digits ) + "%"
 
-        valueString = valueString.length < 5 && bPad
-            ? "0" + valueString
-            : valueString
+        valueString = valueString.length < 5 && bPad ?
+            "0" + valueString :
+            valueString
 
         switch ( valueType ) {
-            case "Billable":
-                return this.rh.addTrafficLights( value, valueString, TGT_BILLABLE, YELLOW_THRESHOLD )
-                break
-            case "Investment":
-                return this.rh.addTrafficLights( value, valueString, TGT_INVESTMENT, YELLOW_THRESHOLD )
-                break
-            case "Total":
-                return this.rh.addTrafficLights( value, valueString, TGT_TOTAL, YELLOW_THRESHOLD )
-                break
-            default:
-                return this.rh.addChangeSymbol( value, this.rh.addChangeColor( value, valueString ) )
+        case "Billable":
+            return this.rh.addTrafficLights( value, valueString,
+                TGT_BILLABLE, YELLOW_THRESHOLD )
+            break
+        case "Investment":
+            return this.rh.addTrafficLights( value, valueString,
+                TGT_INVESTMENT, YELLOW_THRESHOLD )
+            break
+        case "Total":
+            return this.rh.addTrafficLights( value, valueString, TGT_TOTAL,
+                YELLOW_THRESHOLD )
+            break
+        default:
+            return this.rh.addChangeSymbol( value, this.rh.addChangeColor(
+                value, valueString ) )
         }
     }
 }

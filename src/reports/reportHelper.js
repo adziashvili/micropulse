@@ -127,7 +127,7 @@ export default class ReportHelper {
             ? this.date.getMonth()
             : toMonth
 
-        let header = StringHelper.padOrTrim( prefix, 12 )
+        let header = StringHelper.exact( prefix, 12 )
 
         for ( let month = 0; month < toMonth; month++ ) {
             header += "\t " + DateHelper.getMonthName( month )

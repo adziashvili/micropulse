@@ -24,8 +24,10 @@ export default class UtilizationReconciler {
             }
         } )
 
-        console.log( ( "+ %d records from currnet will be merged to the new list. Total %d records aft" +
-            "er merge." ).yellow, newRecordsCount, toList.length )
+        console.log( (
+                "+ %d records from currnet will be merged to the new list. Total %d records aft" +
+                "er merge." )
+            .yellow, newRecordsCount, toList.length )
 
         if ( newRecordsCount > 0 ) {
             console.log( "! Committing changes".red )
@@ -33,14 +35,16 @@ export default class UtilizationReconciler {
         }
     }
 
-    commit(records) {
+    commit( records ) {
         // backup utilization store db
         let utilStoreFile = StoreManager.utilizationStorePath()
-        FSHelper.rename( utilStoreFile, this.touchName( utilStoreFile, "back" ), true )
+        FSHelper.rename( utilStoreFile, this.touchName( utilStoreFile,
+            "back" ), true )
 
         // backup input file
         let inputFile = StoreManager.newInputFilePath()
-        FSHelper.rename( inputFile, this.touchName( inputFile, "back" ), true )
+        FSHelper.rename( inputFile, this.touchName( inputFile, "back" ),
+            true )
 
         // Commit new records to store
         this.store.store = records
@@ -48,14 +52,16 @@ export default class UtilizationReconciler {
 
         // clean the store from cicular references
         this.store.reader = null
-        
+
         // Save new data
         FSHelper.save( this.store, utilStoreFile )
     }
 
     isIncluded( record, list ) {
         let filterlist = list.filter( ( r ) => {
-            return r.type === record.type && r.name === record.name && r.date.getFullYear() == record.date.getFullYear() && r.date.getMonth() == record.date.getMonth()
+            return r.type === record.type && r.name === record.name &&
+                r.date.getFullYear() == record.date.getFullYear() &&
+                r.date.getMonth() == record.date.getMonth()
         } )
 
         return filterlist.length > 0
@@ -63,6 +69,7 @@ export default class UtilizationReconciler {
 
     touchName( fileName, prefix ) {
         let d = new Date( Date.now() )
-        return fileName + `.${ prefix}.D_${ d.getFullYear()}_${ d.getMonth()}_${ d.getDate()}_T_${ d.getHours()}_${ d.getMinutes()}_${ d.getSeconds()}__${ d.getMilliseconds() }`
+        return fileName +
+            `.${ prefix}.D_${ d.getFullYear()}_${ d.getMonth()}_${ d.getDate()}_T_${ d.getHours()}_${ d.getMinutes()}_${ d.getSeconds()}__${ d.getMilliseconds() }`
     }
 }

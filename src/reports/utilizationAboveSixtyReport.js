@@ -54,7 +54,7 @@ export default class UtilizationAboveSixtyReport {
                 ? position = ""
                 : position = "#" + ( leader++ ) + "."
 
-            position = StringHelper.padOrTrim( position, 3 ).bold
+            position = StringHelper.exact( position, 3 ).bold
             console.log( "%s %s", position, this.addPosition( this.leaderboard[ i ] ) );
 
             i++
@@ -64,7 +64,7 @@ export default class UtilizationAboveSixtyReport {
     addPosition( leader ) {
         let successRatio = leader.score / this.rounds * 100
 
-        return StringHelper.padOrTrim( leader.name, 10 ).bold + leader.score + " times" +
+        return StringHelper.exact( leader.name, 10 ).bold + leader.score + " times" +
                 "\t(" + successRatio.toFixed( 1 ) + "% of " + this.rounds + " rounds)"
     }
 }

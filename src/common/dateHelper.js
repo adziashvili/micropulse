@@ -1,10 +1,3 @@
-const options = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-}
-
 const monthNames = [
     "Jan",
     "Feb",
@@ -20,6 +13,9 @@ const monthNames = [
     "Dec"
 ]
 
+/**
+ * Helper function for quick date functions
+ */
 export default class DateHelper {
 
     constructor( date ) {
@@ -27,6 +23,14 @@ export default class DateHelper {
     }
 
     get localeDateString() {
+
+        let options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }
+
         return this.date.toLocaleDateString( 'en-US', options )
     }
 

@@ -1,7 +1,10 @@
 const path = require( 'path' )
 
 import UtilizationStore from './UtilizationStore'
-import { FSHelper, JSONHelper } from '../common'
+import {
+    FSHelper,
+    JSONHelper
+} from '../common'
 
 const STORAGE_BASE_PATH = "./data"
 const STORAGE_BASE_PATH_ABS = path.join( __dirname, "../../data" )
@@ -43,7 +46,9 @@ export default class StoreManager {
         let dir = FSHelper.listdirectory( STORAGE_BASE_PATH_ABS )
 
         if ( dir.includes( NEW_DATA_FILE_WARINING ) ) {
-            console.log( "[MP] If you would like process %s, convert it to .xlsx file and try again" );
+            console.log(
+                "[MP] If you would like process %s, convert it to .xlsx file and try again"
+            );
         }
 
         return dir.includes( NEW_DATA_FILE )
@@ -99,10 +104,10 @@ export default class StoreManager {
             return store.key === key
         } )
 
-        return match.length === 1
-            ? isGetEntry
-                ? match[ 0 ]
-                : match[ 0 ].store
-            : null
+        return match.length === 1 ?
+            isGetEntry ?
+            match[ 0 ] :
+            match[ 0 ].store :
+            null
     }
 }

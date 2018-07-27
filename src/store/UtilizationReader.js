@@ -1,4 +1,6 @@
-import { UtilizationRecord } from '../store'
+import {
+    UtilizationRecord
+} from '../store'
 
 const assert = require( 'assert' )
 
@@ -21,8 +23,6 @@ const CELLS = [
 ]
 
 const NOT_FOUND = -1
-
-let GREADER = null
 
 const DATES_ROW_MARKER = "Resource Practice"
 const REPORT_DATE_CELL = "A6"
@@ -67,18 +67,30 @@ export default class UtilizationReader {
         let readPromise = wb.xlsx.readFile( file ).then( ( value ) => {
             wb.eachSheet( function ( ws, sheetId ) {
                 if ( [ "in", "mp" ].includes( ws.name ) ) {
-                    utilizationStore.reader.onWorkshoeetRead( ws )
+                    utilizationStore.reader.onWorkshoeetRead(
+                        ws )
                     utilizationStore.reconcile()
                 }
             } )
         } )
     }
 
+    /**
+     * Processes the worksheet that was read.
+     * Populates records as read from the excel.
+     *
+     * @param {[type]} worksheet The raw worksheet that was read.
+     *
+     * @return {Void} Nothing.
+     */
     onWorkshoeetRead( worksheet ) {
         this.ws = worksheet
 
-        let dates = this.readValues( UTILIZATION_DATA_FIRST_COL, this.getAnchorRow( DATES_ROW_MARKER ) )
-        dates[dates.length - 1] = dates[dates.length - 2]
+        let dates = this.readValues(
+            UTILIZATION_DATA_FIRST_COL,
+            this.getAnchorRow( DATES_ROW_MARKER ) )
+
+        dates[ dates.length - 1 ] = dates[ dates.length - 2 ]
 
         this.practices.forEach( ( practice ) => {
 
@@ -88,8 +100,13 @@ export default class UtilizationReader {
                 return
             }
 
-            practice.billable = this.readValues( UTILIZATION_DATA_FIRST_COL, practice.row )
-            practice.investment = this.readValues( UTILIZATION_DATA_FIRST_COL, practice.row + 1 )
+            practice.billable = this.readValues(
+                UTILIZATION_DATA_FIRST_COL,
+                practice.row )
+
+            practice.investment = this.readValues(
+                UTILIZATION_DATA_FIRST_COL,
+                practice.row + 1 )
 
             let periods = dates.length
 
@@ -97,18 +114,40 @@ export default class UtilizationReader {
             assert( periods === practice.investment.length )
 
             for ( let i = 0; i < periods - 1; i++ ) {
-                this.records.push( new UtilizationRecord( UtilizationRecord.TYPE_MONTHLY, practice.name, dates[i], practice.billable[i], practice.investment[ i ] ) )
+                this.records.push(
+                    new UtilizationRecord(
+                        UtilizationRecord.TYPE_MONTHLY,
+                        practice.name,
+                        dates[ i ],
+                        practice.billable[ i ],
+                        practice.investment[ i ] ) )
             }
 
-            this.records.push( new UtilizationRecord( UtilizationRecord.TYPE_YTD, practice.name, dates[periods - 1], practice.billable[periods - 1], practice.investment[periods - 1] ) )
-
+            this.records.push(
+                new UtilizationRecord(
+                    UtilizationRecord.TYPE_YTD,
+                    practice.name,
+                    dates[ periods - 1 ],
+                    practice.billable[ periods - 1 ],
+                    practice.investment[ periods - 1 ] ) )
         } )
     }
 
+    /**
+     * Calculates and returns the size of reocrds.
+     * This is similar to this.records.length.
+     *
+     * @return {Number} Length of records read from excel
+     */
     get size() {
         return this.records.length
     }
 
+    /**
+     * Return a new copy of read records. This new copy can be freely manipulated.
+     *
+     * @return {Array} Array copy of records
+     */
     cloneRecords() {
         let newRecords = []
         this.records.forEach( ( r ) => {
@@ -130,7 +169,7 @@ export default class UtilizationReader {
 
         while ( true ) {
 
-            let value = this.ws.getCell( "" + CELLS[col - 1] + row ).value
+            let value = this.ws.getCell( "" + CELLS[ col - 1 ] + row ).value
 
             if ( value !== null ) {
                 values.push( value )
@@ -199,6 +238,6 @@ export default class UtilizationReader {
         let tokens1 = date.split( "/" )
         let tokens2 = tokens1[ 2 ].split( " " )
 
-        return new Date( tokens2[0], tokens1[ 0 ] - 1, tokens1[ 1 ] )
+        return new Date( tokens2[ 0 ], tokens1[ 0 ] - 1, tokens1[ 1 ] )
     }
 }
