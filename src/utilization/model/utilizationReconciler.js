@@ -1,8 +1,8 @@
 const readline = require( 'readline' )
 const path = require( 'path' )
 
-import { FSHelper } from '../common'
-import StoreManager from './StoreManager'
+import { FSHelper } from '../../common'
+import { StoreManager } from '../../store'
 
 export default class UtilizationReconciler {
 

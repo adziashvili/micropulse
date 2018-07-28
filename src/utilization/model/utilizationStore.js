@@ -1,13 +1,16 @@
 const assert = require( 'assert' )
+
+import { JSONHelper } from '../../common'
+
 import UtilizationRecord from './UtilizationRecord'
 import UtilizationReader from './UtilizationReader'
 import UtilizationReconciler from './UtilizationReconciler'
 
-import {
-    JSONHelper
-} from '../common'
-
 export default class UtilizationStore {
+
+    static get STORE_KEY() {
+        return "UtilizationStore"
+    }
 
     constructor() {
         this._store = []
@@ -179,7 +182,7 @@ export default class UtilizationStore {
 
     processNewData( onDataProcessComplete ) {
         this.onDataProcessComplete = onDataProcessComplete
-        UtilizationReader.read( "./data/in.xlsx", this )
+        UtilizationReader.read( "./data/utilization.xlsx", this )
     }
 
     reconcile() {

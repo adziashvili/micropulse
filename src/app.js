@@ -1,8 +1,8 @@
 const path = require( 'path' )
 const colors = require( 'colors' )
 
-import { StoreManager, UtilizationRecord, UtilizationStore, UtilizationReader } from './store'
-import { UtilizationPulse } from './reports'
+import { StoreManager } from './store'
+import { Pulse } from './utilization'
 import { FSHelper, JSONHelper } from './common'
 
 const REPORT_DATE = new Date( 2018, 7, 30 )
@@ -23,20 +23,20 @@ let names = [
 // Used to force a specific order on the reports so APAC names comes first.
 
 let sm = new StoreManager()
-sm.utilizationStore.build( names, REPORT_DATE )
+sm.buildAll( names, REPORT_DATE )
 
 function micropulse() {
-    new UtilizationPulse( sm.utilizationStore, REPORT_DATE )
+    new Pulse(
+            sm.utilizationStore,
+            REPORT_DATE )
         .run()
 }
 
-if ( StoreManager.isNewInputFile() ) {
-    console.log( '[MP] New input file detect. Reconciling ...'.yellow );
+if ( sm.hasNewData() ) {
+    console.log( '[MP] New data is avaiallbe. Processing...'.yellow );
     sm.utilizationStore.processNewData( micropulse )
     // resolving new input file Once processed, the reports will be printed
 } else {
     micropulse()
     // no file to process Printing out the report
 }
-
-sm.saveAll()

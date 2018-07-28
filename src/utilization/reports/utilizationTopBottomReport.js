@@ -1,6 +1,5 @@
-import { ReportHelper } from '../reports'
-import { UtilizationRecord } from '../store'
-import { StringHelper, DateHelper } from '../common'
+import { StringHelper, DateHelper, ReportHelper } from '../../common'
+import { UtilizationRecord } from '../model'
 
 export default class UtilizationTopBottomReport {
 

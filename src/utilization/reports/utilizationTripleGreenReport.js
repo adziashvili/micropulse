@@ -1,23 +1,18 @@
-import { ReportHelper } from '../reports'
-import { UtilizationRecord } from '../store'
-import { StringHelper } from '../common'
+import { ReportHelper, StringHelper } from '../../common'
 
-export default class UtilizationAboveSixtyReport {
+export default class UtilizationTripleGreenReport {
 
-    constructor( store, type ) {
+    constructor( store ) {
         this.store = store
-        this.type = type
         this.leaderboard = []
         this.rounds = this.store.date.getMonth()
-        this.rh = new ReportHelper( type + " ABOVE 60% LEADERBOARD", this.store.date )
+        this.rh = new ReportHelper( "TRIPLE GREEN LEADERBOARD", this.store.date )
         this.initialise()
     }
 
     initialise() {
         let store = this.store
-        let model = this.type === UtilizationRecord.TYPE_YTD
-            ? store.ytd
-            : store.monthly
+        let monthly = store.monthly
         let date = store.date
 
         store.names.forEach( ( name ) => {
@@ -25,10 +20,8 @@ export default class UtilizationAboveSixtyReport {
         } )
 
         store.names.forEach( ( name ) => {
-
             for ( let m = 0; m < date.getMonth(); m++ ) {
-                if ( model[ name ][ "Total" ][ m ] >= 0.6 ) {
-
+                if ( monthly[ name ][ "Billable" ][ m ] >= 0.4 && monthly[ name ][ "Investment" ][ m ] >= 0.2 ) {
                     this.leaderboard.find( ( candidate ) => {
                         return candidate.name === name
                     } ).score++
@@ -43,10 +36,11 @@ export default class UtilizationAboveSixtyReport {
 
     report() {
         this.rh.addReportTitle()
-        this.rh.addSubtitle( "Times " + this.type + " utilization was above 60%" )
+        let green = "Green".green.italic
+        this.rh.addSubtitle( "Practice is " + green +  " on Billable, Investment and Total Utilization".grey.italic )
 
-        let i = 0
-        let leader = 1
+        let i = 0,
+            leader = 1
 
         while ( i < this.leaderboard.length && this.leaderboard[ i ].score > 0 ) {
 

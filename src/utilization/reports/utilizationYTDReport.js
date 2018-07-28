@@ -1,6 +1,5 @@
-import { UtilizationRecord } from '../store'
-import { StringHelper, DateHelper } from '../common'
-import { ReportHelper } from '../reports'
+import { UtilizationRecord } from '../model'
+import { ReportHelper, StringHelper, DateHelper } from '../../common'
 
 const TGT_BILLABLE = 0.4
 const TGT_INVESTMENT = 0.2

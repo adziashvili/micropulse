@@ -1,6 +1,6 @@
 import {
     UtilizationRecord
-} from '../store'
+} from '../model'
 
 const assert = require( 'assert' )
 
@@ -31,48 +31,48 @@ const UTILIZATION_DATA_FIRST_COL = 3
 export default class UtilizationReader {
 
     constructor() {
-        this.practices = [
-            {
-                name: "ANZ",
-                lookup: "ANZ"
-            }, {
-                name: "ASEAN",
-                lookup: "ASEAN"
-            }, {
-                name: "INDIA",
-                lookup: "INDIA"
-            }, {
-                name: "S.KOREA",
-                lookup: "S. KOREA"
-            }, {
-                name: "APAC",
-                lookup: "APAC"
-            }, {
-                name: "JAPAN",
-                lookup: "JAPAN"
-            }, {
-                name: "APJ Shared",
-                lookup: "APJ Shared"
-            }, {
-                name: "APJ",
-                lookup: "APJ"
-            }
-        ]
+        this.practices = [ {
+            name: "ANZ",
+            lookup: "ANZ"
+        }, {
+            name: "ASEAN",
+            lookup: "ASEAN"
+        }, {
+            name: "INDIA",
+            lookup: "INDIA"
+        }, {
+            name: "S.KOREA",
+            lookup: "S. KOREA"
+        }, {
+            name: "APAC",
+            lookup: "APAC"
+        }, {
+            name: "JAPAN",
+            lookup: "JAPAN"
+        }, {
+            name: "APJ Shared",
+            lookup: "APJ Shared"
+        }, {
+            name: "APJ",
+            lookup: "APJ"
+        } ]
         this.records = []
         this.ws = null
     }
 
     static read( file, utilizationStore ) {
         let wb = new Excel.Workbook()
-        let readPromise = wb.xlsx.readFile( file ).then( ( value ) => {
-            wb.eachSheet( function ( ws, sheetId ) {
-                if ( [ "in", "mp" ].includes( ws.name ) ) {
-                    utilizationStore.reader.onWorkshoeetRead(
-                        ws )
-                    utilizationStore.reconcile()
-                }
+        let readPromise = wb.xlsx.readFile( file )
+            .then( ( value ) => {
+                wb.eachSheet( function ( ws, sheetId ) {
+                  console.log("BAD SHEET NAME");
+                    if ( [ "in", "mp" ].includes( ws.name ) ) {
+                        utilizationStore.reader.onWorkshoeetRead(
+                            ws )
+                        utilizationStore.reconcile()
+                    }
+                } )
             } )
-        } )
     }
 
     /**
@@ -84,6 +84,7 @@ export default class UtilizationReader {
      * @return {Void} Nothing.
      */
     onWorkshoeetRead( worksheet ) {
+
         this.ws = worksheet
 
         let dates = this.readValues(
@@ -169,7 +170,8 @@ export default class UtilizationReader {
 
         while ( true ) {
 
-            let value = this.ws.getCell( "" + CELLS[ col - 1 ] + row ).value
+            let value = this.ws.getCell( "" + CELLS[ col - 1 ] + row )
+                .value
 
             if ( value !== null ) {
                 values.push( value )
@@ -194,7 +196,8 @@ export default class UtilizationReader {
 
         while ( true ) {
 
-            let value = this.ws.getCell( 'A' + row ).value
+            let value = this.ws.getCell( 'A' + row )
+                .value
 
             if ( null === value || !value ) {
                 value = ""
@@ -220,7 +223,8 @@ export default class UtilizationReader {
      * @return {any} As read from the file
      */
     readCell( cell ) {
-        return this.ws.getCell( cell ).value
+        return this.ws.getCell( cell )
+            .value
     }
 
     /**
