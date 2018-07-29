@@ -48,49 +48,6 @@ export default class StoreManager {
         return 2
     }
 
-    getStoragePath( key, fileType, storageType ) {
-
-        let store = this.getStoreEntry( key )
-        // Getting the store entry
-
-        let file = fileType === this.CURRENT_DATA_FILE ? store.path : store.newDataFileName
-        // selecting the file requested based on file type
-
-        let filePath = StoreManager.STORAGE_ROOT_PATH
-        // All files reside under root
-
-        if ( storageType === this.ARCHIVE_STORE ) {
-            filePath = path.join( filePath, StoreManager.ARCHIVE_FOLDER )
-            // incase archive folder needed, adding the path under root
-        }
-
-        return path.join( filePath, file )
-        // lastly, adding the file name to the selected path
-    }
-
-    commit( key ) {
-        let store = this.getStoreEntry( key )
-
-        // backup utilization store db
-        let dataFile = this.getStoragePath( key, this.CURRENT_DATA_FILE, this.DATA_STORE )
-        let dataFileArchive = this.getStoragePath( key, this.CURRENT_DATA_FILE, this.ARCHIVE_STORE )
-
-        FSHelper.rename(
-            dataFile,
-            FSHelper.touchName( dataFileArchive, "back" ), true )
-
-        // backup input file
-        let inputFile = this.getStoragePath( key, this.NEW_DATA_FILE, this.DATA_STORE )
-        let inputFileArchive = this.getStoragePath( key, this.NEW_DATA_FILE, this.ARCHIVE_STORE )
-
-        FSHelper.rename(
-            inputFile,
-            FSHelper.touchName( inputFileArchive, "back" ), true )
-
-        // Save new data
-        FSHelper.save( store, dataFile )
-    }
-
     constructor() {
 
         this._stores = [ {
@@ -101,6 +58,7 @@ export default class StoreManager {
         } ]
 
         this.stores.forEach( ( s ) => {
+
             s.store.initialise(
                 require( StoreManager.path( s.path ) ) )
         } )
@@ -163,6 +121,49 @@ export default class StoreManager {
                     this.DATA_STORE ) )
         }
 
+    }
+
+    getStoragePath( key, fileType, storageType ) {
+
+        let store = this.getStoreEntry( key )
+        // Getting the store entry
+
+        let file = fileType === this.CURRENT_DATA_FILE ? store.path : store.newDataFileName
+        // selecting the file requested based on file type
+
+        let filePath = StoreManager.STORAGE_ROOT_PATH
+        // All files reside under root
+
+        if ( storageType === this.ARCHIVE_STORE ) {
+            filePath = path.join( filePath, StoreManager.ARCHIVE_FOLDER )
+            // incase archive folder needed, adding the path under root
+        }
+
+        return path.join( filePath, file )
+        // lastly, adding the file name to the selected path
+    }
+
+    commit( key ) {
+        let store = this.getStoreEntry( key )
+
+        // backup utilization store db
+        let dataFile = this.getStoragePath( key, this.CURRENT_DATA_FILE, this.DATA_STORE )
+        let dataFileArchive = this.getStoragePath( key, this.CURRENT_DATA_FILE, this.ARCHIVE_STORE )
+
+        FSHelper.rename(
+            dataFile,
+            FSHelper.touchName( dataFileArchive, "back" ), true )
+
+        // backup input file
+        let inputFile = this.getStoragePath( key, this.NEW_DATA_FILE, this.DATA_STORE )
+        let inputFileArchive = this.getStoragePath( key, this.NEW_DATA_FILE, this.ARCHIVE_STORE )
+
+        FSHelper.rename(
+            inputFile,
+            FSHelper.touchName( inputFileArchive, "back" ), true )
+
+        // Save new data
+        FSHelper.save( store, dataFile )
     }
 
     saveStore( key ) {

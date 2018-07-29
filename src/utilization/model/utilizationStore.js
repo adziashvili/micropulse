@@ -37,7 +37,9 @@ export default class UtilizationStore {
      */
     initialise( store ) {
 
-        let records = store._store.map( ( record ) => {
+        let theStore = store.store._store
+
+        let records = theStore.map( ( record ) => {
             return new UtilizationRecord( record._type, record._name,
                 record._date, record._b, record._i )
         } )
