@@ -1,6 +1,7 @@
 const path = require( 'path' )
 
 import { UtilizationStore } from '../utilization/model'
+import { ExcelReader } from '../common'
 
 import {
     FSHelper,
@@ -8,25 +9,86 @@ import {
 } from '../common'
 
 const NEW_DATA_FILE = "utilization.xlsx"
-const NEW_DATA_FILE_WARINING = "in.xls"
+const UTILIZATION_DB = "utilizationDB.json"
+const _STORAGE_ROOT = "../../data"
+const _ARCHIVE_FOLDER = "archive"
+
+const DATA_FOLDER = 0
+const ARCHIVE_FOLDER = 1
 
 export default class StoreManager {
 
-    static get STORAGE_BASE_PATH_ABS() {
-        return path.join( __dirname, "../../data" )
+    static get STORAGE_ROOT_PATH() {
+        return path.join( __dirname, _STORAGE_ROOT )
+    }
+
+    static get ARCHIVE_FOLDER() {
+        return _ARCHIVE_FOLDER
     }
 
     static path( fileName ) {
-        return path.join( StoreManager.STORAGE_BASE_PATH_ABS, fileName )
+        return path.join(
+            StoreManager.STORAGE_ROOT_PATH,
+            fileName )
     }
 
-    static utilizationStorePath() {
-        return path.join( StoreManager.STORAGE_BASE_PATH_ABS,
-            "utilizationDB.json" )
+    get CURRENT_DATA_FILE() {
+        return 1
     }
 
-    static newInputFilePath() {
-        return path.join( StoreManager.STORAGE_BASE_PATH_ABS, NEW_DATA_FILE )
+    get NEW_DATA_FILE() {
+        return 2
+    }
+
+    get DATA_STORE() {
+        return 1
+    }
+
+    get ARCHIVE_STORE() {
+        return 2
+    }
+
+    getStoragePath( key, fileType, storageType ) {
+
+        let store = this.getStoreEntry( key )
+        // Getting the store entry
+
+        let file = fileType === this.CURRENT_DATA_FILE ? store.path : store.newDataFileName
+        // selecting the file requested based on file type
+
+        let filePath = StoreManager.STORAGE_ROOT_PATH
+        // All files reside under root
+
+        if ( storageType === this.ARCHIVE_STORE ) {
+            filePath = path.join( filePath, StoreManager.ARCHIVE_FOLDER )
+            // incase archive folder needed, adding the path under root
+        }
+
+        return path.join( filePath, file )
+        // lastly, adding the file name to the selected path
+    }
+
+    commit( key ) {
+        let store = this.getStoreEntry( key )
+
+        // backup utilization store db
+        let dataFile = this.getStoragePath( key, this.CURRENT_DATA_FILE, this.DATA_STORE )
+        let dataFileArchive = this.getStoragePath( key, this.CURRENT_DATA_FILE, this.ARCHIVE_STORE )
+
+        FSHelper.rename(
+            dataFile,
+            FSHelper.touchName( dataFileArchive, "back" ), true )
+
+        // backup input file
+        let inputFile = this.getStoragePath( key, this.NEW_DATA_FILE, this.DATA_STORE )
+        let inputFileArchive = this.getStoragePath( key, this.NEW_DATA_FILE, this.ARCHIVE_STORE )
+
+        FSHelper.rename(
+            inputFile,
+            FSHelper.touchName( inputFileArchive, "back" ), true )
+
+        // Save new data
+        FSHelper.save( store, dataFile )
     }
 
     constructor() {
@@ -34,7 +96,7 @@ export default class StoreManager {
         this._stores = [ {
             "key": UtilizationStore.STORE_KEY,
             "store": new UtilizationStore(),
-            "path": "utilizationDB.json",
+            "path": UTILIZATION_DB,
             "newDataFileName": NEW_DATA_FILE
         } ]
 
@@ -42,7 +104,6 @@ export default class StoreManager {
             s.store.initialise(
                 require( StoreManager.path( s.path ) ) )
         } )
-
     }
 
     get stores() {
@@ -78,7 +139,7 @@ export default class StoreManager {
     }
 
     hasNewData() {
-        let dir = FSHelper.listdirectory( StoreManager.STORAGE_BASE_PATH_ABS )
+        let dir = FSHelper.listdirectory( StoreManager.STORAGE_ROOT_PATH )
         let isNewDataFileFound = false
 
         this.stores.some( ( s ) => {
@@ -90,10 +151,24 @@ export default class StoreManager {
         return isNewDataFileFound
     }
 
+    readNewData() {
+        if ( !this.hasNewData() ) {
+            return Promise.resolve( null )
+        } else {
+            console.log( '[MP] New data is avaiallbe. Processing...'.yellow );
+            return ExcelReader.load(
+                this.getStoragePath(
+                    UtilizationStore.STORE_KEY,
+                    this.NEW_DATA_FILE,
+                    this.DATA_STORE ) )
+        }
+
+    }
+
     saveStore( key ) {
         let storeEntry = this.getStoreEntry( key )
         if ( storeEntry !== null ) {
-            FSHelper.save( storeEntry.store, storeEntry.path )
+            FSHelper.save( storeEntry.store, StoreManager.path( storeEntry.path ) )
         }
     }
 

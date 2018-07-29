@@ -31,30 +31,13 @@ export default class UtilizationReconciler {
 
         if ( newRecordsCount > 0 ) {
             console.log( "! Committing changes".red )
-            this.commit( toList )
+
+            this.store.store = toList
+            this.store.rebuild()
+
+            // clean the store from cicular references
+            this.store.reader = null
         }
-    }
-
-    commit( records ) {
-        // backup utilization store db
-        let utilStoreFile = StoreManager.utilizationStorePath()
-        FSHelper.rename( utilStoreFile, this.touchName( utilStoreFile,
-            "back" ), true )
-
-        // backup input file
-        let inputFile = StoreManager.newInputFilePath()
-        FSHelper.rename( inputFile, this.touchName( inputFile, "back" ),
-            true )
-
-        // Commit new records to store
-        this.store.store = records
-        this.store.rebuild()
-
-        // clean the store from cicular references
-        this.store.reader = null
-
-        // Save new data
-        FSHelper.save( this.store, utilStoreFile )
     }
 
     isIncluded( record, list ) {
@@ -65,11 +48,5 @@ export default class UtilizationReconciler {
         } )
 
         return filterlist.length > 0
-    }
-
-    touchName( fileName, prefix ) {
-        let d = new Date( Date.now() )
-        return fileName +
-            `.${ prefix}.D_${ d.getFullYear()}_${ d.getMonth()}_${ d.getDate()}_T_${ d.getHours()}_${ d.getMinutes()}_${ d.getSeconds()}__${ d.getMilliseconds() }`
     }
 }

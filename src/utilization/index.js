@@ -1,5 +1,5 @@
-import Pulse from './pulse'
+import UtilizationPulse from './utilizationPulse'
 
 export {
-    Pulse,
+    UtilizationPulse,
 }

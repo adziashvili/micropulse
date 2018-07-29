@@ -6,21 +6,7 @@ const assert = require( 'assert' )
 
 let Excel = require( 'exceljs' )
 
-const CELLS = [
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M'
-]
+const CELLS = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M' ]
 
 const NOT_FOUND = -1
 
@@ -31,48 +17,19 @@ const UTILIZATION_DATA_FIRST_COL = 3
 export default class UtilizationReader {
 
     constructor() {
-        this.practices = [ {
-            name: "ANZ",
-            lookup: "ANZ"
-        }, {
-            name: "ASEAN",
-            lookup: "ASEAN"
-        }, {
-            name: "INDIA",
-            lookup: "INDIA"
-        }, {
-            name: "S.KOREA",
-            lookup: "S. KOREA"
-        }, {
-            name: "APAC",
-            lookup: "APAC"
-        }, {
-            name: "JAPAN",
-            lookup: "JAPAN"
-        }, {
-            name: "APJ Shared",
-            lookup: "APJ Shared"
-        }, {
-            name: "APJ",
-            lookup: "APJ"
-        } ]
+
+        this.practices = [
+            { name: "ANZ", lookup: "ANZ" },
+            { name: "ASEAN", lookup: "ASEAN" },
+            { name: "INDIA", lookup: "INDIA" },
+            { name: "S.KOREA", lookup: "S. KOREA" },
+            { name: "APAC", lookup: "APAC" },
+            { name: "JAPAN", lookup: "JAPAN" },
+            { name: "APJ Shared", lookup: "APJ Shared" },
+            { name: "APJ", lookup: "APJ" } ]
+
         this.records = []
         this.ws = null
-    }
-
-    static read( file, utilizationStore ) {
-        let wb = new Excel.Workbook()
-        let readPromise = wb.xlsx.readFile( file )
-            .then( ( value ) => {
-                wb.eachSheet( function ( ws, sheetId ) {
-                  console.log("BAD SHEET NAME");
-                    if ( [ "in", "mp" ].includes( ws.name ) ) {
-                        utilizationStore.reader.onWorkshoeetRead(
-                            ws )
-                        utilizationStore.reconcile()
-                    }
-                } )
-            } )
     }
 
     /**
@@ -83,7 +40,7 @@ export default class UtilizationReader {
      *
      * @return {Void} Nothing.
      */
-    onWorkshoeetRead( worksheet ) {
+    loadRecords( worksheet ) {
 
         this.ws = worksheet
 

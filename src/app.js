@@ -2,15 +2,15 @@ const path = require( 'path' )
 const colors = require( 'colors' )
 
 import { StoreManager } from './store'
-import { Pulse } from './utilization'
-import { FSHelper, JSONHelper } from './common'
+import { UtilizationPulse } from './utilization'
 
-const REPORT_DATE = new Date( 2018, 7, 30 )
+import {
+    FSHelper,
+    JSONHelper,
+    ExcelReader
+} from './common'
 
-console.clear()
-// Clenaing the concole
-
-let names = [
+const names = [
     "ANZ",
     "ASEAN",
     "INDIA",
@@ -18,25 +18,20 @@ let names = [
     "APAC",
     "JAPAN",
     "APJ Shared",
-    "APJ"
-]
+    "APJ" ]
 // Used to force a specific order on the reports so APAC names comes first.
 
+const REPORT_DATE = new Date( 2018, 7, 30 )
+// A date for the reporting cut off
+
+console.clear()
+// Clenaing the concole before outputing the report
+
 let sm = new StoreManager()
+// Loads the data manager
+
 sm.buildAll( names, REPORT_DATE )
+// Asks the store manager to build all the data models
 
-function micropulse() {
-    new Pulse(
-            sm.utilizationStore,
-            REPORT_DATE )
-        .run()
-}
-
-if ( sm.hasNewData() ) {
-    console.log( '[MP] New data is avaiallbe. Processing...'.yellow );
-    sm.utilizationStore.processNewData( micropulse )
-    // resolving new input file Once processed, the reports will be printed
-} else {
-    micropulse()
-    // no file to process Printing out the report
-}
+new UtilizationPulse( sm, REPORT_DATE ).run().then( sm.save() )
+// Runs utilization pulse

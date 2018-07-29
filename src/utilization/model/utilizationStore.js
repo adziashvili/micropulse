@@ -8,8 +8,12 @@ import UtilizationReconciler from './UtilizationReconciler'
 
 export default class UtilizationStore {
 
-    static get STORE_KEY() {
+    static STORE_KEY() {
         return "UtilizationStore"
+    }
+
+    get storeKey() {
+        return UtilizationStore.STORE_KEY
     }
 
     constructor() {
@@ -172,23 +176,17 @@ export default class UtilizationStore {
         // take bottom 10
     }
 
+    reconcile() {
+        let reconciler = new UtilizationReconciler( this )
+        reconciler.reconcile()
+    }
+
     get reader() {
         return this._reader
     }
 
     set reader( reader ) {
         this._reader = reader
-    }
-
-    processNewData( onDataProcessComplete ) {
-        this.onDataProcessComplete = onDataProcessComplete
-        UtilizationReader.read( "./data/utilization.xlsx", this )
-    }
-
-    reconcile() {
-        let reconciler = new UtilizationReconciler( this )
-        reconciler.reconcile()
-        this.onDataProcessComplete()
     }
 
     set bottom( bottom ) {

@@ -132,4 +132,19 @@ export default class FSHelper {
             }
         }
     }
+
+    /**
+     * Adds a suffic to a file name in the form of <file_name>.prefix.D_YYYY_M_DD_T_HH_MM_SS__SSS
+     *
+     * @param {String} fileName File name to process
+     * @param {String} prefix   Adds the prefix before the date pattern
+     *
+     * @return {[type]} [description]
+     */
+    static touchName( fileName, prefix ) {
+        let d = new Date( Date.now() )
+        return fileName +
+            `.${ prefix}.D_${ d.getFullYear()}_${ d.getMonth()}_${ d.getDate()}_T_${ d.getHours()}_${ d.getMinutes()}_${ d.getSeconds()}__${ d.getMilliseconds() }`
+    }
+
 }
