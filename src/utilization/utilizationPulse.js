@@ -42,13 +42,11 @@ export default class UtilizationPulse {
     run() {
 
         let isSuccess = true
-        let reader = this.store.reader
 
         this.sm.readNewData()
             .then( ( data ) => {
                 if ( data !== null ) {
-                    reader.loadRecords( data.getWorksheet( data.worksheets[ 0 ].id ) )
-                    this.store.reconcile()
+                    this.store.reconcile(data.getWorksheet( data.worksheets[ 0 ].id ))
                     this.sm.commit( this.store.storeKey )
                 }
                 this.report()

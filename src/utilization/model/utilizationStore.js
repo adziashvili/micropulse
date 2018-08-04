@@ -4,16 +4,11 @@ import { JSONHelper } from '../../common'
 
 import UtilizationRecord from './UtilizationRecord'
 import UtilizationReader from './UtilizationReader'
-import UtilizationReconciler from './UtilizationReconciler'
 
 export default class UtilizationStore {
 
     static STORE_KEY() {
         return "UtilizationStore"
-    }
-
-    get storeKey() {
-        return UtilizationStore.STORE_KEY
     }
 
     constructor() {
@@ -25,7 +20,6 @@ export default class UtilizationStore {
         this._bottom = []
         this._names = []
         this.date = null
-        this._reader = new UtilizationReader()
     }
 
     /**
@@ -37,7 +31,7 @@ export default class UtilizationStore {
      */
     initialise( store ) {
 
-        let theStore = store.store._store
+        let theStore = !!store._store ? store._store : store.store._store
 
         let records = theStore.map( ( record ) => {
             return new UtilizationRecord( record._type, record._name,
@@ -48,34 +42,21 @@ export default class UtilizationStore {
     }
 
     /**
-     * Returns a reference to the utilization store.
-     *
-     * @return {Array} Array of records consistuting the store.
-     */
-    get store() {
-        return this._store
-    }
-
-    set store( records ) {
-        this._store = records
-    }
-
-    rebuild() {
-        this.build( this.names, this.date )
-    }
-
-    /**
      * Builds all models based on records in store.
      *
-     * @param {[type]} names [description]
-     * @param {[type]} date  [description]
+     * @param {Array} names [description]
+     * @param {Date} date  [description]
      *
      * @return {[type]} [description]
      */
     build( names, date ) {
 
-        this._names = names
-        this._date = date
+        if ( !!names ) {
+            this._names = names
+        }
+        if ( !!date ) {
+            this._date = date
+        }
 
         this.monthly = this.buildModel( UtilizationRecord.TYPE_MONTHLY )
         this.ytd = this.buildModel( UtilizationRecord.TYPE_YTD )
@@ -178,17 +159,144 @@ export default class UtilizationStore {
         // take bottom 10
     }
 
-    reconcile() {
-        let reconciler = new UtilizationReconciler( this )
-        reconciler.reconcile()
+    reconcile( data ) {
+        let reader = new UtilizationReader()
+        reader.loadRecords( data )
+        let toList = reader.cloneRecords()
+
+        let newRecordsCount = 0
+        this.store.forEach( ( fromRecord ) => {
+            if ( !this.isIncluded( fromRecord, toList ) ) {
+                toList.push( fromRecord )
+                console.log( "+ ".green, fromRecord.toString() );
+                newRecordsCount++
+            }
+        } )
+
+        console.log( (
+                "+ %d records from currnet will be merged to the new list. Total %d records aft" +
+                "er merge." )
+            .yellow, newRecordsCount, toList.length )
+
+        if ( newRecordsCount > 0 ) {
+            console.log( "! Committing changes".red )
+            this.store = toList
+            // Storing reconciled list
+
+            this.build()
+            // Building the models
+        }
     }
 
-    get reader() {
-        return this._reader
+    isIncluded( record, list ) {
+        let filterlist = list.filter( ( r ) => {
+            return r.type === record.type && r.name === record.name &&
+                r.date.getFullYear() == record.date.getFullYear() &&
+                r.date.getMonth() == record.date.getMonth()
+        } )
+
+        return filterlist.length > 0
     }
 
-    set reader( reader ) {
-        this._reader = reader
+    /**
+     * Return a sorted list of record names (distinct) as listed in the data.
+     *
+     * @return {Array} Names in store
+     */
+    listNames() {
+
+        let names = []
+
+        this.store.forEach( ( record ) => {
+            if ( !names.includes( record.name ) ) {
+                names.push( record.name )
+            }
+        } )
+
+        return names.sort()
+    }
+
+    /**
+     * Adds a record to the utilization store.
+     *
+     * @param {UtilizationRecord} record UtilizationRecord to add
+     */
+    addRecord( record ) {
+        this.store.push( record )
+    }
+
+    /**
+     * [getRecords description]
+     *
+     * @param {[type]} type [description]
+     * @param {[type]} name [description]
+     *
+     * @return {[type]} [description]
+     */
+    getRecords( type, name ) {
+        return this.store.filter( ( r ) => {
+            return r.type === type && r.name === name
+        } )
+    }
+
+    /**
+     * [getLatest description]
+     *
+     * @param {[type]} type  [description]
+     * @param {[type]} name  [description]
+     * @param {[type]} year  [description]
+     * @param {[type]} month [description]
+     *
+     * @return {[type]} [description]
+     */
+    getLatest( type, name, year, month ) {
+
+        let monthDate = new Date( year, month )
+
+        let records = this.getRecords( type, name )
+        // get the records for type and name
+
+        records = records.filter( ( r ) => {
+            return r.date.getFullYear() == monthDate.getFullYear() &&
+                r.date.getMonth() == monthDate.getMonth()
+        } )
+        // filter the reocrds for the relevant month
+
+        if ( records.length > 0 ) {
+
+            let latestDate = records[ 0 ].date
+            // What's the latest date
+
+            for ( let r of records ) {
+                if ( r.date > latestDate ) {
+                    latestDate = r.date
+                }
+            }
+            // find the record with the latest date
+
+            records = records.filter( ( r ) => {
+                return r.date >= latestDate
+            } )
+        }
+
+        return records
+    }
+
+    get storeKey() {
+        return UtilizationStore.STORE_KEY
+    }
+
+    /**
+     * Returns a reference to the utilization store.
+     *
+     * @return {Array} Array of records consistuting the store.
+     */
+    get store() {
+        return this._store
+    }
+
+    set store( records ) {
+        this._store = records
     }
 
     set bottom( bottom ) {
@@ -241,88 +349,6 @@ export default class UtilizationStore {
 
     get size() {
         return this._store.length
-    }
-
-    /**
-     * Return a sorted list of record names (distinct) as listed in the data.
-     *
-     * @return {Array} Names in store
-     */
-    listNames() {
-
-        let names = []
-
-        this.store.forEach( ( record ) => {
-            if ( !names.includes( record.name ) ) {
-                names.push( record.name )
-            }
-        } )
-
-        return names.sort()
-    }
-
-    /**
-     * Adds a record to the utilization store.
-     *
-     * @param {UtilizationRecord} record UtilizationRecord to add
-     */
-    addRecord( record ) {
-        this.store.push( record )
-    }
-
-    /**
-     * [getRecords description]
-     *
-     * @param {[type]} type [description]
-     * @param {[type]} name [description]
-     *
-     * @return {[type]} [description]
-     */
-    getRecords( type, name ) {
-
-        return this.store.filter( ( r ) => {
-            return r.type === type && r.name === name
-        } )
-    }
-
-    /**
-     * [getLatest description]
-     *
-     * @param {[type]} type  [description]
-     * @param {[type]} name  [description]
-     * @param {[type]} year  [description]
-     * @param {[type]} month [description]
-     *
-     * @return {[type]} [description]
-     */
-    getLatest( type, name, year, month ) {
-
-        let monthDate = new Date( year, month )
-
-        // get the records for type and name
-        let records = this.getRecords( type, name )
-
-        // filter the reocrds for the relevant month
-        records = records.filter( ( r ) => {
-            return r.date.getFullYear() == monthDate.getFullYear() &&
-                r.date.getMonth() == monthDate.getMonth()
-        } )
-
-        if ( records.length > 0 ) {
-            // What's the latest date
-            let latestDate = records[ 0 ].date
-            for ( let r of records ) {
-                if ( r.date > latestDate ) {
-                    latestDate = r.date
-                }
-            }
-
-            records = records.filter( ( r ) => {
-                return r.date >= latestDate
-            } )
-        }
-
-        return records
     }
 
 }
