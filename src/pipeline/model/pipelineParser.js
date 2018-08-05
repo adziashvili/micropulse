@@ -19,7 +19,16 @@ export default class PipelineParser extends SFDCExcelParserBase {
         let dataRow = headerRow + 1
 
         while ( dataRow < totalsRow ) {
-            this.records.push( new PipelineRecord( this.readValues( 1, dataRow++ ) ) )
+
+            let data = this.readValues( 1, dataRow++ )
+            // read all data
+
+            if ( data.length > 0 ) {
+                data[ 0 ] = this.lookupPractice( data[ 0 ] )
+            }
+            // fix SFDC practice name
+
+            this.records.push( new PipelineRecord( data ) )
         }
 
         return this.records

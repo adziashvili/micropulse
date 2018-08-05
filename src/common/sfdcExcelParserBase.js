@@ -37,6 +37,34 @@ export default class SFDCExcelParserBase {
     }
 
     /**
+     * Lookups the practice name based on SFDC practice name convention
+     *
+     * @param {String} str Practice name as in SFDC input file
+     *
+     * @return {String} The Micropulse convention for the practice name.
+     *                  "UNKNOWN" if not found or if lookup str is null or 'undefined'
+     */
+    lookupPractice( str ) {
+
+        const UNKNOWN = "UNKNOWN"
+        let practice = UNKNOWN
+
+        if ( str === null || !str ) {
+            return UNKNOWN
+        }
+
+        let lookup = this.practices.filter( ( p ) => {
+            return p.lookup.toLowerCase() === str.toLowerCase()
+        } )
+
+        if ( lookup.length === 1 ) {
+            practice = lookup[ 0 ].name
+        }
+
+        return practice
+    }
+
+    /**
      * Reads a row starting from Col and Row.
      *
      * @param {Number} col Col to start from
