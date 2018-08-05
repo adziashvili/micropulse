@@ -1,6 +1,8 @@
 import PipelineRecord from './pipelineRecord'
 import PipelineParser from './pipelineParser'
 
+import { DateHelper } from '../../common'
+
 export default class PipelineStore {
 
     static get STORE_KEY() {
@@ -169,49 +171,18 @@ export default class PipelineStore {
     }
 
     setupMonths() {
-        this.minDate = this.minCloseDate()
-        this.maxDate = this.maxCloseDate()
+        let { minDate, maxDate } = DateHelper.getMinMaxDates( this.store, "_closeDate" )
+
+        this.minDate = minDate
+        this.maxDate = maxDate
+
         this.months = []
 
-        for ( let m = this.minDate.getMonth(); m <= this.maxDate.getMonth(); m++ ) {
-            this.months.push( m )
-        }
-    }
-
-    maxCloseDate() {
-        let maxDate = null
-
-        if ( this.store.length > 0 ) {
-            maxDate = this.store[ 0 ].closeDate
-        } else {
-            return maxDate
-        }
-
-        this.store.forEach( ( p ) => {
-            if ( p.closeDate.valueOf() > maxDate.valueOf() ) {
-                maxDate = p.closeDate
+        if ( this.minDate !== null && this.maxDate !== null ) {
+            for ( let m = this.minDate.getMonth(); m <= this.maxDate.getMonth(); m++ ) {
+                this.months.push( m )
             }
-        } )
-
-        return maxDate
-    }
-
-    minCloseDate() {
-        let minDate = null
-
-        if ( this.store.length > 0 ) {
-            minDate = this.store[ 0 ].closeDate
-        } else {
-            return minDate
         }
-
-        this.store.forEach( ( p ) => {
-            if ( p.closeDate.valueOf() < minDate.valueOf() ) {
-                minDate = p.closeDate
-            }
-        } )
-
-        return minDate
     }
 
     practices( name ) {

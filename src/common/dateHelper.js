@@ -18,10 +18,6 @@ const monthNames = [
  */
 export default class DateHelper {
 
-    constructor( date ) {
-        this.date = date
-    }
-
     static parse( date ) {
         if ( date instanceof Date ) {
             if ( Number.isNaN( date.valueOf() ) ) {
@@ -41,6 +37,44 @@ export default class DateHelper {
 
     static getMonthName( month ) {
         return monthNames[ month ]
+    }
+
+    /**
+     * Calculates the min date and max date in an array of objects.
+     *
+     * @param {Array}  [objArray=[]] Array of objects to scan
+     * @param {String} [dateProp=""] The propery in the objects that holds the date prop
+     *
+     * @return {[type]} Object with two properties minDate and maxDate.
+     *                  If objArray is not an array with size > 0 or if
+     *                  objProp is not a string {null, null} is returned.
+     */
+    static getMinMaxDates( objArray = [], dateProp = "" ) {
+
+        let dates = { minDate: null, maxDate: null }
+
+        if ( typeof dateProp !== 'string' || !Array.isArray( objArray ) || objArray.length === 0 ) {
+            return null
+        } else {
+            dates.minDate = objArray[ 0 ][ dateProp ]
+            dates.maxDate = objArray[ 0 ][ dateProp ]
+        }
+
+        objArray.forEach( ( obj ) => {
+            if ( obj[ dateProp ].valueOf() < dates.minDate.valueOf() ) {
+                dates.minDate = obj[ dateProp ]
+            }
+            if ( obj[ dateProp ].valueOf() > dates.maxDate.valueOf() ) {
+                dates.maxDate = obj[ dateProp ]
+            }
+        } )
+
+        return dates
+
+    }
+
+    constructor( date ) {
+        this.date = date
     }
 
     get localeDateString() {
