@@ -1,6 +1,7 @@
 const path = require( 'path' )
 
 import { UtilizationStore } from '../utilization/model'
+import { PipelineStore } from '../pipeline/model'
 import { ExcelReader } from '../common'
 
 import {
@@ -8,8 +9,12 @@ import {
     JSONHelper
 } from '../common'
 
-const NEW_DATA_FILE = "utilization.xlsx"
+const UTILIZATION_NEW_DATA_FILE = "utilization.xlsx"
+const PIPELINE_NEW_DATA_FILE = "pipeline.xlsx"
+
 const UTILIZATION_DB = "utilizationDB.json"
+const PIPELINE_DB = "pipelineDB.json"
+
 const _STORAGE_ROOT = "../../data"
 const _ARCHIVE_FOLDER = "archive"
 
@@ -51,14 +56,19 @@ export default class StoreManager {
     constructor() {
 
         this._stores = [ {
-            "key": UtilizationStore.STORE_KEY,
-            "store": new UtilizationStore(),
-            "path": UTILIZATION_DB,
-            "newDataFileName": NEW_DATA_FILE
-        } ]
+                "key": UtilizationStore.STORE_KEY,
+                "store": new UtilizationStore(),
+                "path": UTILIZATION_DB,
+                "newDataFileName": UTILIZATION_NEW_DATA_FILE
+        }, {
+                "key": PipelineStore.STORE_KEY,
+                "store": new PipelineStore(),
+                "path": PIPELINE_DB,
+                "newDataFileName": PIPELINE_NEW_DATA_FILE
+        }
+       ]
 
         this.stores.forEach( ( s ) => {
-
             s.store.initialise(
                 require( StoreManager.path( s.path ) ) )
         } )
@@ -96,31 +106,31 @@ export default class StoreManager {
         } )
     }
 
-    hasNewData() {
+    hasNewData( key ) {
         let dir = FSHelper.listdirectory( StoreManager.STORAGE_ROOT_PATH )
-        let isNewDataFileFound = false
+        let storeEntry = this.getStoreEntry( key )
 
-        this.stores.some( ( s ) => {
-            if ( dir.includes( s.newDataFileName ) ) {
-                isNewDataFileFound = true
-            }
-        } )
-
-        return isNewDataFileFound
+        return dir.includes( storeEntry.newDataFileName )
     }
 
-    readNewData() {
-        if ( !this.hasNewData() ) {
+    readNewData( key ) {
+
+        let storeEntry = this.getStoreEntry( key )
+
+        if ( null === storeEntry ) {
+            throw "Error: Invalid key" + key
+        }
+
+        if ( !this.hasNewData( key ) ) {
             return Promise.resolve( null )
         } else {
-            console.log( '[MP] New data is avaiallbe. Processing...'.yellow );
+            console.log( '[MP] New data is avaiallbe for %s. Processing...'.yellow, key );
             return ExcelReader.load(
                 this.getStoragePath(
-                    UtilizationStore.STORE_KEY,
+                    storeEntry.key,
                     this.NEW_DATA_FILE,
                     this.DATA_STORE ) )
         }
-
     }
 
     getStoragePath( key, fileType, storageType ) {
@@ -163,7 +173,7 @@ export default class StoreManager {
             FSHelper.touchName( inputFileArchive, "back" ), true )
 
         // Save new data
-        FSHelper.save( store, dataFile )
+        FSHelper.save( store.store, dataFile )
     }
 
     saveStore( key ) {

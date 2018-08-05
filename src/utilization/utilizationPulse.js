@@ -5,7 +5,7 @@ import {
     UtilizationTopBottomReport,
 } from './reports'
 
-import { UtilizationRecord } from './model'
+import { UtilizationRecord, UtilizationStore } from './model'
 import { ReportHelper } from '../common'
 
 export default class UtilizationPulse {
@@ -43,10 +43,10 @@ export default class UtilizationPulse {
 
         let isSuccess = true
 
-        this.sm.readNewData()
+        this.sm.readNewData( UtilizationStore.STORE_KEY )
             .then( ( data ) => {
                 if ( data !== null ) {
-                    this.store.reconcile(data.getWorksheet( data.worksheets[ 0 ].id ))
+                    this.store.reconcile( data.getWorksheet( data.worksheets[ 0 ].id ) )
                     this.sm.commit( this.store.storeKey )
                 }
                 this.report()

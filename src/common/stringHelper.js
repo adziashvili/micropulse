@@ -62,4 +62,78 @@ export default class StringHelper {
 
         return fixed
     }
+
+    /**
+     * Parses a number string.
+     *
+     * @param {String} [value="0.00"]                     Value to parse. Can be string or numeric.
+     * @param {String} [currencyPrefix="USD "]            When it a string, currency will be trimmed
+     *
+     * @return {number} Float number representing the value parsed
+     */
+    static parseNumber( value = "0.00", currencyPrefix = "USD " ) {
+
+        let tmpVal = ( "-" === value || "" === value ) ? "0.00" : value
+
+        if ( 'string' === typeof tmpVal ) {
+
+            if ( tmpVal.startsWith( currencyPrefix ) ) {
+                tmpVal = tmpVal.substring( currencyPrefix.length )
+            }
+            // remove currency prefix
+
+            tmpVal = tmpVal.replace( new RegExp( ',', 'g' ), "" )
+            // just in case, since Number.parseFloat() trims on ,
+        }
+
+        return Number.parseFloat( tmpVal )
+    }
+
+    /**
+     * Parses a percent string.
+     * String value can have '%' as a suffix.
+     * When number is passed, it will be return as a float.
+     *
+     * @param {String}  [value="0%"]       Value to parse
+     * @param {Boolean} [bScaleToOne=true] If true, percent will be scaled to a numebr between 0..1
+     *
+     * @return {number}  Percent numeric value
+     */
+    static parsePercent( value = "0%", bScaleToOne = true ) {
+        let tmpVal = ( "-" === value || "" === value ) ? "0%" : value
+
+        if ( 'string' === typeof tmpVal ) {
+            tmpVal = tmpVal.replace( "%", "" )
+            // removing the % sign if it is included
+        }
+
+        let percent = Number.parseFloat( tmpVal )
+
+        if ( bScaleToOne && percent > 1 ) {
+            percent = percent / 100
+        }
+
+        return percent
+    }
+
+    /**
+     * Parses a a boolean value.
+     *
+     * @param {String} [value=""] Value to parse.
+     *
+     * @return {boolean} If value is tring, returns true if lower ccase
+     *                   value matches "yes", "true" or "1".
+     *
+     *                   If value is boolean, it is returned as is.
+     */
+    static parseBoolean( value = "" ) {
+
+        if ( 'boolean' === typeof value ) {
+            return value
+        }
+
+        let v = value.toLowerCase()
+
+        return ( "yes" === v || "true" === v || "1" === v )
+    }
 }

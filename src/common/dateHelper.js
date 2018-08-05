@@ -22,6 +22,27 @@ export default class DateHelper {
         this.date = date
     }
 
+    static parse( date ) {
+        if ( date instanceof Date ) {
+            if ( Number.isNaN( date.valueOf() ) ) {
+                // invalid date object
+                return null
+            } else {
+                return date
+            }
+        }
+        if ( 'string' === typeof date ) {
+            let ms = Date.parse( date )
+            if ( !Number.isNaN( ms ) ) {
+                return new Date( ms )
+            }
+        }
+    }
+
+    static getMonthName( month ) {
+        return monthNames[ month ]
+    }
+
     get localeDateString() {
 
         let options = {
@@ -51,8 +72,19 @@ export default class DateHelper {
         return monthNames[ this.date.getMonth() ]
     }
 
-    static getMonthName( month ) {
-        return monthNames[ month ]
+    get date() {
+        return this._date
+    }
+
+    set date( d ) {
+
+        let tmpDate = DateHelper.parse( d )
+        if ( null === tmpDate ) {
+            console.log( "%s is an invalid date".red, d );
+            throw "Error: Invalid date or date string"
+        }
+
+        this._date = tmpDate
     }
 
 }

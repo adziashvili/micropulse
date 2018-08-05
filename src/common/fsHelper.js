@@ -76,7 +76,7 @@ export default class FSHelper {
     /**
      * Saves a JS object to a json file.
      *
-     * @param {object}  obj           Object to ave
+     * @param {object}  obj           Object to save
      * @param {string}  fileName      The destination file name
      * @param {Boolean} [pretty=true] True for pretty json
      *
@@ -98,10 +98,7 @@ export default class FSHelper {
                             err );
                     }
                     console.log(
-                        "%s Saved to \'%s\'".grey.italic, !!obj.name ?
-                        obj.name :
-                        '',
-                        fileName
+                        "Saved \'%s\'".grey.italic, fileName
                     )
                 } )
         }
@@ -127,10 +124,24 @@ export default class FSHelper {
         } else {
             fs.renameSync( fileName, newFileName )
             if ( verbose ) {
-                console.log( "Renamed %s -> %s".italic.grey, fileName,
-                    newFileName );
+                console.log( "Renamed %s -> %s".italic.grey,
+                    FSHelper.fileName( fileName ),
+                    FSHelper.fileName( newFileName ) );
             }
         }
+    }
+
+    /**
+     * Return the file name in a path
+     *
+     * @param {String} path Something like "/foo/bar/file.js"
+     *
+     * @return {String} Return the file name i.e. file.js in the example above.
+     */
+    static fileName( path ) {
+        return ( !path || null === path ) ? "" :
+            -1 === path.lastIndexOf( "/" ) ? path :
+            path.substring( path.lastIndexOf( "/" ) )
     }
 
     /**

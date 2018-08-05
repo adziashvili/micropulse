@@ -5,6 +5,7 @@ import StringBuffer from './StringBuffer'
 import DateHelper from './dateHelper'
 import ReportHelper from './reportHelper'
 import ExcelReader from './excelReader'
+import SFDCExcelParserBase from './SFDCExcelParserBase'
 
 export {
     FSHelper,
@@ -13,5 +14,6 @@ export {
     StringBuffer,
     DateHelper,
     ReportHelper,
-    ExcelReader
+    ExcelReader,
+    SFDCExcelParserBase
 }

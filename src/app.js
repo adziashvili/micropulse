@@ -3,6 +3,7 @@ const colors = require( 'colors' )
 
 import { StoreManager } from './store'
 import { UtilizationPulse } from './utilization'
+import { PipelinePulse } from './pipeline'
 
 import {
     FSHelper,
@@ -33,5 +34,9 @@ let sm = new StoreManager()
 sm.buildAll( names, REPORT_DATE )
 // Asks the store manager to build all the data models
 
-new UtilizationPulse( sm, REPORT_DATE ).run().then( sm.save() )
-// Runs utilization pulse
+Promise.resolve( true )
+    .then( new UtilizationPulse( sm, REPORT_DATE ).run() )
+    .then( new PipelinePulse( sm, REPORT_DATE ).run() )
+    .then( sm.save() )
+
+// Runs pulse reports
