@@ -139,5 +139,4 @@ export default class ReportHelper {
         console.log( "\n%s".bold, header )
         // print title
     }
-
 }

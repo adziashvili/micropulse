@@ -4,6 +4,7 @@ const colors = require( 'colors' )
 import { StoreManager } from './store'
 import { UtilizationPulse } from './utilization'
 import { PipelinePulse } from './pipeline'
+import { PracticeManager } from './managers'
 
 import {
     FSHelper,
@@ -11,15 +12,9 @@ import {
     ExcelReader
 } from './common'
 
-const names = [
-    "ANZ",
-    "ASEAN",
-    "INDIA",
-    "S.KOREA",
-    "APAC",
-    "JAPAN",
-    "APJ Shared",
-    "APJ" ]
+let pm = new PracticeManager()
+
+const names = pm.practices()
 // Used to force a specific order on the reports so APAC names comes first.
 
 const REPORT_DATE = new Date( 2018, 7, 30 )

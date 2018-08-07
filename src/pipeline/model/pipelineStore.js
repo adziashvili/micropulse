@@ -2,6 +2,7 @@ import PipelineRecord from './pipelineRecord'
 import PipelineParser from './pipelineParser'
 
 import { DateHelper } from '../../common'
+import { PracticeManager } from '../../managers'
 
 export default class PipelineStore {
 
@@ -10,6 +11,7 @@ export default class PipelineStore {
     }
 
     constructor() {
+        this.pm = new PracticeManager()
         this.store = []
         this.stages = [
           "Technical Validation",
@@ -86,13 +88,6 @@ export default class PipelineStore {
 
         this.monthly = this.buildMonthlyPipeline()
         // Build the base monthly pipeline data
-
-        this.monthly.forEach( ( p ) => {
-            console.log( p.practice );
-            p.months.forEach( ( m ) => {
-                console.log( m );
-            } )
-        } )
     }
 
     buildMonthlyPipeline() {
@@ -109,7 +104,7 @@ export default class PipelineStore {
                 pipe.months.push( monthlyPipe )
                 let total = { value: 0, count: 0 }
                 this.stages.forEach( ( s ) => {
-                    monthlyPipe[ s ] = this.sumPipe( this.practices( name ), m, s, "_value" )
+                    monthlyPipe[ s ] = this.sumPipe( this.pm.expand( name ), m, s, "_value" )
                     total.value = this.add( total.value, monthlyPipe[ s ].value )
                     total.count += monthlyPipe[ s ].count
                 } )
@@ -143,6 +138,24 @@ export default class PipelineStore {
         return model
     }
 
+    get total() {
+        return this.getPipe( "APJ", -1, "Total" )
+    }
+
+    getPipe( practice, month, stage ) {
+        let data = this.getMonthData( this.getPracticeData( practice ), month )
+        return !!data ? data[ stage ].value : 0
+    }
+
+    getPracticeData( practiceName ) {
+        let data = this.monthly.find( ( p ) => { return p.practice === practiceName } )
+        return !data ? {} : data
+    }
+
+    getMonthData( practiceData, month ) {
+        return practiceData.months.find( ( m ) => { return m.month === month } )
+    }
+
     reconcile( data ) {
         let parser = new PipelineParser( data )
         let newData = parser.parse()
@@ -155,7 +168,7 @@ export default class PipelineStore {
             }
         } )
 
-        console.log( "%s New opportunities", newData.length - this.store.length );
+        console.log( "%s New opportunities".green, newData.length - this.store.length );
         console.log( "%s Total opportunities", newData.length );
 
         this.store = newData
@@ -182,22 +195,6 @@ export default class PipelineStore {
             for ( let m = this.minDate.getMonth(); m <= this.maxDate.getMonth(); m++ ) {
                 this.months.push( m )
             }
-        }
-    }
-
-    practices( name ) {
-
-        let APAC = [ "ANZ", "ASEAN", "INDIA", "S.KOREA" ]
-
-        switch ( name ) {
-            case "APAC":
-                return APAC
-                break;
-            case "APJ":
-                return APAC.concat( [ "JAPAN", "APJ Shared" ] )
-                break;
-            default:
-                return [ name ]
         }
     }
 

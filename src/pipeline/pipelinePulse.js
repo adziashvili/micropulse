@@ -1,5 +1,6 @@
 import { PipelineStore } from './model'
 import { ReportHelper } from '../common'
+import { PipelineReport } from './reports'
 
 export default class PipelinePulse {
 
@@ -9,17 +10,23 @@ export default class PipelinePulse {
         this.store = this.sm.getStore( this.key )
         this.date = date
 
+        this.reports = [ new PipelineReport( this.store ) ]
+        this.rh = new ReportHelper( "PIPELINE REPORTS", date )
     }
 
     report() {
-        let rh = new ReportHelper( "PIPELINE REPORT" )
-        rh.addReportTitle()
-        console.log( "COUNT OF RECORDS: %d", this.store.store.length );
-        console.log("\n");
+        this.rh.addReportTitle()
+
+        console.log( "Total pipeline K USD %s across %d opportunities.",
+            ( this.store.total / 1000 ).toFixed( 1 ),
+            this.store.store.length )
+
+        this.reports.forEach( ( r ) => {
+            r.report()
+        } )
     }
 
     run() {
-
         let isSuccess = true
 
         this.sm.readNewData( this.key )

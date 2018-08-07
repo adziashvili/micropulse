@@ -3,8 +3,7 @@ import { ReportHelper, StringHelper, DateHelper } from '../../common'
 
 const TGT_BILLABLE = 0.4
 const TGT_INVESTMENT = 0.2
-const TGT_TOTAL = ( TGT_BILLABLE + TGT_INVESTMENT )
-    .toFixed( 3 ) * 1
+const TGT_TOTAL = ( TGT_BILLABLE + TGT_INVESTMENT ).toFixed( 3 ) * 1
 const YELLOW_THRESHOLD = 0.8
 
 /**
@@ -251,21 +250,21 @@ export default class UtilizationYTDReport {
             valueString
 
         switch ( valueType ) {
-        case "Billable":
-            return this.rh.addTrafficLights( value, valueString,
-                TGT_BILLABLE, YELLOW_THRESHOLD )
-            break
-        case "Investment":
-            return this.rh.addTrafficLights( value, valueString,
-                TGT_INVESTMENT, YELLOW_THRESHOLD )
-            break
-        case "Total":
-            return this.rh.addTrafficLights( value, valueString, TGT_TOTAL,
-                YELLOW_THRESHOLD )
-            break
-        default:
-            return this.rh.addChangeSymbol( value, this.rh.addChangeColor(
-                value, valueString ) )
+            case "Billable":
+                return this.rh.addTrafficLights( value, valueString,
+                    TGT_BILLABLE, YELLOW_THRESHOLD )
+                break
+            case "Investment":
+                return this.rh.addTrafficLights( value, valueString,
+                    TGT_INVESTMENT, YELLOW_THRESHOLD )
+                break
+            case "Total":
+                return this.rh.addTrafficLights( value, valueString, TGT_TOTAL,
+                    YELLOW_THRESHOLD )
+                break
+            default:
+                return this.rh.addChangeSymbol( value, this.rh.addChangeColor(
+                    value, valueString ) )
         }
     }
 }

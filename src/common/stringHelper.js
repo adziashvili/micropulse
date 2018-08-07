@@ -30,7 +30,8 @@ export default class StringHelper {
     }
 
     /**
-     * Returns exactly a string in with length equals to max.
+     * Returns exactly a string in with length equals to max (default 20).
+     *
      * If the provided str is shorter than that then c is used to padd the rest.
      * If it is longer than max, then a suffic StringHelper.SUFFIX is added at the end.
      *
@@ -42,8 +43,9 @@ export default class StringHelper {
      */
     static exact(
         str = '',
-        max = StringHelper.DEFAULT_MAX_PADDING, c =
-        StringHelper.PADDING_CHAR ) {
+        max = StringHelper.DEFAULT_MAX_PADDING,
+        c = StringHelper.PADDING_CHAR,
+        isPrefix = false ) {
 
         let fixed = str + ''
 
@@ -54,13 +56,21 @@ export default class StringHelper {
                     StringHelper.SUFFIX
             }
         } else {
-            fixed = str + ( Array( max - fixed.length + 1 )
-                .join( c ) )
+            let padding = Array( max - fixed.length + 1 ).join( c )
+            fixed = !isPrefix ? str + padding : padding + str
         }
 
-        assert( fixed.length === max, 'exact: We have a bug...' )
+        assert( fixed.length === max, 'exact: We have a bug with...' + fixed + ': ' + fixed.length + '!=' + max )
 
         return fixed
+    }
+
+    static prefix(
+        str = '',
+        max = StringHelper.DEFAULT_MAX_PADDING,
+        c = StringHelper.PADDING_CHAR ) {
+
+        return StringHelper.exact( str, max, c, true )
     }
 
     /**
