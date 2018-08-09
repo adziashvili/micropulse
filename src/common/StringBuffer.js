@@ -4,7 +4,6 @@ export default class StringBuffer {
 
     constructor( str ) {
         this._buffer = []
-
         if ( !!str ) {
             this._buffer.push( str )
         }
@@ -19,7 +18,6 @@ export default class StringBuffer {
         for ( let i = 0; i < times; i++ ) {
             this.append( str )
         }
-
         return this
     }
 
@@ -36,13 +34,10 @@ export default class StringBuffer {
     }
 
     toString() {
-
         let str = ""
-
         this._buffer.forEach( ( s ) => {
             str += s
         } )
-
         return str
     }
 }
