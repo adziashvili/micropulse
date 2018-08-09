@@ -1,7 +1,12 @@
-import { StringHelper, DateHelper } from '../common'
+import { StringHelper, StringBuffer, DateHelper } from '../common'
 
-const DEVIDER = "------------------------------------------------------------------------"
-// Report devider
+const DEFAULT_DIVIDER_LEN = 80
+const DEFAULT_DIVIDER_CH = "-"
+
+const DEF_DIVIDER = {
+    LEN: 80,
+    CH: "-"
+}
 
 /**
  * An aggregation of utilities needed for consistent and quick reporting formating.
@@ -11,7 +16,7 @@ const DEVIDER = "---------------------------------------------------------------
 export default class ReportHelper {
 
     /**
-     * Pass the required two inputs NAME for the report and DATE.
+     * Expects the required two inputs NAME for the report and DATE.
      *
      * @param {String} reportName Name of the report
      * @param {Date} date The daye for which the rpeort is generated for.
@@ -19,43 +24,85 @@ export default class ReportHelper {
     constructor( reportName, date ) {
         this.reportName = reportName
         this.date = date
+        this.setDivider()
     }
 
+    /**
+     * Builds the divider used by ReportHelper.
+     *
+     * Pass option with len and ch to setup the divider.
+     *
+     * @param {Object} options Can include len and ch properties.
+     *                         len defaults to DEF_DIVIDER.LEN
+     *                         ch defaults to DEF_DIVIDER.CH
+     */
+    setDivider( {
+        len = DEF_DIVIDER.LEN,
+        ch = DEF_DIVIDER.CH
+    } = DEF_DIVIDER ) {
+
+        this._divider = new StringBuffer().appendTimes( ch, len ).toString()
+    }
+
+    /**
+     * Divider is used when addDevider is called to add visual break in the report.
+     *
+     * @return {String} The divider.
+     */
+    get divider() {
+        return this._divider
+    }
+
+    /**
+     * Trending up green symbol.
+     */
     get UP() {
         return "\u25B4".green
     }
 
+    /**
+     * Trending down red symbol.
+     */
     get DOWN() {
         return "\u25Be".red
     }
 
+    /**
+     * No change grey symbol.
+     */
     get NO_CHANGE() {
         return "-".grey
     }
 
+    /**
+     * [addChangeSymbol description]
+     *
+     * @param {[type]} v    [description]
+     * @param {[type]} vStr [description]
+     */
     addChangeSymbol( v, vStr ) {
-        return v > 0
-            ? this.UP + " " + vStr
-            : v < 0
-                ? this.DOWN + " " + vStr
-                : this.NO_CHANGE + " " + vStr
+        return v > 0 ?
+            this.UP + " " + vStr :
+            v < 0 ?
+            this.DOWN + " " + vStr :
+            this.NO_CHANGE + " " + vStr
     }
 
     addChangeColor( value, valueString ) {
-        return value > 0
-            ? valueString.green
-            : value < 0
-                ? valueString.red
-                : valueString.grey
+        return value > 0 ?
+            valueString.green :
+            value < 0 ?
+            valueString.red :
+            valueString.grey
     }
 
     addTrafficLights( value, valueString, target, goYellowThreahold ) {
 
-        return value >= target
-            ? valueString.green
-            : value >= target * goYellowThreahold
-                ? valueString.yellow
-                : valueString.red
+        return value >= target ?
+            valueString.green :
+            value >= target * goYellowThreahold ?
+            valueString.yellow :
+            valueString.red
     }
 
     /**
@@ -66,9 +113,9 @@ export default class ReportHelper {
      */
     addReportTitle( newTitle, newlines = 0 ) {
 
-        let title = !newTitle
-            ? this.reportName
-            : newTitle
+        let title = !newTitle ?
+            this.reportName :
+            newTitle
 
         this.addWhiteSpece( newlines )
         console.log( "%s", title.bold.underline );
@@ -98,36 +145,36 @@ export default class ReportHelper {
     }
 
     /**
-     * Adds a devider <i>DEVIDER</i> to the stdout.
+     * Adds a divider to the stdout.
      *
      * @param {String}  [name=""]             Name to check agasint the addOnlyForNames input.
-     * @param {Array}   [addOnlyForNames=[]]  Qualifies the name. If this array of strings includes the name, the devider will be printed
-     * @param {Boolean} [bAddNewLine=false]   If true, a new line will be added before the devider
+     * @param {Array}   [addOnlyForNames=[]]  Qualifies the name. If this array of strings includes the name, the divider will be printed
+     * @param {Boolean} [bAddNewLine=false]   If true, a new line will be added before the divider
      */
     addDevider( name = "", addOnlyForNames = [], bAddNewLine = false ) {
 
         if ( addOnlyForNames.length === 0 || addOnlyForNames.includes( name ) ) {
-            let deviderString = DEVIDER
+            let dividerStr = this.divider
             if ( bAddNewLine ) {
-                deviderString += "\n"
+                dividerStr += "\n"
             }
-            console.log( deviderString.grey );
+            console.log( dividerStr.grey );
         }
     }
 
     /**
-     * Add month names to a prefix (e.g. Name)
+     * Add month names to a firstValue (e.g. Name)
      *
-     * @param {String} [prefix=""] Baseline of the colounm row
+     * @param {String} [firstValue=""] Baseline of the colounm row
      * @param {Date} toMonth     How many months to add
      */
-    addHeaderAsMonths( prefix = "", toMonth ) {
+    addHeaderAsMonths( firstValue = "", toMonth ) {
 
-        toMonth = !toMonth
-            ? this.date.getMonth()
-            : toMonth
+        toMonth = !toMonth ?
+            this.date.getMonth() :
+            toMonth
 
-        let header = StringHelper.exact( prefix, 12 )
+        let header = StringHelper.exact( firstValue, 12 )
 
         for ( let month = 0; month < toMonth; month++ ) {
             header += "\t " + DateHelper.getMonthName( month )
@@ -138,5 +185,81 @@ export default class ReportHelper {
 
         console.log( "\n%s".bold, header )
         // print title
+    }
+
+    /**
+     * Prints a bolded line with firstValue and Month names as indicated with the months array.
+     *
+     * The line will be firstLine month1 month 2... and last element will be "TOTAL"
+     *
+     * @param {Array}  [months=[]]     Each element should have month correstponding to the month index.
+     * @param {String} [firstValue=""] [description]
+     * @param {Object} layout          Can include {indent = "", firstColWidth = 20, otherColWidth = 10, totalSeperator = " | "}.
+     *                                 See layout details @addValues for details.
+     */
+    addHeaderAsMonthsArray( months = [], firstValue = "", layout ) {
+
+        let values = months.map( ( m ) => {
+            return m.month !== -1 ? DateHelper.getMonthName( m.month ) : "TOTAL"
+        } )
+        // Get all the months headers
+
+        values.unshift( firstValue )
+        // Add to head of array
+
+        this.addValues( values, layout, ( str ) => { return str.bold } )
+    }
+
+    /**
+     * Formats and prints values (array) to stdout according to the layout and decorator.
+     *
+     * e.g. addValues( values, layout, ( str ) => { return str.bold } )
+     *
+     * Layout is an object (like options) that provides formating details and includes:
+     * {indent = "", firstColWidth = 20, otherColWidth = 10, totalSeperator = " | "}
+     *
+     * @param {Array}  [values=[]]        Array of string values.
+     * @param {String} [indent=""]        Indent is a string added after the first
+     *                                    value and before any other value.
+     * @param {Number} [firstColWidth=20] The first value will be exactly this length.
+     *                                    It will be padded iwth " " if needed.
+     * @param {Number} [otherColWidth=10] The 2nd and following values in the array will be
+     *                                    exactly of otherColWidth in length adding " " if needed.
+     * @param {String} [totalSeperator= " | "    } = layout] totalSeperator will be added before the last element.
+     *                                    Layout is an object that includes details on how to format the values into a line.
+     * @param {[type]} [decorator=null]   If provided, decorator will be passed the final string for formating before printing.
+     */
+    addValues( values = [], {
+        indent = "",
+        firstColWidth = 20,
+        otherColWidth = 10,
+        totalSeperator = " | "
+    } = layout, decorator = null ) {
+
+        let sb = new StringBuffer()
+
+        for ( let i = 0; i < values.length; i++ ) {
+
+            if ( i > 0 && i < values.length - 1 ) {
+                sb.appendPad( indent + values[ i ], otherColWidth )
+            } else if ( i === 0 ) {
+                sb.appendExact( values[ i ], firstColWidth )
+                sb.append( indent ) // How we generalise this?
+            } else {
+                sb.append( totalSeperator )
+                sb.appendPad( "Total", otherColWidth )
+            }
+        }
+
+        console.log( decorator === null ? sb.toString() : decorator( sb.toString() ) )
+    }
+
+    /**
+     * Adds a new line to stdout.
+     *
+     * @return {nothing} Does not return a value.
+     */
+    newLine() {
+        console.log()
     }
 }

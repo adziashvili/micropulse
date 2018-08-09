@@ -1,5 +1,5 @@
 import { PipelineStore } from './model'
-import { ReportHelper } from '../common'
+import { StringHelper as SH, ReportHelper } from '../common'
 import { PipelineReport } from './reports'
 
 export default class PipelinePulse {
@@ -18,7 +18,7 @@ export default class PipelinePulse {
         this.rh.addReportTitle()
 
         console.log( "Total pipeline K USD %s across %d opportunities.",
-            ( this.store.total / 1000 ).toFixed( 1 ),
+            SH.addCommas( ( this.store.total / 1000 ).toFixed( 1 ) ),
             this.store.store.length )
 
         this.reports.forEach( ( r ) => {

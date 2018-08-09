@@ -65,6 +65,17 @@ export default class StringHelper {
         return fixed
     }
 
+    /**
+     * Adds a prefix to a string up to a specfiied length.
+     *
+     * e.g. prefix ("Hi", 5, "Z") will result in "ZZZHi"
+     *
+     * @param {String} [str='']                               String to pad.
+     * @param {[type]} [max=StringHelper.DEFAULT_MAX_PADDING] Total final length desired. Includes Str and prefix added.
+     * @param {[type]} [c=StringHelper.PADDING_CHAR]          What character to add as prefix.
+     *
+     * @return {[type]} [description]
+     */
     static prefix(
         str = '',
         max = StringHelper.DEFAULT_MAX_PADDING,
@@ -101,6 +112,7 @@ export default class StringHelper {
 
     /**
      * Parses a percent string.
+     *
      * String value can have '%' as a suffix.
      * When number is passed, it will be return as a float.
      *
@@ -145,5 +157,20 @@ export default class StringHelper {
         let v = value.toLowerCase()
 
         return ( "yes" === v || "true" === v || "1" === v )
+    }
+
+    /**
+     * Returns a number with commans.
+     *
+     * e.g. addCommas (10000.321) will return "10,000.321"
+     *
+     * @param {number} x A number
+     *
+     * @return {string} Commas seperated by thousands
+     */
+    static addCommas( x ) {
+        var parts = x.toString().split( "." );
+        parts[ 0 ] = parts[ 0 ].replace( /\B(?=(\d{3})+(?!\d))/g, "," );
+        return parts.join( "." );
     }
 }

@@ -88,6 +88,9 @@ export default class PipelineStore {
 
         this.monthly = this.buildMonthlyPipeline()
         // Build the base monthly pipeline data
+
+        this.buildMonthlyRatios()
+        // Building the monthly pipe in respect to total
     }
 
     buildMonthlyPipeline() {
@@ -99,12 +102,13 @@ export default class PipelineStore {
             let pipe = { "practice": name, "months": [] }
             model.push( pipe )
 
-            this.months.forEach( ( m ) => {
-                let monthlyPipe = { "month": m }
+            this.months.forEach( ( m ) => {                
+                let monthlyPipe = { "month": m.month, isPast: m.isPast }
                 pipe.months.push( monthlyPipe )
                 let total = { value: 0, count: 0 }
                 this.stages.forEach( ( s ) => {
-                    monthlyPipe[ s ] = this.sumPipe( this.pm.expand( name ), m, s, "_value" )
+                    monthlyPipe[ s ] = this.sumPipe( this.pm.expand( name ), m.month, s,
+                        "_value" )
                     total.value = this.add( total.value, monthlyPipe[ s ].value )
                     total.count += monthlyPipe[ s ].count
                 } )
@@ -136,6 +140,16 @@ export default class PipelineStore {
         } )
 
         return model
+    }
+
+    buildMonthlyRatios() {
+        this.monthly.forEach( ( p ) => {
+            let total = this.getPipe( p.practice, -1, "Total" )
+            p.months.forEach( ( m ) => {
+                let monthlyTotal = m[ "Total" ].value
+                m.monthlyVsTotal = total !== 0 ? monthlyTotal / total : 0
+            } )
+        } )
     }
 
     get total() {
@@ -185,6 +199,7 @@ export default class PipelineStore {
 
     setupMonths() {
         let { minDate, maxDate } = DateHelper.getMinMaxDates( this.store, "_closeDate" )
+        let minD = new DateHelper( minDate )
 
         this.minDate = minDate
         this.maxDate = maxDate
@@ -193,7 +208,7 @@ export default class PipelineStore {
 
         if ( this.minDate !== null && this.maxDate !== null ) {
             for ( let m = this.minDate.getMonth(); m <= this.maxDate.getMonth(); m++ ) {
-                this.months.push( m )
+                this.months.push( { month: m, isPast: minD.isPast( m ) } )
             }
         }
     }

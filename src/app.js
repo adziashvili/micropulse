@@ -17,7 +17,7 @@ let pm = new PracticeManager()
 const names = pm.practices()
 // Used to force a specific order on the reports so APAC names comes first.
 
-const REPORT_DATE = new Date( 2018, 7, 30 )
+const REPORT_DATE = new Date( 2018, 8, 30 )
 // A date for the reporting cut off
 
 console.clear()

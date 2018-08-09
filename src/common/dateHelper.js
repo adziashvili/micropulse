@@ -102,6 +102,14 @@ export default class DateHelper {
         return this.date.getMonth() === today.getMonth() - 1
     }
 
+    isPast( addMoreMonths = 0 ) {
+        let today = new Date( Date.now() )
+        let dateInMonths = ( this.date.getFullYear() - 1 ) * 12 + addMoreMonths
+        let todayInMonths = ( today.getFullYear() - 1 ) * 12 + today.getMonth()
+
+        return dateInMonths < todayInMonths
+    }
+
     get monthName() {
         return monthNames[ this.date.getMonth() ]
     }
