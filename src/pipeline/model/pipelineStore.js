@@ -183,8 +183,7 @@ export default class PipelineStore {
         this.monthly.forEach( ( p ) => {
             let total = this.getPipe( p.practice, -1, "Total" )
             p.months.forEach( ( m ) => {
-                m.monthlyVsTotal = this.divide( m.Total.value / total )
-
+                m.monthlyVsTotal = this.divide( m[ "Total" ].value , total )                
             } )
         } )
     }
