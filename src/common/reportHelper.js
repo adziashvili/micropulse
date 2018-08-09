@@ -247,7 +247,7 @@ export default class ReportHelper {
                 sb.append( indent ) // How we generalise this?
             } else {
                 sb.append( totalSeperator )
-                sb.appendPad( "Total", otherColWidth )
+                sb.appendPad( values[ i ], otherColWidth )
             }
         }
 
