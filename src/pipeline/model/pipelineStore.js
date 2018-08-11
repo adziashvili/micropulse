@@ -31,6 +31,8 @@ export default class PipelineStore {
             pipeRecords = data._store
         }
 
+        this.dataRefreshDate = data.dataRefreshDate
+
         this.store = pipeRecords.map( ( pr ) => {
             return new PipelineRecord( [
                 pr._practice,
@@ -86,7 +88,7 @@ export default class PipelineStore {
         this.setupMonths()
         // Scan and see what is the min and max pipe months
 
-        this.monthly = this.buildMonthlyPipeline()
+        this.monthly = this.rollupStages()
         // Build the base monthly pipeline data
 
         this.buildMonthlyRollups()
@@ -100,21 +102,19 @@ export default class PipelineStore {
         // Building the monthly pipe in respect to total pipe value
     }
 
-    buildMonthlyPipeline() {
-
+    rollupStages() {
         let model = []
         this.names.forEach( ( name ) => {
-            let pipe = { "practice": name, "months": [] }
-            model.push( pipe )
+            let practice = { "practice": name, "months": [] }
             this.months.forEach( ( m ) => {
                 let mp = { "month": m.month, isPast: m.isPast }
                 this.stages.forEach( ( s ) => {
                     mp[ s ] = this.stats( this.pm.expand( name ), m.month, s )
                 } )
-                pipe.months.push( mp )
+                practice.months.push( mp )
             } )
+            model.push( practice )
         } )
-
         return model
     }
 
@@ -122,17 +122,54 @@ export default class PipelineStore {
         this.monthly.forEach( ( p ) => {
             p.months.forEach( ( m ) => {
                 let rollups = this.rollup( [ m ] )
-                m.pa = rollups.pa
-                m.ai = rollups.ai
                 m.Total = rollups.t
+                m.Total.pa = rollups.pa
+                m.Total.ai = rollups.ai
             } )
         } )
     }
 
+    buildTotals() {
+        this.monthly.forEach( ( p ) => {
+            let pt = { "month": -1, isPast: false }
+            this.stages.forEach( ( s ) => {
+                pt[ s ] = { value: 0, count: 0, avg: 0 }
+                p.months.forEach( ( m ) => {
+                    pt[ s ].value = this.add( pt[ s ].value, m[ s ].value )
+                    pt[ s ].count += m[ s ].count
+                } )
+            } )
+            let rollups = this.rollup( p.months )
+            pt.Total = rollups.t
+            pt.Total.pa = rollups.pa
+            pt.Total.ai = rollups.ai
+
+            p.months.push( pt )
+        } )
+    }
+
+    buildMonthlyRatios() {
+        this.monthly.forEach( ( p ) => {
+            let total = this.getPipe( p.practice, -1, "Total" )
+            p.months.forEach( ( m ) => {
+                m.monthlyVsTotal = this.divide( m[ "Total" ].value, total )
+            } )
+        } )
+    }
+
+    /**
+     * For a list of motnhs [ms], caluclates the stats and total.
+     * Month == -1 is skipped
+     *
+     * @param {Array} [ms=[]] List of months
+     *
+     * @return {Object} Stats object that includes pa, ai and t (total) properties
+     */
     rollup( ms = [] ) {
-        let pa = { count: 0, vsCount: 0 } // Partner Attach
-        let ai = { value: 0, count: 0, avg: 0, vsValue: 0, vsCount: 0 } // Adoption Incentive
-        let t = { value: 0, count: 0, avg: 0 } // Total that cuts across stage values
+
+        let pa = { count: 0, vsCount: 0 }
+        let ai = { value: 0, count: 0, avg: 0, vsValue: 0, vsCount: 0 }
+        let t = { value: 0, count: 0, avg: 0 }
 
         ms.forEach( ( m ) => {
             if ( m.month === -1 ) { return } // we should not rollup the last month
@@ -152,40 +189,6 @@ export default class PipelineStore {
         t.avg = this.divide( t.value, t.count )
 
         return { pa, ai, t }
-    }
-
-    buildTotals() {
-        this.monthly.forEach( ( p ) => {
-
-            let pt = {
-                "month": -1,
-                isPast: false,
-            }
-
-            this.stages.forEach( ( s ) => {
-                pt[ s ] = { value: 0, count: 0, avg: 0 }
-                p.months.forEach( ( m ) => {
-                    pt[ s ].value = this.add( pt[ s ].value, m[ s ].value )
-                    pt[ s ].count += m[ s ].count
-                } )
-            } )
-
-            let rollups = this.rollup( p.months )
-            pt.pa = rollups.pa
-            pt.ai = rollups.ai
-            pt.Total = rollups.t
-
-            p.months.push( pt )
-        } )
-    }
-
-    buildMonthlyRatios() {
-        this.monthly.forEach( ( p ) => {
-            let total = this.getPipe( p.practice, -1, "Total" )
-            p.months.forEach( ( m ) => {
-                m.monthlyVsTotal = this.divide( m[ "Total" ].value , total )                
-            } )
-        } )
     }
 
     get total() {
@@ -210,17 +213,27 @@ export default class PipelineStore {
         let parser = new PipelineParser( data )
         let newData = parser.parse()
 
+        let removedOpts = 0
         this.store.forEach( ( p ) => {
             if ( !this.isIncluded( p, newData ) ) {
-                newData.push( p )
-            } else {
-                console.log( "%s %s %s", "+".green, p.practice.grey, p.opportunity.grey );
+                removedOpts++
+                console.log( "%s %s \t%s", "-".red, p.practice.grey, p.opportunity.red )
             }
         } )
 
-        console.log( "%s New opportunities".green, newData.length - this.store.length );
+        let newOpts = 0
+        newData.forEach( ( p ) => {
+            if ( !this.isIncluded( p, this.store ) ) {
+                newOpts++
+                console.log( "%s %s \t%s", "+".green, p.practice.grey, p.opportunity.green )
+            }
+        } )
+
+        console.log( "+%s opportunities".green, newOpts );
+        console.log( "-%s opportunities".red, removedOpts );
         console.log( "%s Total opportunities", newData.length );
 
+        this.dataRefreshDate = parser.date
         this.store = newData
         this.build()
     }

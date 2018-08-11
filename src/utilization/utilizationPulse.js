@@ -27,19 +27,19 @@ export default class UtilizationPulse {
         ]
     }
 
-    report() {
+    report(isVerbose = false) {
         let postReportWhiteSpece = 2
         console.log( "%s %s (%s records)", "[MICROPULSE]".red,
             "Jan 01 - Jul 25, 2018 SalesForce data".grey.italic, this.store
             .size );
         this.reports.forEach( ( report ) => {
-            report.report( false )
+            report.report( isVerbose )
             this.rh.addWhiteSpece( this.postReportWhiteSpece )
         } )
         // this.reports[ 0 ].report( true )
     }
 
-    run() {
+    run(isVerbose = false) {
 
         let isSuccess = true
 
@@ -49,12 +49,13 @@ export default class UtilizationPulse {
                     this.store.reconcile( data.getWorksheet( data.worksheets[ 0 ].id ) )
                     this.sm.commit( this.store.storeKey )
                 }
-                this.report()
+                this.report(isVerbose)
 
             } ).catch( ( e ) => {
                 isSuccess = false
                 console.log( "Ooops! We have an Error reading new data.".red );
                 console.log( e )
+                throw e
             } )
 
         return Promise.resolve( isSuccess )

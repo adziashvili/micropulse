@@ -173,4 +173,29 @@ export default class StringHelper {
         parts[ 0 ] = parts[ 0 ].replace( /\B(?=(\d{3})+(?!\d))/g, "," );
         return parts.join( "." );
     }
+
+    /**
+     * Formats a number ratio as a percent e.g. 0.3 => 30.0%, 1.153 => 115.3%
+     *
+     * @param {Number}                  ratio A ratio to format
+     * @param {Number} [fixed=1]        number of digits after the point
+     *
+     * @return {String} String formated as string
+     */
+    static toPercent( ratio, fixed = 1 ) {
+        return ( ratio * 100 ).toFixed( fixed ) + "%"
+    }
+
+    /**
+     * Scales a number to thouhsands.
+     *
+     * @param {Number}  number             Number to scale (can be float or int)
+     * @param {Boolean} [isAddCommas=true] If true, adds commas; By default true
+     *
+     * @return {String}  formated number
+     */
+    static toThousands( number, isAddCommas = true ) {
+        let scaled = ( number / 1000 ).toFixed( 0 )
+        return isAddCommas ? StringHelper.addCommas( scaled ) : scaled
+    }
 }

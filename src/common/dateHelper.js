@@ -80,10 +80,15 @@ export default class DateHelper {
     get localeDateString() {
 
         let options = {
-            weekday: 'long',
+            hourCycle: 'h24',
+            weekday: 'short',
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZoneName: 'short'
         }
 
         return this.date.toLocaleDateString( 'en-US', options )
@@ -108,6 +113,11 @@ export default class DateHelper {
         let todayInMonths = ( today.getFullYear() - 1 ) * 12 + today.getMonth()
 
         return dateInMonths < todayInMonths
+    }
+
+    isSameMonth( date ) {
+        return this.date.getFullYear() === date.getFullYear() &&
+            this.date.getMonth() === date.getMonth()
     }
 
     get monthName() {

@@ -1,5 +1,5 @@
 import { PipelineStore } from './model'
-import { StringHelper as SH, ReportHelper } from '../common'
+import { StringHelper as SH, ReportHelper, DateHelper } from '../common'
 import { PipelineReport } from './reports'
 
 export default class PipelinePulse {
@@ -14,19 +14,21 @@ export default class PipelinePulse {
         this.rh = new ReportHelper( "PIPELINE REPORTS", date )
     }
 
-    report() {
+    report( isVerbose = false ) {
         this.rh.addReportTitle()
+        let dh = new DateHelper( this.store.dataRefreshDate )
 
-        console.log( "Total pipeline K USD %s across %d opportunities.",
-            SH.addCommas( ( this.store.total / 1000 ).toFixed( 1 ) ),
+        console.log( "Total pipeline USD %sK across %d opportunities.",
+            SH.toThousands( this.store.total ),
             this.store.store.length )
+        console.log( "Pipeline as for:", dh.localeDateString )
 
         this.reports.forEach( ( r ) => {
-            r.report()
+            r.report( isVerbose )
         } )
     }
 
-    run() {
+    run( isVerbose = false ) {
         let isSuccess = true
 
         this.sm.readNewData( this.key )
@@ -35,12 +37,13 @@ export default class PipelinePulse {
                     this.store.reconcile( data.getWorksheet( data.worksheets[ 0 ].id ) )
                     this.sm.commit( this.key )
                 }
-                this.report()
+                this.report( isVerbose )
 
             } ).catch( ( e ) => {
                 isSuccess = false
                 console.log( "Ooops! We have an Error reading new data.".red );
                 console.log( e )
+                throw e
             } )
 
         return Promise.resolve( isSuccess )

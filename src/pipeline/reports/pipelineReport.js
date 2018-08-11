@@ -16,19 +16,21 @@ export default class PipelineReport {
         }
     }
 
-    report() {
+    report( isVerbose = false ) {
         let {
             indent,
             firstColWidth,
             otherColWidth,
             totalSeperator
         } = this.layout
+
         let deviderName = [ "APAC", "APJ" ]
 
         this.rh.addReportTitle()
+
         this.store.monthly.forEach( ( p ) => {
 
-            if ( p.practice === "APJ Shared" ) { return } // SKIP
+            if ( p.practice === "APJ Shared" ) { return } // No pipeline here
 
             this.rh.addDevider( p.practice, deviderName )
             this.rh.addHeaderAsMonthsArray( p.months, p.practice, this.layout )
@@ -37,7 +39,7 @@ export default class PipelineReport {
                 let sb = new StringBuffer( indent )
                 let isTotal = "Total" === s
 
-                sb.append( SH.exact( isTotal ? "Monthly Total" : s, firstColWidth ).italic.grey )
+                sb.append( SH.exact( isTotal ? "Monthly Total" : s, firstColWidth ).italic )
                 p.months.forEach( ( m ) => {
                     if ( m.month === -1 ) { sb.append( totalSeperator ) }
                     let valueString = this.formatValue( m[ s ].value )
@@ -46,49 +48,74 @@ export default class PipelineReport {
                     )
                     sb.append( coloredValueString )
                 } )
-
-                // if ( isTotal ) { sb.newLine() }
                 console.log( this.boldIf( sb.toString(), isTotal ) )
             } )
 
-            this.addRatios( p.months )
+            // Ratio of Month Pipe vs. Total Pipe
+            this.addTotal( "% vs. PIPELINE", p.months.map( ( m ) => {
+                return SH.toPercent( m.monthlyVsTotal )
+            } ) )
+
+            if ( isVerbose ) {
+                this.addVerbose( p )
+            }
+
             this.rh.addDevider( p.practice, deviderName, true )
             this.rh.newLine()
         } )
     }
 
-    addRatios( months ) {
-        let ratios = months.map( ( m ) => {
-            return this.toPercent( m.monthlyVsTotal )
-        } )
-        ratios.unshift( this.layout.indent + "Monthly vs. Total" )
-        this.rh.addValues( ratios, this.layout, ( str ) => { return str.grey } )
+    addVerbose( p ) {
+        // ADS
+        this.rh.newLine()
+        this.addTotal( "$ Average Deal Size", p.months.map( ( m ) => {
+            return SH.toThousands( m.Total.avg )
+        } ) )
+        this.addTotal( "# Opportunities", p.months.map( ( m ) => {
+            return m.Total.count
+        } ) )
+
+        // PA
+        this.rh.newLine()
+        this.addTotal( "% Partner attached", p.months.map( ( m ) => {
+            return SH.toPercent( m.Total.pa.vsCount )
+        } ) )
+        this.addTotal( "# Partner attached", p.months.map( ( m ) => {
+            return m.Total.pa.count
+        } ) )
+
+        // AI
+        this.rh.newLine()
+        this.addTotal( "% With AI", p.months.map( ( m ) => {
+            return SH.toPercent( m.Total.ai.vsCount )
+        } ) )
+        this.addTotal( "# With AI", p.months.map( ( m ) => {
+            return m.Total.ai.count
+        } ) )
+
+        this.addTotal( "% AI vs. Value", p.months.map( ( m ) => {
+            return SH.toPercent( m.Total.ai.vsValue )
+        } ) )
+
+        this.addTotal( "$ Avg. AI (when > 0)", p.months.map( ( m ) => {
+            return SH.toThousands( m.Total.ai.value )
+        } ) )
     }
 
-    toPercent( zeroToOneNumber ) {
-        return ( zeroToOneNumber * 100 ).toFixed( 1 ) + "%"
-    }
-
-    toThousands( num ) {
-        return SH.addCommas( ( num / 1000 ).toFixed( 0 ) )
-    }
-
-    redIfZero( num, str ) {
-        return num === 0 ? str.red : str
+    addTotal( title, values ) {
+        values.unshift( this.layout.indent + title )
+        this.rh.addValues( values, this.layout, ( str ) => { return str.grey } )
     }
 
     redIfs( v, str, conditions = [] ) {
         let match = conditions.some( ( c ) => {
             return c
         } )
-
         return match ? str.red : str
     }
 
     formatValue( v ) {
-        let strValue = v === 0 ? "-" : this.toThousands( v )
-        let prefixed = SH.prefix( strValue, this.layout.otherColWidth )
-
+        let prefixed = SH.prefix( SH.toThousands( v ), this.layout.otherColWidth )
         return v === 0 ? prefixed.red : prefixed
     }
 

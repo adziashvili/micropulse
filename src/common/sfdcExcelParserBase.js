@@ -155,15 +155,12 @@ export default class SFDCExcelParserBase {
      */
     getReportDate() {
         let date = this.readCell( REPORT_DATE_CELL )
-
         if ( null === date ) {
             throw "Can't find report data in " + REPORT_DATE_CELL
+        } else {
+            // SFDC reports are offset
+            return new Date( date.trim() + " UTC" )
         }
-
-        let tokens1 = date.split( "/" )
-        let tokens2 = tokens1[ 2 ].split( " " )
-
-        return new Date( tokens2[ 0 ], tokens1[ 0 ] - 1, tokens1[ 1 ] )
     }
 
 }

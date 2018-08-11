@@ -17,7 +17,7 @@ let pm = new PracticeManager()
 const names = pm.practices()
 // Used to force a specific order on the reports so APAC names comes first.
 
-const REPORT_DATE = new Date( 2018, 8, 30 )
+const REPORT_DATE = new Date( "8/31/2018 23:59:59 GMT-7" )
 // A date for the reporting cut off
 
 console.clear()
@@ -30,8 +30,8 @@ sm.buildAll( names, REPORT_DATE )
 // Asks the store manager to build all the data models
 
 Promise.resolve( true )
-    .then( new UtilizationPulse( sm, REPORT_DATE ).run() )
-    .then( new PipelinePulse( sm, REPORT_DATE ).run() )
+    .then( new UtilizationPulse( sm, REPORT_DATE ).run( true ) )
+    .then( new PipelinePulse( sm, REPORT_DATE ).run( true ) )
     .then( sm.save() )
 
 // Runs pulse reports

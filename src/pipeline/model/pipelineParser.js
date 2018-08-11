@@ -34,4 +34,8 @@ export default class PipelineParser extends SFDCExcelParserBase {
         return this.records
     }
 
+    get date() {
+        return this.getReportDate()
+    }
+
 }
