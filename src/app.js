@@ -12,6 +12,8 @@ import {
     ExcelReader
 } from './common'
 
+import { Table, Modeler } from './common'
+
 let pm = new PracticeManager()
 
 const names = pm.practices()
@@ -33,5 +35,31 @@ Promise.resolve( true )
     .then( new UtilizationPulse( sm, REPORT_DATE ).run( true ) )
     .then( new PipelinePulse( sm, REPORT_DATE ).run( true ) )
     .then( sm.save() )
+
+// let table = new Table()
+// let file = "./data/pipelineTest.xlsx"
+//
+// new ExcelReader
+//     // .load( "./data/bookings.xlsx" )
+//     .load( file )
+//     .then( ( data ) => {
+//         table.process( data.getWorksheet( data.worksheets[ 0 ].id ) )
+//         let modeler = new Modeler( table )
+//
+//         modeler.rows = [
+//             { key: "Practice", transform: null },
+//             { key: "Stage", transform: null } ]
+//
+//         modeler.cols = [
+//             { key: 'Is Partner Account Involved?', transform: null },
+//             { key: 'Forecast Status', transform: null } ]
+//
+//         modeler.model()
+//     } )
+//     .catch( ( e ) => {
+//         console.log( "Ooops! We have an Error reading file.".red, file );
+//         console.log( e )
+//         throw e
+//     } )
 
 // Runs pulse reports

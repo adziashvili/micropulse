@@ -72,7 +72,7 @@ export default class SFDCExcelParserBase {
      *
      * @return {Array} Returns array of values
      */
-    readValues( col, row ) {
+    readRow( col, row ) {
         let values = []
 
         while ( true ) {
@@ -90,28 +90,59 @@ export default class SFDCExcelParserBase {
         return values
     }
 
+    readCol( col, row, rowEnd ) {
+        let values = []
+
+        while ( row <= rowEnd ) {
+            let value = this.ws.getCell( "" + this.CELLS[ col - 1 ] + row ).value
+            if ( value !== null ) {
+                values.push( value )
+                row++
+            } else {
+                break
+            }
+        }
+        return values
+    }
+
     /**
-     * Looks for lookup scanning from scanCol downwards
+     * Scan down to find a lookup string scanning from A1 downwards
      *
      * @param {string} lookup Value to look for
+     * @param {string} col Col to scan
+     * @param {number} row Starting row
      *
      * @return {number} the row number where the lookup was found
      */
-    scanDown( lookup, scanCol = "A" ) {
+    lookDown( lookup, col = "A", row = 1 ) {
+        return this.lookDownCondition( ( v ) => {
+            return v !== null && !!v && v.toLowerCase().startsWith( lookup.toLowerCase() )
+        }, col, row ).row
+    }
 
-        let row = 1
-        let value = this.ws.getCell( scanCol + row ).value
+    /**
+     * Scans values from col:row downwards untill condition is met. If
+     * condition is null, none null value is searched for - i.e. ANY value.
+     *
+     * @param {[type]} [condition=null] Condition to halt on.
+     * @param {String} [col="A"]        Colunm to scan, by default 'A'
+     * @param {Number} [row=1]          Starting row, by default 1
+     * @param {Number} [attempts=100]   Attempts before giving up
+     *
+     * @return {[type]} The first row number where the condition is met.
+     *                  -1 if failed to meet condition for 1000 rows
+     *                  scanned below 'row'
+     */
+    lookDownCondition( condition = null, col = "A", row = 1, attempts = 1000 ) {
 
-        while ( ( value !== null && !!value ) || row < 1000 ) {
+        let value = this.ws.getCell( col + row ).value
+        let isTrue = condition === null ? value !== null : condition( value )
 
-            if ( value !== null && !!value && value.toLowerCase().startsWith( lookup.toLowerCase() ) ) {
-                return row
-            }
-
-            value = this.ws.getCell( scanCol + ( ++row ) ).value
+        while ( !isTrue && row < attempts ) {
+            value = this.ws.getCell( col + ( ++row ) ).value
+            isTrue = condition === null ? value !== null : condition( value )
         }
-
-        return this.NOT_FOUND
+        return value === null ? { row: this.NOT_FOUND, value } : { row, value }
     }
 
     /**
@@ -161,6 +192,14 @@ export default class SFDCExcelParserBase {
             // SFDC reports are offset
             return new Date( date.trim() + " UTC" )
         }
+    }
+
+    /**
+     * Number colunm values that represent 0 without explicity setting it
+     * to z
+     */
+    static get ZERO_OR_MISSING() {
+        return [ "", "-" ]
     }
 
 }
