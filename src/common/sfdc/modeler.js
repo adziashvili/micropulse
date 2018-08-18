@@ -1,5 +1,6 @@
 import {
-    JSONHelper
+    JSONHelper,
+    Analyzer
 } from '../../common'
 
 export default class Modeler {
@@ -15,12 +16,12 @@ export default class Modeler {
         this.construct( model )
         this.allocate( model )
         this.calculate( model )
+        this.describe( model )
         return model
     }
 
     construct( model ) {
-        model.header = { key: 'root', value: 'root' }
-        model.rows = {}
+        Object.assign( model, { key: 'root', value: 'root', rows: [] } )
 
         this.addCols( model, this.cols )
         this.addRows( model, this.rows )
@@ -33,8 +34,8 @@ export default class Modeler {
         let { key } = cols[ 0 ]
         let values = this.table.distinct( key )
         data.cols = []
-        values.forEach( ( g ) => {
-            data.cols.push( { header: { key: key, value: g }, rows: {} } )
+        values.forEach( ( value ) => {
+            data.cols.push( { key, value, rows: [] } )
         } )
         // Adding a stackby model to the data model we got
 
@@ -57,15 +58,9 @@ export default class Modeler {
             let values = this.table.distinct( key )
             values.forEach( ( value ) => {
                 let [ , ...next ] = rows
-                data.rows[ value ] = {}
-                this.addRows( data.rows[ value ], next )
-            } )
-        } else if ( typeof data === 'object' ) {
-            let values = this.table.distinct( key )
-            values.forEach( ( value ) => {
-                data[ value ] = {}
-                let [ , ...next ] = rows
-                this.addRows( data[ value ], next )
+                let newRow = { key, value, rows: [] }
+                data.rows.push( newRow )
+                this.addRows( newRow, next )
             } )
         }
 
@@ -81,21 +76,19 @@ export default class Modeler {
         // Get every relevant object called for record allocation
         for ( let key in model ) {
             switch ( key ) {
-                case 'header':
-                    break;
                 case 'rows':
-                    for ( let key in model.rows ) {
-                        this.allocate( model.rows[ key ], fRows.concat( [ key ] ), fCols )
-                    }
+                    model.rows.forEach( ( r ) => {
+                        this.allocate( r, fRows.concat( [ r.value ] ), fCols )
+                    } )
                     break;
                 case 'cols':
                     model.cols.forEach( ( c ) => {
-                        this.allocate( c, fRows, fCols.concat( [ c.header.value ] ) )
+                        this.allocate( c, fRows, fCols.concat( [ c.value ] ) )
                     } )
                     break;
                 default:
                     if ( 'object' === typeof model[ key ] ) {
-                        this.allocate( model[ key ], fRows.concat( [ key ] ), fCols )
+                        this.allocate( model[ key ], fRows.concat( [ model[ key ].value ] ), fCols )
                     }
             }
         }
@@ -123,19 +116,53 @@ export default class Modeler {
         return filterList
     }
 
-    calculate( model ) {
+    calculate( model, headers = null ) {
 
-        // All the is left is to calculate the
-        // model every where there is a list
+        if ( null === headers ) headers = this.statsHeaders
+        // we want to avoid calling this.statsHeaders every time since it
+        // a computed property
+
+        for ( let key in model ) {
+            if ( typeof model[ key ] === 'object' && Array.isArray( model[ key ] ) ) {
+                model[ key ].forEach( ( m ) => { this.calculate( m, headers ) } )
+            }
+        }
+        // fork cols and rows
+
+        if ( !!model.records ) {
+            let stats = { count: model.records.length }
+            // Adding number of matching records
+
+            headers.forEach( ( h ) => {
+                stats[ h.header ] = Analyzer.analyze( h.type,
+                    model.records.map( ( r ) => { return r[ h.header ] } ) )
+            } )
+            // Based on the type of the values, all values for each header are analysed
+
+            model.stats = stats
+        }
+        // if the model has records, stats are caluclated
     }
 
-    describe( model, indent = " " ) {
+    describe( model, indent ) {
+
         console.log( "\n---\nMODEL\n".green );
         console.log( JSONHelper.stringify( model ) );
     }
 
-    set rows( rows = [] ) {
+    get statsHeaders() {
+        return this.table.headers.filter( ( h ) => {
+            let isRows = this.rows.some( ( r ) => {
+                return r.key === h.header
+            } )
+            let isCols = this.cols.some( ( c ) => {
+                return c.key === h.header
+            } )
+            return [ 'date', 'number', 'currency' ].includes( h.type ) || ( !isRows && !isCols )
+        } )
+    }
 
+    set rows( rows = [] ) {
         let keys = rows.map( ( row ) => { return row.key } )
         if ( !this.table.isHeader( keys ) ) {
             throw "Bad plan. All headers must be valid headers in the file"

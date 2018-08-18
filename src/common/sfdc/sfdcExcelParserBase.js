@@ -199,7 +199,7 @@ export default class SFDCExcelParserBase {
      * to z
      */
     static get ZERO_OR_MISSING() {
-        return [ "", "-" ]
+        return [ null, "", "-" ]
     }
 
 }

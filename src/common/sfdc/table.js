@@ -2,7 +2,8 @@ import {
     SFDCExcelParserBase as Parser,
     Record,
     StringHelper as SH,
-    DateHelper as DH
+    DateHelper as DH,
+    Analyzer as AI
 } from '../../common'
 
 export default class Table {
@@ -98,15 +99,15 @@ export default class Table {
         let data = this.parser.readCol( col, firstDataRow, lastDataRow )
         let meta = { type: '?' }
 
-        if ( this.isNumber( data ) ) {
+        if ( AI.isNumber( data ) ) {
             meta.type = 'number'
-        } else if ( this.isCurrency( data ) ) {
+        } else if ( AI.isCurrency( data ) ) {
             meta.type = 'currency'
-        } else if ( this.isDate( data ) ) {
+        } else if ( AI.isDate( data ) ) {
             meta.type = 'date'
-        } else if ( this.isBoolean( data ) ) {
+        } else if ( AI.isBoolean( data ) ) {
             meta.type = 'boolean'
-        } else if ( this.isString( data ) ) {
+        } else if ( AI.isString( data ) ) {
             meta.type = 'string'
         }
 
@@ -131,75 +132,6 @@ export default class Table {
         } )
 
         return values
-    }
-
-    isString( data ) {
-        return !data.some( ( d ) => {
-            return !( typeof d === 'string' )
-        } )
-    }
-
-    isCurrency( data ) {
-
-        let sizeOfDashOrNull = data.filter( ( d ) => {
-            return Parser.ZERO_OR_MISSING.includes( d )
-        } ).length
-
-        if ( sizeOfDashOrNull === data.length ) {
-            return false
-        }
-
-        return !data.filter( ( d ) => {
-            return !Parser.ZERO_OR_MISSING.includes( d )
-        } ).some( ( d ) => {
-            return !( typeof d === 'string' && d.toLowerCase().trim().startsWith( "usd " ) )
-        } )
-    }
-
-    isNumber( data ) {
-
-        let sizeOfDashOrNull = data.filter( ( d ) => {
-            return Parser.ZERO_OR_MISSING.includes( d )
-        } ).length
-
-        if ( sizeOfDashOrNull === data.length ) {
-            return false
-        }
-
-        return !data.filter( ( d ) => {
-            return !Parser.ZERO_OR_MISSING.includes( d )
-        } ).some( ( d ) => {
-            return typeof d !== 'number'
-        } )
-    }
-
-    isPercent( data ) {
-        return !data.some( ( d ) => {
-            return !d.toLowerCase().endsWith( "%" )
-        } )
-    }
-
-    isDate( data ) {
-        return !data.some( ( d ) => {
-            let ms = Date.parse( d )
-            if ( isNaN( ms ) ) return true
-            let date = new Date( ms )
-            if ( date.getMonth === undefined ) return true
-        } )
-    }
-
-    isBoolean( data ) {
-        return !data.some( ( d ) => {
-            if ( typeof d === 'boolean' ) {
-                return false
-            } else if ( typeof d === 'string' ) {
-                return !( [ "yes", "no", "true", "false" ].includes( d.toLowerCase() ) )
-            } else if ( typeof d === 'number' ) {
-                return !( d === 0 || d === 1 )
-            } else {
-                return true
-            }
-        } )
     }
 
     analyse() {

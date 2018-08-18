@@ -9,6 +9,7 @@ import SFDCExcelParserBase from './sfdc/SFDCExcelParserBase'
 import Record from './sfdc/record'
 import Table from './sfdc/table'
 import Modeler from './sfdc/modeler'
+import Analyzer from './sfdc/analyzer'
 
 export {
     FSHelper,
@@ -22,4 +23,5 @@ export {
     Record,
     Table,
     Modeler,
+    Analyzer
 }
