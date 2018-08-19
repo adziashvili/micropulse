@@ -5,11 +5,13 @@ import StringBuffer from './StringBuffer'
 import DateHelper from './dateHelper'
 import ReportHelper from './reportHelper'
 import ExcelReader from './excelReader'
-import SFDCExcelParserBase from './sfdc/SFDCExcelParserBase'
+import Parser from './sfdc/parser'
 import Record from './sfdc/record'
 import Table from './sfdc/table'
 import Modeler from './sfdc/modeler'
 import Analyzer from './sfdc/analyzer'
+import Reporter from './sfdc/reporter'
+import Layout from './sfdc/layout'
 
 export {
     FSHelper,
@@ -19,9 +21,11 @@ export {
     DateHelper,
     ReportHelper,
     ExcelReader,
-    SFDCExcelParserBase,
+    Parser,
     Record,
     Table,
     Modeler,
-    Analyzer
+    Analyzer,
+    Reporter,
+    Layout
 }

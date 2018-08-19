@@ -1,4 +1,4 @@
-import { SFDCExcelParserBase as Parser } from '../../common'
+import { Parser } from '../../common'
 
 export default class Analyzer {
 
@@ -64,6 +64,9 @@ export default class Analyzer {
         stats.countTotal = values.length
         stats.countDistinct = Analyzer.distinct( values ).count
         stats.countNonEmpty = Analyzer.nonEmpty( values ).count
+        let lengths = values.map( ( v ) => { return ("" + v).length } )
+        stats.maxStringLength = Math.max( ...lengths )
+        stats.minStringLength = Math.min( ...lengths )
         return stats
     }
 

@@ -1,9 +1,9 @@
 const assert = require( 'assert' )
 
-import { SFDCExcelParserBase } from '../../common'
+import { Parser } from '../../common'
 import PipelineRecord from './pipelineRecord'
 
-export default class PipelineParser extends SFDCExcelParserBase {
+export default class PipelineParser extends Parser {
 
     constructor( data ) {
         super( data )

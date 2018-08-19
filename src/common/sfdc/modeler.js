@@ -5,18 +5,20 @@ import {
 
 export default class Modeler {
 
-    constructor( table, dictionary = [] ) {
+    constructor( table ) {
         this.table = table
-        this._rows = []
-        this._cols = []
+        this.model = {}
+        this.rows = []
+        this.cols = []
     }
 
-    model() {
+    build() {
         let model = {}
         this.construct( model )
         this.allocate( model )
         this.calculate( model )
-        this.describe( model )
+        // this.describe( model )
+        this.model = model
         return model
     }
 
@@ -32,10 +34,11 @@ export default class Modeler {
         // nothing to add
 
         let { key } = cols[ 0 ]
+        let type = this.table.getType( key )
         let values = this.table.distinct( key )
         data.cols = []
         values.forEach( ( value ) => {
-            data.cols.push( { key, value, rows: [] } )
+            data.cols.push( { key, value, type, rows: [] } )
         } )
         // Adding a stackby model to the data model we got
 
@@ -53,12 +56,13 @@ export default class Modeler {
         if ( rows.length === 0 ) return
 
         let { key } = rows[ 0 ]
+        let type = this.table.getType( key )
 
         if ( !!data.rows ) {
             let values = this.table.distinct( key )
             values.forEach( ( value ) => {
                 let [ , ...next ] = rows
-                let newRow = { key, value, rows: [] }
+                let newRow = { key, value, type, rows: [] }
                 data.rows.push( newRow )
                 this.addRows( newRow, next )
             } )
@@ -150,6 +154,56 @@ export default class Modeler {
         console.log( JSONHelper.stringify( model ) );
     }
 
+    describeAspects( strKey ) {
+        let description = []
+        this[ strKey ].forEach( ( aspect ) => {
+            let distinctValues = this.table.distinct( aspect.key )
+            let maxStringLength = Math.max( ...distinctValues.map( ( v ) => { return ( "" + v ).length } ) )
+            let count = distinctValues.length
+            description.push( { key: aspect.key, count, maxStringLength, distinctValues } )
+        } )
+        return description
+    }
+
+    find( key, rows = [], cols = [] ) {
+
+        let model = this.model
+
+        if ( cols.length > 0 ) {
+            model = this.filter( 'cols', cols, model )
+        }
+
+        if ( undefined === model ) return undefined
+
+        if ( rows.length > 0 ) {
+            model = this.filter( 'rows', rows, model )
+        }
+
+        return undefined === model ? undefined : model[ key ]
+    }
+
+    filter( key, kvp = [], model = {} ) {
+
+        if ( kvp.length === 0 ) return model
+
+        let condition = kvp[ 0 ]
+        model = model[ key ].find( ( m ) => {
+            return m.key === condition.key && m.value === condition.value
+        } )
+
+        if ( undefined === model ) {
+            return undefined
+        }
+
+        if ( kvp.length > 1 ) { // being asked to go one level deeper
+            if ( !model[ key ] ) return undefined
+            let [ , ...next ] = kvp
+            model = this.filter( key, next, model )
+        }
+
+        return model
+    }
+
     get statsHeaders() {
         return this.table.headers.filter( ( h ) => {
             let isRows = this.rows.some( ( r ) => {
@@ -163,9 +217,11 @@ export default class Modeler {
     }
 
     set rows( rows = [] ) {
-        let keys = rows.map( ( row ) => { return row.key } )
-        if ( !this.table.isHeader( keys ) ) {
-            throw "Bad plan. All headers must be valid headers in the file"
+        if ( rows.length > 0 ) {
+            let keys = rows.map( ( row ) => { return row.key } )
+            if ( !this.table.isHeader( keys ) ) {
+                throw "Invalid rows: All headers must be valid headers in the file"
+            }
         }
         this._rows = rows
     }
@@ -175,14 +231,32 @@ export default class Modeler {
     }
 
     set cols( cols ) {
-        let keys = cols.map( ( col ) => { return col.key } )
-        if ( !this.table.isHeader( keys ) ) {
-            throw "Bad plan. All headers must be valid headers in the file"
+        if ( cols.length > 0 ) {
+            let keys = cols.map( ( col ) => { return col.key } )
+            if ( !this.table.isHeader( keys ) ) {
+                throw "Invalid cols: All headers must be valid headers in the file"
+            }
         }
         this._cols = cols
     }
 
     get cols() {
         return this._cols
+    }
+
+    get table() {
+        return this._table
+    }
+
+    set table( table ) {
+        this._table = table
+    }
+
+    set model( model ) {
+        this._model = model
+    }
+
+    get model() {
+        return this._model
     }
 }

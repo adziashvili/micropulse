@@ -2,9 +2,10 @@ const assert = require( 'assert' )
 
 let Excel = require( 'exceljs' )
 
+const REPORT_NAME_CELL = "A1"
 const REPORT_DATE_CELL = "A6"
 
-export default class SFDCExcelParserBase {
+export default class Parser {
 
     constructor( ws ) {
 
@@ -192,6 +193,16 @@ export default class SFDCExcelParserBase {
             // SFDC reports are offset
             return new Date( date.trim() + " UTC" )
         }
+    }
+
+    /**
+     * Reads the report name from cell A!
+     *
+     * @return {String} The report name or "UNKNOWN REPORT NAME" if not found
+     */
+    getReportName() {
+        let name = this.readCell( REPORT_NAME_CELL )
+        return name === null ? "UNKNOWN REPORT NAME" : name
     }
 
     /**

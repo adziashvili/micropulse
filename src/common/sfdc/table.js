@@ -1,5 +1,5 @@
 import {
-    SFDCExcelParserBase as Parser,
+    Parser,
     Record,
     StringHelper as SH,
     DateHelper as DH,
@@ -20,7 +20,10 @@ export default class Table {
 
         Object.assign(
             this.meta,
-            this.analyse(), { date: this.parser.getReportDate() } )
+            this.analyse(), {
+                name: this.parser.getReportName(),
+                date: this.parser.getReportDate()
+            } )
 
         let { headersRow, firstDataRow, lastDataRow } = this.meta
 
