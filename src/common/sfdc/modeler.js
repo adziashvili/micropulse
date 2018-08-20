@@ -10,6 +10,7 @@ export default class Modeler {
         this.model = {}
         this.rows = []
         this.cols = []
+        this.stats = []
     }
 
     build() {
@@ -165,6 +166,20 @@ export default class Modeler {
         return description
     }
 
+    expand( model, prop, prev = [], kvps = [] ) {
+
+        if ( !!model[ prop ] && model[ prop ].length > 0 ) {
+            model[ prop ].forEach( ( item ) => {
+                let newPrev = model.key === 'root' ? prev : prev.concat( [ { key: model.key, value: model.value } ] )
+                this.expand( item, prop, newPrev, kvps )
+            } )
+        } else {
+            kvps.push( prev.concat( [ { key: model.key, value: model.value } ] ) )
+        }
+
+        return kvps
+    }
+
     find( key, rows = [], cols = [] ) {
 
         let model = this.model
@@ -243,6 +258,16 @@ export default class Modeler {
     get cols() {
         return this._cols
     }
+
+    set stats( stats ) {
+        if ( stats.length > 0 &&
+            !this.table.isHeader( stats.map( ( s ) => { return s.key } ) ) ) {
+            throw "Invalid cols: All headers must be valid headers in the file"
+        }
+        this._stats = stats
+    }
+
+    get stats() { return this._stats }
 
     get table() {
         return this._table

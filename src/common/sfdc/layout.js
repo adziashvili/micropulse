@@ -60,4 +60,12 @@ export default class Layout {
         }
         this.cols = aspects
     }
+
+    nestedIndent( nesting = 0 ) {
+        let nested = ""
+        for ( let i = 0; i < nesting; i++ ) {
+            nested += this.indent
+        }
+        return nested
+    }
 }
