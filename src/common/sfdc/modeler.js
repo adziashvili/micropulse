@@ -267,7 +267,9 @@ export default class Modeler {
         this._stats = stats
     }
 
-    get stats() { return this._stats }
+    get stats() {
+        return this._stats
+    }
 
     get table() {
         return this._table

@@ -9,11 +9,12 @@ from '../../common'
 
 export default class Reporter {
 
-    constructor( modeler ) {
+    constructor( modeler, isAddTotal = true ) {
         this.modeler = modeler
+        this.isAddTotal = isAddTotal
+
         this.rh = new ReportHelper( modeler.table.meta.name, modeler.table.meta.date )
         this.layout = new Layout()
-
     }
 
     report( isVerbose = false ) {
@@ -37,16 +38,81 @@ export default class Reporter {
         rh.newLine()
         // Adding headers
 
-        this.addRow( this.getValues( "TOTAL" ), ( s ) => { return s.bold } )
+        this.addRowsCascade( model )
+        // adding the data
+
+        let total = this.getValues( "TOTAL" )
+        this.addRow( total, ( s ) => { return s.bold } )
         rh.newLine()
         // Printing totals first. This is a matter of style.
 
-        this.addRowsCascade( model )
-        // adding the gist of the report
+        this.addStats( stats )
+        // Printins the requested stats
+    }
 
-        // TODO: We need to print a report on the stats requested by the user.
+    addStats( stats ) {
+        let rowStats = this.getRowStats()
+        stats.forEach( ( stat ) => {
+            let values = rowStats.map( ( obj ) => {
+                return obj[ stat.key ]
+            } )
+            this.addStat( stat.key, values )
+            this.rh.newLine()
+        } )
+    }
 
-        // Done
+    addStat( key, values ) {
+        let sample = values[ 0 ]
+        this.addRow( [ key ], ( s ) => { return s.grey.bold } )
+        for ( let skey in sample ) {
+            let statsValues = [ this.layout.indent + skey ]
+            values.forEach( ( v ) => {
+                statsValues.push( v[ skey ] )
+            } )
+            this.addRow( statsValues, ( s ) => { return s.grey } )
+        }
+    }
+
+    getRowStats( rowFilter = [] ) {
+
+        let arr = []
+
+        this.colsKVPs.forEach( ( cKvp ) => {
+            let s = this.modeler.find( 'stats', rowFilter, cKvp )
+            if ( s !== undefined ) arr.push( s )
+        } )
+
+        if ( this.isAddTotal ) {
+            let s = this.modeler.find( 'stats', rowFilter, [] )
+            if ( s !== undefined ) arr.push( s )
+        }
+
+        return arr
+    }
+
+    getValues( firstValue, rowFilter ) {
+
+        let values = [ firstValue ]
+
+        // Adds value per colunm
+        this.colsKVPs.forEach( ( cKvp ) => {
+            this.push( values, this.modeler.find( 'stats', rowFilter, cKvp ) )
+        } )
+
+        // if requested, adds total
+        if ( this.isAddTotal ) {
+            this.push( values, this.modeler.find( 'stats', rowFilter, [] ) )
+        }
+
+        return values
+    }
+
+    push( values, stats ) {
+        if ( undefined === stats ) {
+            values.push( '-' )
+        } else {
+            values.push( stats.count )
+        }
     }
 
     addRowsCascade( model, filter = [], level = 0 ) {
@@ -70,7 +136,7 @@ export default class Reporter {
                 // Forking for other children
 
                 if ( level === 0 ) {
-                    console.log()
+                    console.log()                    
                 }
                 // Seperating the groups of rows
 
@@ -78,60 +144,21 @@ export default class Reporter {
         }
     }
 
-    getValues( firstValue, rowFilter, isAddTotal = true ) {
-
-        let values = [ firstValue ]
-
-        // Adds value per colunm
-        this.colsKVPs.forEach( ( cKvp ) => {
-            this.push( values, this.modeler.find( 'stats', rowFilter, cKvp ) )
-
-            //TDOO: Support subtotal per col change
-        } )
-
-        // if requested, adds total
-        if ( isAddTotal ) {
-            this.push( values, this.modeler.find( 'stats', rowFilter, [] ) )
-        }
-
-        return values
-    }
-
-    push( values, stats ) {
-
-        if ( undefined === stats ) {
-            values.push( '-' )
-        } else {
-            values.push( stats.count )
-        }
-
-    }
-
-    addHeaders( isAddTotal = true ) {
+    addHeaders() {
         let { layout } = this
         let { cols } = layout
-        let otherColWidth = cols[ cols.length - 1 ].layoutLength
-
-        for ( let i = 0; i < cols.length; i++ ) {
+        cols.forEach( ( col, i ) => {
+            let headers = layout.getHeaders( i, this.isAddTotal )
             let sb = new StringBuffer()
-            sb.append( SH.exact( "", layout.firstColWidth ) )
-            for ( let j = 0; j <= i; j++ ) {
-                cols[ i ].distinctValues.forEach( ( dv ) => {
-                    sb.append( SH.exact( dv, cols[ i ].layoutLength ) )
-                } )
-            }
-            //TODO 1: This does not support subtotal per colum yet.
-
-            //TODO 2: This should be using addRow in some way,
-            //        however this model of using col[i].layoutLength should be used
-
-            // Adds total if requested
-            if ( i === 0 && isAddTotal ) {
-                sb.append( SH.exact( "TOTAL", otherColWidth ) )
-            }
-
-            console.log( sb.toString().toUpperCase().bold )
-        }
+            headers.forEach( ( h, i ) => {
+                if ( i => 0 ) {
+                    sb.appendPad( h.value, h.length )
+                } else {
+                    sb.appendExact( h.value, h.length )
+                }
+            } )
+            console.log( sb.toString().toUpperCase().bold );
+        } )
     }
 
     /**
@@ -146,17 +173,22 @@ export default class Reporter {
      */
     addRow( values, decorator = null ) {
 
-        let { indent, firstColWidth, cols, totalSeperator } = this.layout
-        let otherColWidth = cols[ cols.length - 1 ].layoutLength
+        let { cols, lengths } = this.layout
+        let vLengths = lengths.length > 0 ? lengths[ lengths.length - 1 ] : []
+
+        if ( vLengths.length < values.length ) {
+            throw "Ooops! we have a bug... expecting at least " + values.length + " entries in vLengths"
+        }
 
         let sb = new StringBuffer()
-
         for ( let i = 0; i < values.length; i++ ) {
-            if ( i === 0 ) {
-                sb.appendExact( values[ i ], firstColWidth )
+            if (i>0) {
+                sb.appendPad( values[ i ], vLengths[ i ] )
             } else {
-                sb.appendExact( values[ i ], otherColWidth )
+                sb.appendExact( values[ i ], vLengths[ i ] )
             }
+
+
         }
         console.log( decorator === null ? sb.toString() : decorator( sb.toString() ) )
     }
