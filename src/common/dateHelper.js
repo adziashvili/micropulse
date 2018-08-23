@@ -39,6 +39,10 @@ export default class DateHelper {
         return monthNames[ month ]
     }
 
+    static getMonthYear( date ) {
+        return monthNames[ date.getMonth() ] + "-" + date.getFullYear()
+    }
+
     /**
      * Calculates the min date and max date in an array of objects.
      *

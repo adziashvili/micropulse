@@ -34,9 +34,10 @@ export default class Modeler {
         if ( cols.length === 0 ) return
         // nothing to add
 
-        let { key } = cols[ 0 ]
+        let { key, transform } = cols[ 0 ]
         let type = this.table.getType( key )
-        let values = this.table.distinct( key )
+        let values = this.table.distinct( key, transform )
+
         data.cols = []
         values.forEach( ( value ) => {
             data.cols.push( { key, value, type, rows: [] } )
@@ -56,11 +57,11 @@ export default class Modeler {
     addRows( data, rows ) {
         if ( rows.length === 0 ) return
 
-        let { key } = rows[ 0 ]
+        let { key, transform } = rows[ 0 ]
         let type = this.table.getType( key )
 
         if ( !!data.rows ) {
-            let values = this.table.distinct( key )
+            let values = this.table.distinct( key, transform )
             values.forEach( ( value ) => {
                 let [ , ...next ] = rows
                 let newRow = { key, value, type, rows: [] }
@@ -74,6 +75,30 @@ export default class Modeler {
                 this.addRows( c, rows )
             } )
         }
+    }
+
+    /**
+     * Returns the transform function for a specfic key.
+     *
+     * @param {String} colKey Key
+     *
+     * @return {function} If found, the transform function is returned. Null otherwise
+     */
+    transformer( colKey ) {
+        let { cols } = this
+        let col = cols.find( ( c ) => { return c.key === colKey } )
+        if ( col !== undefined ) {
+            return col.transform
+        }
+
+        let { rows } = this
+
+        let row = rows.find( ( r ) => { return r.key === colKey } )
+        if ( row !== undefined ) {
+            return row.transform
+        }
+
+        return null
     }
 
     allocate( model, fRows = [], fCols = [] ) {
@@ -101,7 +126,10 @@ export default class Modeler {
         let filterList = this.getFilterList( fRows, fCols )
         model.records = this.table.list.filter( ( r ) => {
             return filterList.every( ( f ) => {
-                return r[ f.key ] === f.value
+                let transformer = this.transformer( f.key )
+                return transformer !== null ?
+                    transformer( r[ f.key ] ) === f.value :
+                    r[ f.key ] === f.value
             } )
         } )
         // Assigns to this entry the reocrds that match the filter
@@ -158,7 +186,7 @@ export default class Modeler {
     describeAspects( strKey ) {
         let description = []
         this[ strKey ].forEach( ( aspect ) => {
-            let distinctValues = this.table.distinct( aspect.key )
+            let distinctValues = this.table.distinct( aspect.key, this.transformer( aspect.key ) )
             let maxStringLength = Math.max( ...distinctValues.map( ( v ) => { return ( "" + v ).length } ) )
             let count = distinctValues.length
             description.push( { key: aspect.key, count, maxStringLength, distinctValues } )

@@ -117,18 +117,30 @@ export default class Table {
         return meta
     }
 
-    values( header ) {
+    values( header, transform = null ) {
         return this.list.map( ( r ) => {
-            return r.get( header )
+            return transform === null ? r.get( header ) : transform( r.get( header ) )
         } )
     }
 
-    distinct( header ) {
+    sort( header, data ) {
+        if ( this.getType( header ) === 'date' ) {
+            return data.sort( ( a, b ) => { return a.valueOf() - b.valueOf() } )
+        }
+        else {
+            return data
+            // return data.sort()
+        }
+    }
 
-        let data = this.values( header )
+    distinct( header, transform = null ) {
+
+        let data = this.sort( header, this.values( header ) )
+
         let values = []
 
         data.forEach( ( d ) => {
+            d = transform === null ? d : transform( d )
             if ( !values.includes( d ) ) {
                 values.push( d )
             }
