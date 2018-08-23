@@ -2,7 +2,7 @@ const DEF_LAYOUT = {
     indent: "  ",
     padding: 3,
     firstColWidth: 10,
-    totalSeperator: "  | ",
+    totalSeperator: "   | ",
     cols: [],
     rows: [],
     lengths: []

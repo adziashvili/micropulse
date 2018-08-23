@@ -28,6 +28,11 @@ export default class Reporter {
         // We rather keep these calls here in case the underlying data changes
 
         layout.rebuild( this.modeler )
+        this.rh.setDivider( {
+            len: layout.totalSeperator.length +
+                layout.lengths[ layout.lengths.length - 1 ]
+                .reduce( ( sum, len ) => { return sum + len } )
+        } )
         // Optimizing the layout to the actual data
 
         rh.addReportTitle()
@@ -116,13 +121,10 @@ export default class Reporter {
     }
 
     addRowsCascade( model, filter = [], level = 0 ) {
-
         if ( !!model.rows ) {
-
-            model.rows.forEach( ( row ) => {
+            model.rows.forEach( ( row, index, rows ) => {
 
                 let newFilter = { key: row.key, value: row.value }
-
                 this.addRow(
                     this.getValues(
                         this.layout.nestedIndent( level ) + row.value,
@@ -135,8 +137,14 @@ export default class Reporter {
                 }
                 // Forking for other children
 
+                if ( level !== 0 && index === rows.length - 1 ) {
+                    console.log( this.layout.nestedIndent( level ) + "Total" );
+                }
+
                 if ( level === 0 ) {
-                    console.log()                    
+                    console.log()
+                    this.rh.addDevider()
+                    console.log()
                 }
                 // Seperating the groups of rows
 
@@ -146,11 +154,15 @@ export default class Reporter {
 
     addHeaders() {
         let { layout } = this
-        let { cols } = layout
+        let { cols, totalSeperator } = layout
         cols.forEach( ( col, i ) => {
             let headers = layout.getHeaders( i, this.isAddTotal )
             let sb = new StringBuffer()
-            headers.forEach( ( h, i ) => {
+            headers.forEach( ( h, i, headers ) => {
+                if ( i === headers.length - 1 && headers.length > 1 ) {
+                    sb.append( totalSeperator )
+                }
+
                 if ( i => 0 ) {
                     sb.appendPad( h.value, h.length )
                 } else {
@@ -172,8 +184,7 @@ export default class Reporter {
      *                                      and is expected to return a string.
      */
     addRow( values, decorator = null ) {
-
-        let { cols, lengths } = this.layout
+        let { cols, lengths, totalSeperator } = this.layout
         let vLengths = lengths.length > 0 ? lengths[ lengths.length - 1 ] : []
 
         if ( vLengths.length < values.length ) {
@@ -182,12 +193,16 @@ export default class Reporter {
 
         let sb = new StringBuffer()
         for ( let i = 0; i < values.length; i++ ) {
-            if (i>0) {
+
+            if ( i === values.length - 1 && values.length > 1 ) {
+                sb.append( totalSeperator )
+            }
+
+            if ( i > 0 ) {
                 sb.appendPad( values[ i ], vLengths[ i ] )
             } else {
                 sb.appendExact( values[ i ], vLengths[ i ] )
             }
-
 
         }
         console.log( decorator === null ? sb.toString() : decorator( sb.toString() ) )
