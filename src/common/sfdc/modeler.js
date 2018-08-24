@@ -11,6 +11,7 @@ export default class Modeler {
         this.rows = []
         this.cols = []
         this.stats = []
+        this.custom = []
     }
 
     build() {
@@ -28,77 +29,6 @@ export default class Modeler {
 
         this.addCols( model, this.cols )
         this.addRows( model, this.rows )
-    }
-
-    addCols( data, cols ) {
-        if ( cols.length === 0 ) return
-        // nothing to add
-
-        let { key, transform } = cols[ 0 ]
-        let type = this.table.getType( key )
-        let values = this.table.distinct( key, transform )
-
-        data.cols = []
-        values.forEach( ( value ) => {
-            data.cols.push( { key, value, type, rows: [] } )
-        } )
-        // Adding a stackby model to the data model we got
-
-        if ( cols.length > 1 ) {
-            let [ , ...next ] = cols
-            data.cols.forEach( ( g ) => {
-                this.addCols( g, next )
-            } )
-        }
-        // For each of the values we have under the added stacks, if there
-        // is more cols, they are added.
-    }
-
-    addRows( data, rows ) {
-        if ( rows.length === 0 ) return
-
-        let { key, transform } = rows[ 0 ]
-        let type = this.table.getType( key )
-
-        if ( !!data.rows ) {
-            let values = this.table.distinct( key, transform )
-            values.forEach( ( value ) => {
-                let [ , ...next ] = rows
-                let newRow = { key, value, type, rows: [] }
-                data.rows.push( newRow )
-                this.addRows( newRow, next )
-            } )
-        }
-
-        if ( Array.isArray( data.cols ) ) {
-            data.cols.forEach( ( c ) => {
-                this.addRows( c, rows )
-            } )
-        }
-    }
-
-    /**
-     * Returns the transform function for a specfic key.
-     *
-     * @param {String} colKey Key
-     *
-     * @return {function} If found, the transform function is returned. Null otherwise
-     */
-    transformer( colKey ) {
-        let { cols } = this
-        let col = cols.find( ( c ) => { return c.key === colKey } )
-        if ( col !== undefined ) {
-            return col.transform
-        }
-
-        let { rows } = this
-
-        let row = rows.find( ( r ) => { return r.key === colKey } )
-        if ( row !== undefined ) {
-            return row.transform
-        }
-
-        return null
     }
 
     allocate( model, fRows = [], fCols = [] ) {
@@ -135,20 +65,6 @@ export default class Modeler {
         // Assigns to this entry the reocrds that match the filter
     }
 
-    getFilterList( fRows, fCols ) {
-        let filterList = []
-
-        fRows.forEach( ( f, i ) => {
-            filterList.push( { key: this.rows[ i ].key, value: f } )
-        } )
-
-        fCols.forEach( ( f, i ) => {
-            filterList.push( { key: this.cols[ i ].key, value: f } )
-        } )
-
-        return filterList
-    }
-
     calculate( model, headers = null ) {
 
         if ( null === headers ) headers = this.statsHeaders
@@ -175,6 +91,56 @@ export default class Modeler {
             model.stats = stats
         }
         // if the model has records, stats are caluclated
+    }
+
+    /**
+     * Returns the transform function for a specfic key.
+     *
+     * @param {String} key Key
+     *
+     * @return {function} If found, the transform function is returned. Null otherwise
+     */
+    transformer( key ) {
+
+        let { cols } = this
+        let col = cols.find( ( c ) => { return c.key === key } )
+        if ( col !== undefined ) {
+            return col.transform
+        }
+
+        let { rows } = this
+        let row = rows.find( ( r ) => { return r.key === key } )
+        if ( row !== undefined ) {
+            return row.transform
+        }
+
+        let { stats } = this
+        let stat = stats.find( ( s ) => { return s.key === key } )
+        if ( stat !== undefined ) {
+            return stat.transform
+        }
+
+        let { custom } = this
+        let c = custom.find( ( c ) => { return c.key === key } )
+        if ( c !== undefined ) {
+            return c.transform
+        }
+
+        return null
+    }
+
+    getFilterList( fRows, fCols ) {
+        let filterList = []
+
+        fRows.forEach( ( f, i ) => {
+            filterList.push( { key: this.rows[ i ].key, value: f } )
+        } )
+
+        fCols.forEach( ( f, i ) => {
+            filterList.push( { key: this.cols[ i ].key, value: f } )
+        } )
+
+        return filterList
     }
 
     describe( model, indent ) {
@@ -247,16 +213,51 @@ export default class Modeler {
         return model
     }
 
-    get statsHeaders() {
-        return this.table.headers.filter( ( h ) => {
-            let isRows = this.rows.some( ( r ) => {
-                return r.key === h.header
+    addRows( data, rows ) {
+        if ( rows.length === 0 ) return
+
+        let { key, transform } = rows[ 0 ]
+        let type = this.table.getType( key )
+
+        if ( !!data.rows ) {
+            let values = this.table.distinct( key, transform )
+            values.forEach( ( value ) => {
+                let [ , ...next ] = rows
+                let newRow = { key, value, type, rows: [] }
+                data.rows.push( newRow )
+                this.addRows( newRow, next )
             } )
-            let isCols = this.cols.some( ( c ) => {
-                return c.key === h.header
+        }
+
+        if ( Array.isArray( data.cols ) ) {
+            data.cols.forEach( ( c ) => {
+                this.addRows( c, rows )
             } )
-            return [ 'date', 'number', 'currency' ].includes( h.type ) || ( !isRows && !isCols )
+        }
+    }
+
+    addCols( data, cols ) {
+        if ( cols.length === 0 ) return
+        // nothing to add
+
+        let { key, transform } = cols[ 0 ]
+        let type = this.table.getType( key )
+        let values = this.table.distinct( key, transform )
+
+        data.cols = []
+        values.forEach( ( value ) => {
+            data.cols.push( { key, value, type, rows: [] } )
         } )
+        // Adding a stackby model to the data model we got
+
+        if ( cols.length > 1 ) {
+            let [ , ...next ] = cols
+            data.cols.forEach( ( g ) => {
+                this.addCols( g, next )
+            } )
+        }
+        // For each of the values we have under the added stacks, if there
+        // is more cols, they are added.
     }
 
     set rows( rows = [] ) {
@@ -297,6 +298,26 @@ export default class Modeler {
 
     get stats() {
         return this._stats
+    }
+
+    set custom( custom ) {
+        this._custom = custom
+    }
+
+    get custom() {
+        return this._custom
+    }
+
+    get statsHeaders() {
+        return this.table.headers.filter( ( h ) => {
+            let isRows = this.rows.some( ( r ) => {
+                return r.key === h.header
+            } )
+            let isCols = this.cols.some( ( c ) => {
+                return c.key === h.header
+            } )
+            return [ 'date', 'number', 'currency' ].includes( h.type ) || ( !isRows && !isCols )
+        } )
     }
 
     get table() {

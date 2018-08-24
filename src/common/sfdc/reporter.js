@@ -49,6 +49,8 @@ export default class Reporter {
         let total = this.getValues( "TOTAL" )
         this.addRow( total, ( s ) => { return s.bold } )
         rh.newLine()
+        this.addCustoms([], -1)
+        rh.newLine()
         // Printing totals first. This is a matter of style.
 
         this.addStats( stats )
@@ -95,6 +97,29 @@ export default class Reporter {
         return arr
     }
 
+    /**
+     * Returns the records for a given row.
+     *
+     * @param {[type]} rowFilter [description]
+     *
+     * @return {[type]} [description]
+     */
+    getRecords( rowFilter ) {
+        let values = []
+
+        // Adds value per colunm
+        this.colsKVPs.forEach( ( cKvp ) => {
+            values.push( this.modeler.find( 'records', rowFilter, cKvp ) )
+        } )
+
+        // if requested, adds total
+        if ( this.isAddTotal ) {
+            values.push( this.modeler.find( 'records', rowFilter, [] ) )
+        }
+
+        return values
+    }
+
     getValues( firstValue, rowFilter ) {
 
         let values = [ firstValue ]
@@ -112,12 +137,67 @@ export default class Reporter {
         return values
     }
 
-    push( values, stats ) {
-        if ( undefined === stats ) {
-            values.push( '-' )
-        } else {
-            values.push( stats.count )
+    defaultStat( key ) {
+        switch ( this.modeler.table.getType( key ) ) {
+            case 'number':
+            case 'currency':
+            case 'percent':
+                return 'sum'
+            case 'string':
+            case 'boolean':
+            case 'date':
+            default:
+                return 'countTotal'
         }
+    }
+
+    format( key, value ) {
+        let transformer = this.modeler.transformer( key )
+
+        if ( transformer !== null ) {
+            return transformer( value )
+        }
+
+        switch ( this.modeler.table.getType( key ) ) {
+            case 'currency':
+                return "$" + SH.toThousands( value ) + "k"
+            case 'percent':
+                return SH.toPercent( value )
+            case 'number':
+            case 'string':
+            case 'boolean':
+            case 'date':
+            default:
+                return SH.toNumber( value )
+        }
+    }
+
+    push( values, objStats ) {
+
+        let { stats } = this.modeler
+        let NA = "N/A"
+
+        if ( !objStats ||
+            !Array.isArray( stats ) ||
+            stats.length === 0 ) {
+            values.push( NA )
+            return
+        }
+
+        let { key, stat } = stats[ 0 ]
+
+        if ( !stat ) {
+            stat = this.defaultStat( key )
+        }
+
+        if ( !Object.keys( objStats ).includes( key ) ||
+            !Object.keys( objStats[ key ] ).includes( stat ) ) {
+
+            values.push( NA )
+            return
+        }
+
+        values.push( this.format( key, objStats[ key ][ stat ] ) )
     }
 
     addRowsCascade( model, filter = [], level = 0 ) {
@@ -137,19 +217,37 @@ export default class Reporter {
                 }
                 // Forking for other children
 
-                if ( level !== 0 && index === rows.length - 1 ) {
-                    console.log( this.layout.nestedIndent( level ) + "Total" );
-                }
+                // if ( level !== 0 && index === rows.length - 1 ) {
+                //     console.log( this.layout.nestedIndent( level ) + "Total" );
+                // }
 
                 if ( level === 0 ) {
                     console.log()
+                    this.addCustoms( filter.concat( newFilter ), level + 1 )
                     this.rh.addDevider()
                     console.log()
                 }
                 // Seperating the groups of rows
-
             } )
         }
+    }
+
+    addCustoms( filter, level ) {
+        let { custom } = this.modeler
+        custom.forEach( ( c ) => {
+            let transformer = this.modeler.transformer( c.key )
+            if ( transformer !== null ) {
+                let recs = this.getRecords( filter )
+                let values = [ this.layout.nestedIndent( level ) + c.key ]
+                recs.forEach( ( colRecords, index, allRecordsArray ) => {
+                    values.push( transformer(
+                        colRecords,
+                        this.modeler,
+                        allRecordsArray ) )
+                } )
+                this.addRow( values )
+            }
+        } )
     }
 
     addHeaders() {

@@ -30,16 +30,16 @@ export default class StringHelper {
     }
 
     /**
-     * Returns exactly a string in with length equals to max (default 20).
+     * Returns a string with length equals to 'max' (defaults to 20).
      *
      * If the provided str is shorter than that then c is used to padd the rest.
-     * If it is longer than max, then a suffic StringHelper.SUFFIX is added at the end.
+     * If it is longer than max, then a suffix (StringHelper.SUFFIX) is added at the end.
      *
      * @param {String} [str='']                               String to process.
-     * @param {[type]} [max=StringHelper.DEFAULT_MAX_PADDING] Defines the length to target. Defaults to 20
-     * @param {[type]} [c=StringHelper.PADDING_CHAR]          Defines what chart to padd in case str is shorter than max. Default is ' '
+     * @param {Number} [max=StringHelper.DEFAULT_MAX_PADDING] Defines the length to target. Defaults to 20
+     * @param {String} [c=StringHelper.PADDING_CHAR]          Defines what chart to padd in case str is shorter than max. Default is ' '
      *
-     * @return {[type]} [description]
+     * @return {String} the reformated string.
      */
     static exact(
         str = '',
@@ -74,7 +74,7 @@ export default class StringHelper {
      * @param {[type]} [max=StringHelper.DEFAULT_MAX_PADDING] Total final length desired. Includes Str and prefix added.
      * @param {[type]} [c=StringHelper.PADDING_CHAR]          What character to add as prefix.
      *
-     * @return {[type]} [description]
+     * @return {String} A string with prefix with a 'max' length
      */
     static prefix(
         str = '',
@@ -197,5 +197,17 @@ export default class StringHelper {
     static toThousands( number, isAddCommas = true ) {
         let scaled = ( number / 1000 ).toFixed( 0 )
         return isAddCommas ? StringHelper.addCommas( scaled ) : scaled
+    }
+
+    /**
+     * Convers a number to a string with a specfic precision.
+     *
+     * @param {Number} number    Number to convert. Must evaluate to a number.
+     * @param {Number} [fixed=0] Number of digits to add, by default 0
+     *
+     * @return {[type]} [description]
+     */
+    static toNumber( number, fixed = 0 ) {
+        return number.toFixed( fixed )
     }
 }

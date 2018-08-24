@@ -70,19 +70,6 @@ export default class Analyzer {
         return stats
     }
 
-    static distinct( values ) {
-        let distinct = []
-        values.forEach( ( s ) => {
-            if ( !distinct.includes( s ) ) { distinct.push( s ) }
-        } )
-        return { count: distinct.length, values: distinct }
-    }
-
-    static nonEmpty( values ) {
-        let nonEmpty = values.filter( ( v ) => { return ![ 0 ].concat( Parser.ZERO_OR_MISSING ).includes( v ) } )
-        return { count: nonEmpty.length, values: nonEmpty }
-    }
-
     static numerics( values ) {
         let sum = 0
         let avg = 0
@@ -101,10 +88,6 @@ export default class Analyzer {
         avgNonEmpty = Analyzer.devide( sum, nonEmpty.count )
 
         return { sum: sum.toFixed( 2 ), avg, avgNonEmpty, min, max }
-    }
-
-    static devide( a, b ) {
-        return ( a / ( b === 0 ? 1 : b ) ).toFixed( 2 )
     }
 
     static isString( data ) {
@@ -175,4 +158,23 @@ export default class Analyzer {
             }
         } )
     }
+
+    static devide( a, b ) {
+        return ( a / ( b === 0 ? 1 : b ) ).toFixed( 2 )
+    }
+
+    static distinct( values ) {
+        let distinct = []
+        values.forEach( ( s ) => {
+            if ( !distinct.includes( s ) ) { distinct.push( s ) }
+        } )
+        return { count: distinct.length, values: distinct }
+    }
+
+    static nonEmpty( values ) {
+        let nonEmpty = values.filter( ( v ) => { return ![ 0 ].concat( Parser.ZERO_OR_MISSING ).includes( v ) } )
+        return { count: nonEmpty.length, values: nonEmpty }
+    }
+
+
 }
