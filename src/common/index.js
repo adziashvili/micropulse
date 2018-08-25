@@ -12,6 +12,7 @@ import Modeler from './sfdc/modeler'
 import Analyzer from './sfdc/analyzer'
 import Reporter from './sfdc/reporter'
 import Layout from './sfdc/layout'
+import Dictionary from './sfdc/dictionary'
 
 export {
     FSHelper,
@@ -27,5 +28,6 @@ export {
     Modeler,
     Analyzer,
     Reporter,
-    Layout
+    Layout,
+    Dictionary
 }

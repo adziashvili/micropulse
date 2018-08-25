@@ -1,3 +1,5 @@
+import {StringBuffer} from '../common'
+
 const monthNames = [
     "Jan",
     "Feb",
@@ -78,7 +80,7 @@ export default class DateHelper {
     }
 
     constructor( date ) {
-        this.date = date
+      this.date = date
     }
 
     get localeDateString() {
@@ -126,6 +128,24 @@ export default class DateHelper {
 
     get monthName() {
         return monthNames[ this.date.getMonth() ]
+    }
+
+    get day() {
+        return this.date.getDate()
+    }
+
+    get shortDate() {
+
+        let sb = new StringBuffer()
+
+        sb
+            .append( this.day )
+            .append( "-" )
+            .append( this.monthName )
+            .append( "-" )
+            .append( this.year )
+
+        return sb.toString()
     }
 
     get date() {

@@ -57,7 +57,7 @@ export default class Modeler {
         model.records = this.table.list.filter( ( r ) => {
             return filterList.every( ( f ) => {
                 let transformer = this.transformer( f.key )
-                return transformer !== null ?
+                return !!transformer ?
                     transformer( r[ f.key ] ) === f.value :
                     r[ f.key ] === f.value
             } )
@@ -100,33 +100,21 @@ export default class Modeler {
      *
      * @return {function} If found, the transform function is returned. Null otherwise
      */
-    transformer( key ) {
+    transformer( key, isGetEntry = false ) {
 
-        let { cols } = this
-        let col = cols.find( ( c ) => { return c.key === key } )
-        if ( col !== undefined ) {
-            return col.transform
+        let { cols, rows, stats, custom } = this
+        let transformers = [ cols, rows, stats, custom ]
+
+        for ( let i = 0; i < transformers.length; i++ ) {
+            let candidate = transformers[ i ].find( ( item ) => {
+                return item.key === key
+            } )
+            if ( !!candidate ) {
+                return isGetEntry ? candidate : candidate.transform
+            }
         }
 
-        let { rows } = this
-        let row = rows.find( ( r ) => { return r.key === key } )
-        if ( row !== undefined ) {
-            return row.transform
-        }
-
-        let { stats } = this
-        let stat = stats.find( ( s ) => { return s.key === key } )
-        if ( stat !== undefined ) {
-            return stat.transform
-        }
-
-        let { custom } = this
-        let c = custom.find( ( c ) => { return c.key === key } )
-        if ( c !== undefined ) {
-            return c.transform
-        }
-
-        return null
+        return isGetEntry ? undefined : null
     }
 
     getFilterList( fRows, fCols ) {

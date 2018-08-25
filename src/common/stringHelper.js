@@ -207,7 +207,7 @@ export default class StringHelper {
      *
      * @return {[type]} [description]
      */
-    static toNumber( number, fixed = 0 ) {
-        return number.toFixed( fixed )
+    static toNumber( x = 0, fixed = 0 ) {
+        return ( x * 1 ).toFixed( fixed )
     }
 }

@@ -1,6 +1,31 @@
 import { Parser } from '../../common'
 
+const DICTIONARY = [
+    { key: 'countTotal', shortName: 'Count' },
+    { key: 'countDistinct', shortName: 'Count (distinct)' },
+    { key: 'countNonEmpty', shortName: 'Count (non empty)' },
+    { key: 'sum', shortName: 'Sum', isTypeSensitive: true },
+    { key: 'avg', shortName: 'Average', isTypeSensitive: true },
+    { key: 'min', shortName: 'Minimum', isTypeSensitive: true },
+    { key: 'max', shortName: 'Maximum', isTypeSensitive: true },
+    { key: 'avgNonEmpty', shortName: 'Average (non empty)', isTypeSensitive: true },
+    { key: 'maxStringLength', shortName: 'Max characters' },
+    { key: 'minStringLength', shortName: 'Min characters' },
+]
+
+const TYPE_SENSITIVE_STATS = DICTIONARY.map( ( m ) => {
+    if ( !!m.isTypeSensitive && m.isTypeSensitive ) return m.key
+} ).filter( ( item ) => { return !!item } )
+
 export default class Analyzer {
+
+    static dictionary() {
+        return DICTIONARY
+    }
+
+    static typeSensitiveStats() {
+        return TYPE_SENSITIVE_STATS
+    }
 
     static analyze( type, values ) {
 
@@ -64,7 +89,7 @@ export default class Analyzer {
         stats.countTotal = values.length
         stats.countDistinct = Analyzer.distinct( values ).count
         stats.countNonEmpty = Analyzer.nonEmpty( values ).count
-        let lengths = values.map( ( v ) => { return ("" + v).length } )
+        let lengths = values.map( ( v ) => { return ( "" + v ).length } )
         stats.maxStringLength = Math.max( ...lengths )
         stats.minStringLength = Math.min( ...lengths )
         return stats
@@ -159,8 +184,8 @@ export default class Analyzer {
         } )
     }
 
-    static devide( a, b ) {
-        return ( a / ( b === 0 ? 1 : b ) ).toFixed( 2 )
+    static devide( a, b, fixed = 2 ) {
+        return ( a / ( b === 0 ? 1 : b ) ).toFixed( fixed )
     }
 
     static distinct( values ) {
@@ -176,5 +201,31 @@ export default class Analyzer {
         return { count: nonEmpty.length, values: nonEmpty }
     }
 
+    static PoP( data = [], transform = null ) {
+
+        if ( !data || !Array.isArray( data ) ) {
+            console.log( "WARNING: data passed to Analyzer.PoP must be an array. Received:", typeof data );
+            return []
+        }
+
+        if ( ( !transform || transform === null ) && !Analyzer.isNumber( data ) ) {
+            console.log( "WARNING: When trasnform is null or undefined data must numeric array." );
+            return []
+        }
+
+        let values = !!transform ? data.map( ( item ) => { return transform( item ) } ) : data
+        let change = [ 0 ]
+
+        values.forEach( ( v, i, values ) => {
+            if ( i === 0 ) return
+            change.push( ( ( Analyzer.devide( v, values[ i - 1 ], 4 ) * 1 ) - 1 ).toFixed( 4 ) * 1 )
+        } )
+
+        return change
+    }
+
+    static avg( values = [] ) {
+        return this.devide( values.reduce( ( sum, v ) => { return sum + v } ), values.length ) * 1
+    }
 
 }

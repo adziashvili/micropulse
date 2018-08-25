@@ -1,9 +1,12 @@
 import {
     JSONHelper,
     ReportHelper,
+    DateHelper,
     StringHelper as SH,
     StringBuffer,
-    Layout
+    Layout,
+    Dictionary,
+    Analyzer
 }
 from '../../common'
 
@@ -12,9 +15,17 @@ export default class Reporter {
     constructor( modeler, isAddTotal = true ) {
         this.modeler = modeler
         this.isAddTotal = isAddTotal
-
         this.rh = new ReportHelper( modeler.table.meta.name, modeler.table.meta.date )
         this.layout = new Layout()
+        this._dictionary = new Dictionary( Analyzer.dictionary() )
+    }
+
+    set dictionary( dictionary ) {
+        this._dictionary = this.dictionary.add( dictionary )
+    }
+
+    get dictionary() {
+        return this._dictionary
     }
 
     report( isVerbose = false ) {
@@ -46,10 +57,9 @@ export default class Reporter {
         this.addRowsCascade( model )
         // adding the data
 
-        let total = this.getValues( "TOTAL" )
+        let total = this.getStats( "TOTAL" )
         this.addRow( total, ( s ) => { return s.bold } )
-        rh.newLine()
-        this.addCustoms([], -1)
+        this.addCustoms( [], 1 )
         rh.newLine()
         // Printing totals first. This is a matter of style.
 
@@ -70,11 +80,12 @@ export default class Reporter {
 
     addStat( key, values ) {
         let sample = values[ 0 ]
-        this.addRow( [ key ], ( s ) => { return s.grey.bold } )
+        this.addRow( [ this.dictionary.get( key ) ], ( s ) => { return s.grey.bold } )
         for ( let skey in sample ) {
-            let statsValues = [ this.layout.indent + skey ]
+            let statsValues = [ this.layout.indent + this.dictionary.get( skey ) ]
+            let type = this.getStatFormatType( key, skey )
             values.forEach( ( v ) => {
-                statsValues.push( v[ skey ] )
+                statsValues.push( this.defaultFormat( type, v[ skey ] ) )
             } )
             this.addRow( statsValues, ( s ) => { return s.grey } )
         }
@@ -120,7 +131,7 @@ export default class Reporter {
         return values
     }
 
-    getValues( firstValue, rowFilter ) {
+    getStats( firstValue, rowFilter ) {
 
         let values = [ firstValue ]
 
@@ -148,27 +159,6 @@ export default class Reporter {
             case 'date':
             default:
                 return 'countTotal'
-        }
-    }
-
-    format( key, value ) {
-        let transformer = this.modeler.transformer( key )
-
-        if ( transformer !== null ) {
-            return transformer( value )
-        }
-
-        switch ( this.modeler.table.getType( key ) ) {
-            case 'currency':
-                return "$" + SH.toThousands( value ) + "k"
-            case 'percent':
-                return SH.toPercent( value )
-            case 'number':
-            case 'string':
-            case 'boolean':
-            case 'date':
-            default:
-                return SH.toNumber( value )
         }
     }
 
@@ -200,16 +190,55 @@ export default class Reporter {
         values.push( this.format( key, objStats[ key ][ stat ] ) )
     }
 
+    format( key, value ) {
+        let transformer = this.modeler.transformer( key )
+        if ( !!transformer ) {
+            return transformer( value )
+        }
+        return this.defaultFormat( this.modeler.table.getType( key ), value )
+    }
+
+    getStatFormatType( key, property ) {
+
+        if ( !Analyzer.typeSensitiveStats().includes( property ) ) {
+            return 'number'
+        }
+
+        let type = this.modeler.table.getType( key )
+
+        if ( type === 'boolean' && [ 'avg', 'avgNonEmpty' ].includes( property ) ) {
+            return 'percent'
+        }
+
+        return type
+    }
+
+    defaultFormat( type = 'number', value ) {
+        switch ( type ) {
+            case 'currency':
+                return "$" + SH.toThousands( value )
+            case 'percent':
+                return SH.toPercent( value )
+            case 'date':                
+                return new DateHelper( value ).shortDate
+            case 'number':
+            case 'string':
+            case 'boolean':
+            default:
+                return SH.toNumber( value )
+        }
+    }
+
     addRowsCascade( model, filter = [], level = 0 ) {
         if ( !!model.rows ) {
             model.rows.forEach( ( row, index, rows ) => {
 
                 let newFilter = { key: row.key, value: row.value }
                 this.addRow(
-                    this.getValues(
+                    this.getStats(
                         this.layout.nestedIndent( level ) + row.value,
                         filter.concat( newFilter ) ),
-                    level !== 0 ? null : ( s ) => { return s.bold } )
+                    level !== 0 ? undefined : ( s ) => { return s.bold } )
                 // Printing data
 
                 if ( !!row.rows ) {
@@ -235,16 +264,19 @@ export default class Reporter {
     addCustoms( filter, level ) {
         let { custom } = this.modeler
         custom.forEach( ( c ) => {
-            let transformer = this.modeler.transformer( c.key )
-            if ( transformer !== null ) {
+            let transformer = this.modeler.transformer( c.key, true )
+            if ( !!transformer && !!transformer.transform ) {
                 let recs = this.getRecords( filter )
                 let values = [ this.layout.nestedIndent( level ) + c.key ]
-                recs.forEach( ( colRecords, index, allRecordsArray ) => {
-                    values.push( transformer(
-                        colRecords,
-                        this.modeler,
-                        allRecordsArray ) )
-                } )
+
+                if ( transformer.isRowTransformer ) {
+                    values = [ ...values, ...transformer.transform( [], this.modeler, recs ) ]
+                } else {
+                    recs.forEach( ( colRecords, index, allRecordsArray ) => {
+                        values.push( transformer.transform( colRecords, this.modeler,
+                            allRecordsArray ) )
+                    } )
+                }
                 this.addRow( values )
             }
         } )
@@ -272,16 +304,17 @@ export default class Reporter {
     }
 
     /**
-     * Prints a row of values to STD out.
+     * Prints a row of values to STD out according to the layout.
      *
-     * If decorator is provided, passed the final string for decoration
-     * prior to printing.
+     * If decorator is provided, the decorator is passed the final string
+     * for decoration prior to printing.
      *
-     * @param {Array} values                Values to print
-     * @param {Function} [decorator=null]   A function that recieves one string
-     *                                      and is expected to return a string.
+     * @param {Array} values                    Values to print
+     * @param {Function} [decorator=undefined]  A function that recieves one string
+     *                                          and is expected to return a string.
      */
-    addRow( values, decorator = null ) {
+    addRow( values, decorator = undefined ) {
+
         let { cols, lengths, totalSeperator } = this.layout
         let vLengths = lengths.length > 0 ? lengths[ lengths.length - 1 ] : []
 
@@ -303,7 +336,7 @@ export default class Reporter {
             }
 
         }
-        console.log( decorator === null ? sb.toString() : decorator( sb.toString() ) )
+        console.log( !decorator ? sb.toString() : decorator( sb.toString() ) )
     }
 
 }
