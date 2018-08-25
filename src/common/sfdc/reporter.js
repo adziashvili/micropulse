@@ -63,8 +63,10 @@ export default class Reporter {
         rh.newLine()
         // Printing totals first. This is a matter of style.
 
-        this.addStats( stats )
-        // Printins the requested stats
+        if ( isVerbose ) {
+            this.addStats( stats )
+            // Printins the requested stats
+        }
     }
 
     addStats( stats ) {
@@ -180,9 +182,7 @@ export default class Reporter {
             stat = this.defaultStat( key )
         }
 
-        if ( !Object.keys( objStats ).includes( key ) ||
-            !Object.keys( objStats[ key ] ).includes( stat ) ) {
-
+        if ( !Object.keys( objStats ).includes( key ) || !Object.keys( objStats[ key ] ).includes( stat ) ) {
             values.push( NA )
             return
         }
@@ -219,7 +219,7 @@ export default class Reporter {
                 return "$" + SH.toThousands( value )
             case 'percent':
                 return SH.toPercent( value )
-            case 'date':                
+            case 'date':
                 return new DateHelper( value ).shortDate
             case 'number':
             case 'string':
@@ -251,10 +251,12 @@ export default class Reporter {
                 // }
 
                 if ( level === 0 ) {
-                    console.log()
+                    // this.rh.newLine( 1, this.modeler.rows.length > 1 )
                     this.addCustoms( filter.concat( newFilter ), level + 1 )
+                    // if ( this.modeler.rows.length > 1 ) {
                     this.rh.addDevider()
                     console.log()
+                    // }
                 }
                 // Seperating the groups of rows
             } )
@@ -284,7 +286,7 @@ export default class Reporter {
 
     addHeaders() {
         let { layout } = this
-        let { cols, totalSeperator } = layout
+        let { cols, totalSeperator, firstColWidth } = layout
         cols.forEach( ( col, i ) => {
             let headers = layout.getHeaders( i, this.isAddTotal )
             let sb = new StringBuffer()
@@ -295,8 +297,8 @@ export default class Reporter {
 
                 if ( i => 0 ) {
                     sb.appendPad( h.value, h.length )
-                } else {
-                    sb.appendExact( h.value, h.length )
+                } else { // first
+                    sb.appendExact( h.value, firstColWidth )
                 }
             } )
             console.log( sb.toString().toUpperCase().bold );

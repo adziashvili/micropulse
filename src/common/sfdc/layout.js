@@ -67,6 +67,14 @@ export default class Layout {
         this.cols.forEach( ( col, i ) => {
             this.lengths.push( this.getRowLengths( i ) )
         } )
+
+        let lastLevelLengths = this.lengths[ this.lengths.length - 1 ]
+        let customRowsHeaderLengths = modeler.custom.map( ( c ) => {
+            return this.indent.length * this.lengths.length + c.key.length
+        } )
+        lastLevelLengths[ 0 ] = Math.max( lastLevelLengths[ 0 ], ...customRowsHeaderLengths )
+        this.firstColWidth = lastLevelLengths[ 0 ]
+        //lastly adjust for custom keys
     }
 
     /**

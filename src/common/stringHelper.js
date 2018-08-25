@@ -56,7 +56,8 @@ export default class StringHelper {
                     StringHelper.SUFFIX
             }
         } else {
-            let padding = Array( max - fixed.length + 1 ).join( c )
+            let len = max - fixed.length + 1
+            let padding = Array( len ).join( c )
             fixed = !isPrefix ? str + padding : padding + str
         }
 

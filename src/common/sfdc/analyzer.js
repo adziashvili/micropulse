@@ -188,6 +188,11 @@ export default class Analyzer {
         return ( a / ( b === 0 ? 1 : b ) ).toFixed( fixed )
     }
 
+    static devideAll( aValues = [], b, tranform = undefined ) {
+        let result =
+            aValues.forEach
+    }
+
     static distinct( values ) {
         let distinct = []
         values.forEach( ( s ) => {
@@ -222,6 +227,18 @@ export default class Analyzer {
         } )
 
         return change
+    }
+
+    static sumProperty( arrayOfObjects = [], property = '' ) {
+
+        if ( !Array.isArray( arrayOfObjects ) || arrayOfObjects.length === 0 ) {
+            return 0
+        }
+
+        return arrayOfObjects.reduce( ( sum, obj ) => {
+            return sum + ( Object.keys( obj ).includes( property ) ? obj[ property ] : 0 )
+        }, 0 )
+
     }
 
     static avg( values = [] ) {

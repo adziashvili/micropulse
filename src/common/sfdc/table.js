@@ -54,6 +54,7 @@ export default class Table {
 
         this.logDigest()
         this.isInitialised = true
+        return this
     }
 
     isHeader( testHeaders = [] ) {
@@ -126,8 +127,7 @@ export default class Table {
     sort( header, data ) {
         if ( this.getType( header ) === 'date' ) {
             return data.sort( ( a, b ) => { return a.valueOf() - b.valueOf() } )
-        }
-        else {
+        } else {
             return data
             // return data.sort()
         }
@@ -188,10 +188,12 @@ export default class Table {
     }
 
     logDigest() {
-        console.log( "%s records loaded and transformed.\nThe following scheme is used:".green, this.list.length )
-        console.log( "  %s %s".bold, SH.exact( "TYPE", 10 ), "HEADER" )
+
+        console.log( "\n[MP] Cool! %s records loaded and transformed.".green, this.list.length )
+        console.log( "[MP] Detected data schme:".grey)
+        console.log( " %s %s".bold, SH.exact( "TYPE", 10 ), "HEADER" )
         this.headers.forEach( ( h ) => {
-            console.log( "  %s %s".grey, SH.exact( h.type, 10 ), h.header );
+            console.log( " %s %s".grey, SH.exact( h.type, 10 ), h.header );
         } )
     }
 

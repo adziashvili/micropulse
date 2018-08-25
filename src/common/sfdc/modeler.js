@@ -252,7 +252,7 @@ export default class Modeler {
         if ( rows.length > 0 ) {
             let keys = rows.map( ( row ) => { return row.key } )
             if ( !this.table.isHeader( keys ) ) {
-                throw "Invalid rows: All headers must be valid headers in the file"
+                throw "Invalid rows: All headers must be valid headers in the processed file. Check Spelling or misplaced spaces in rows".red
             }
         }
         this._rows = rows
@@ -266,7 +266,7 @@ export default class Modeler {
         if ( cols.length > 0 ) {
             let keys = cols.map( ( col ) => { return col.key } )
             if ( !this.table.isHeader( keys ) ) {
-                throw "Invalid cols: All headers must be valid headers in the file"
+                throw "Invalid cols: All headers must be valid headers in the processed file. Check Spelling or misplaced spaces in cols".red
             }
         }
         this._cols = cols

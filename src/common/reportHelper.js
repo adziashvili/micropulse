@@ -259,7 +259,11 @@ export default class ReportHelper {
      *
      * @return {nothing} Does not return a value.
      */
-    newLine() {
-        console.log()
+    newLine( times = 1, condition = true ) {
+        if ( condition ) {
+            while ( times-- > 0 ) {
+                console.log()
+            }
+        }
     }
 }
