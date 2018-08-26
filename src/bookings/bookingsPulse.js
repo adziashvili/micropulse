@@ -43,8 +43,13 @@ export default class BookingsPulse {
                 } ]
                 let bookingsKey = 'Amount (converted)'
 
-                modeler.rows = [ { key: "Project: Practice" } ]
+                modeler.rows = [ {
+                    key: "Project: Practice",
+                    rollup: { values: [ "ANZ", "ASEAN", "S.KOREA" ], key: "APAC" }
+                } ]
+
                 modeler.stats = [ { key: bookingsKey } ]
+
                 modeler.custom = [
                     {
                         key: 'Avergae Bookings Size',

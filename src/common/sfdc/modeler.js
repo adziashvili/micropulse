@@ -57,14 +57,23 @@ export default class Modeler {
         model.records = this.table.list.filter( ( r ) => {
             return filterList.every( ( f ) => {
                 let transformer = this.transformer( f.key )
-                return !!transformer ?
-                    transformer( r[ f.key ] ) === f.value :
-                    r[ f.key ] === f.value
+                return f.condition( !!transformer ? transformer( r[ f.key ] ) : r[ f.key ] )
             } )
         } )
         // Assigns to this entry the reocrds that match the filter
     }
 
+    /**
+     * Calculates the model based on rows and cols.
+     *
+     * It is a recursive function that will iterate through the available
+     * records under each key and crease a stats object with all the calculations.
+     *
+     * @param {Object} model          Model to scan
+     * @param {Array} [headers=null]  This is used by calculate. Do not pass value.
+     *
+     * @return {Nothing} No return value
+     */
     calculate( model, headers = null ) {
 
         if ( null === headers ) headers = this.statsHeaders
@@ -119,22 +128,37 @@ export default class Modeler {
 
     getFilterList( fRows, fCols ) {
         let filterList = []
+        let list = [
+            { fValues: fRows, settings: this.rows },
+            { fValues: fCols, settings: this.cols }
+        ]
 
-        fRows.forEach( ( f, i ) => {
-            filterList.push( { key: this.rows[ i ].key, value: f } )
-        } )
-
-        fCols.forEach( ( f, i ) => {
-            filterList.push( { key: this.cols[ i ].key, value: f } )
+        list.forEach( ( obj ) => {
+            let { fValues, settings } = obj
+            fValues.forEach( ( f, i ) => {
+                let { key, rollup } = settings[ i ]
+                if ( !!rollup ) {
+                    filterList.push( {
+                        key: key,
+                        condition: ( v ) => {
+                            return rollup.values.includes( v )
+                        }
+                    } )
+                } else {
+                    filterList.push( {
+                        key: key,
+                        condition: ( v ) => { return v === f }
+                    } )
+                }
+            } )
         } )
 
         return filterList
     }
 
     describe( model, indent ) {
-
         console.log( "\n---\nMODEL\n".green );
-        console.log( JSONHelper.stringify( model ) );
+        console.log( JSONHelper.stringify( model ).grey );
     }
 
     describeAspects( strKey ) {
@@ -204,11 +228,14 @@ export default class Modeler {
     addRows( data, rows ) {
         if ( rows.length === 0 ) return
 
-        let { key, transform } = rows[ 0 ]
+        let { key, transform, rollup } = rows[ 0 ]
         let type = this.table.getType( key )
 
         if ( !!data.rows ) {
             let values = this.table.distinct( key, transform )
+            if ( !!rollup && !!rollup.key ) {
+                values.push( rollup.key )
+            }
             values.forEach( ( value ) => {
                 let [ , ...next ] = rows
                 let newRow = { key, value, type, rows: [] }
@@ -224,6 +251,7 @@ export default class Modeler {
         }
     }
 
+    // TODO: Do we want to add roolup for cols?
     addCols( data, cols ) {
         if ( cols.length === 0 ) return
         // nothing to add
@@ -248,11 +276,15 @@ export default class Modeler {
         // is more cols, they are added.
     }
 
+    // GETTERS and SETTERS
+    // -------------------
+
     set rows( rows = [] ) {
         if ( rows.length > 0 ) {
             let keys = rows.map( ( row ) => { return row.key } )
             if ( !this.table.isValidHeaders( keys ) ) {
-                throw "Invalid rows: All headers must be valid headers in the processed file. Check Spelling or misplaced spaces in rows".red
+                throw "Invalid rows: All headers must be valid headers in the processed file. Check Spelling or misplaced spaces in rows"
+                    .red
             }
         }
         this._rows = rows
@@ -266,7 +298,8 @@ export default class Modeler {
         if ( cols.length > 0 ) {
             let keys = cols.map( ( col ) => { return col.key } )
             if ( !this.table.isValidHeaders( keys ) ) {
-                throw "Invalid cols: All headers must be valid headers in the processed file. Check Spelling or misplaced spaces in cols".red
+                throw "Invalid cols: All headers must be valid headers in the processed file. Check Spelling or misplaced spaces in cols"
+                    .red
             }
         }
         this._cols = cols

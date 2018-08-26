@@ -58,14 +58,12 @@ export default class Reporter {
         rh.newLine()
         // Adding headers
 
-        let total = this.getStats( this.dictionary.get( "TOTAL" ) )
-        this.addRow( total, ( s ) => { return s.bold } )
-        this.addCustoms( [], 1 )
-        rh.newLine()
-        // Printing totals first. This is a matter of style.
-
         this.addRowsCascade( model )
         // adding the data
+
+        this.addTotal()
+        rh.newLine()
+        // Printing totals first. This is a matter of style.
 
         if ( isVerbose ) {
             this.addStats( stats )
@@ -73,8 +71,15 @@ export default class Reporter {
         }
     }
 
+    addTotal() {
+        let total = this.getStats( this.dictionary.get( "TOTAL" ) )
+        this.addRow( total, ( s ) => { return s.bold } )
+        this.addCustoms( [] )
+    }
+
     addStats( stats ) {
-        let rowStats = this.getRowStats()
+        // let rowStats = this.getRowStats()
+        let rowStats = this.getRowData( [], 'stats' )
         stats.forEach( ( stat ) => {
             let values = rowStats.map( ( obj ) => {
                 return obj[ stat.key ]
@@ -97,75 +102,29 @@ export default class Reporter {
         }
     }
 
-    getRowStats( rowFilter = [] ) {
-
-        let arr = []
-
-        this.colsKVPs.forEach( ( cKvp ) => {
-            let s = this.modeler.find( 'stats', rowFilter, cKvp )
-            if ( s !== undefined ) arr.push( s )
-        } )
-
-        if ( this.isAddTotal ) {
-            let s = this.modeler.find( 'stats', rowFilter, [] )
-            if ( s !== undefined ) arr.push( s )
-        }
-
-        return arr
-    }
-
-    /**
-     * Returns the records for a given row.
-     *
-     * @param {[type]} rowFilter [description]
-     *
-     * @return {[type]} [description]
-     */
-    getRecords( rowFilter ) {
-        let values = []
-
-        // Adds value per colunm
-        this.colsKVPs.forEach( ( cKvp ) => {
-            values.push( this.modeler.find( 'records', rowFilter, cKvp ) )
-        } )
-
-        // if requested, adds total
-        if ( this.isAddTotal ) {
-            values.push( this.modeler.find( 'records', rowFilter, [] ) )
-        }
-
-        return values
-    }
-
-    getStats( firstValue, rowFilter ) {
+    getStats( firstValue = '', rowFilter = [] ) {
 
         let values = [ firstValue ]
-
-        // Adds value per colunm
-        this.colsKVPs.forEach( ( cKvp ) => {
-            this.push( values, this.modeler.find( 'stats', rowFilter, cKvp ) )
-        } )
-
-        // if requested, adds total
-        if ( this.isAddTotal ) {
-            this.push( values, this.modeler.find( 'stats', rowFilter, [] ) )
-        }
+        let stats = this.getRowData( rowFilter )
+        stats.forEach( ( s ) => { this.push( values, s ) } )
 
         return values
     }
 
-    defaultStat( key ) {
-        switch ( this.modeler.table.getType( key ) ) {
-            case 'number':
-            case 'currency':
-            case 'percent':
-                return 'sum'
-            case 'string':
-            case 'boolean':
-            case 'date':
-            default:
-                return 'countTotal'
+    getRowData( rowFilter = [], property = 'stats' ) {
+        let values = []
+
+        this.colsKVPs.forEach( ( cKvp ) => {
+            let v = this.modeler.find( property, rowFilter, cKvp )
+            if ( v !== undefined ) values.push( v )
+        } )
+
+        if ( this.isAddTotal ) {
+            let v = this.modeler.find( property, rowFilter, [] )
+            if ( v !== undefined ) values.push( v )
         }
+
+        return values
     }
 
     push( values, objStats ) {
@@ -183,7 +142,7 @@ export default class Reporter {
         let { key, stat } = stats[ 0 ]
 
         if ( !stat ) {
-            stat = this.defaultStat( key )
+            stat = Analyzer.getDefaultStatKey( this.modeler.table.getType( key ) )
         }
 
         if ( !Object.keys( objStats ).includes( key ) || !Object.keys( objStats[ key ] ).includes( stat ) ) {
@@ -236,8 +195,8 @@ export default class Reporter {
     addRowsCascade( model, filter = [], level = 0 ) {
         if ( !!model.rows ) {
             model.rows.forEach( ( row, index, rows ) => {
-
                 let newFilter = { key: row.key, value: row.value }
+
                 this.addRow(
                     this.getStats(
                         this.layout.nestedIndent( level ) + row.value,
@@ -267,12 +226,12 @@ export default class Reporter {
         }
     }
 
-    addCustoms( filter, level ) {
+    addCustoms( filter, level = 1 ) {
         let { custom } = this.modeler
         custom.forEach( ( c ) => {
             let transformer = this.modeler.transformer( c.key, true )
             if ( !!transformer && !!transformer.transform ) {
-                let recs = this.getRecords( filter )
+                let recs = this.getRowData( filter, 'records' )
                 let values = [ this.layout.nestedIndent( level ) + c.key ]
 
                 if ( transformer.isRowTransformer ) {

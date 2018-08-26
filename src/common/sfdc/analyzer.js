@@ -65,6 +65,20 @@ export default class Analyzer {
         }
     }
 
+    static getDefaultStatKey( type ) {
+        switch ( type ) {
+            case 'number':
+            case 'currency':
+            case 'percent':
+                return 'sum'
+            case 'string':
+            case 'boolean':
+            case 'date':
+            default:
+                return 'countTotal'
+        }
+    }
+
     static numbers( values ) {
         values = values.map( ( v ) => {
             return Parser.ZERO_OR_MISSING.includes( v ) ? 0 : v
