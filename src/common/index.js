@@ -11,6 +11,7 @@ import Table from './sfdc/table'
 import Modeler from './sfdc/modeler'
 import Analyzer from './sfdc/analyzer'
 import Reporter from './sfdc/reporter'
+import Report from './sfdc/report'
 import Layout from './sfdc/layout'
 import Dictionary from './sfdc/dictionary'
 
@@ -28,6 +29,7 @@ export {
     Modeler,
     Analyzer,
     Reporter,
+    Report,
     Layout,
     Dictionary
 }
