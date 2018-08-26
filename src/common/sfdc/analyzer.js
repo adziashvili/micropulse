@@ -27,6 +27,25 @@ export default class Analyzer {
         return TYPE_SENSITIVE_STATS
     }
 
+    static analyzeType( data = [] ) {
+
+        let type = "string"
+
+        if ( Analyzer.isNumber( data ) ) {
+            type = 'number'
+        } else if ( Analyzer.isCurrency( data ) ) {
+            type = 'currency'
+        } else if ( Analyzer.isDate( data ) ) {
+            type = 'date'
+        } else if ( Analyzer.isBoolean( data ) ) {
+            type = 'boolean'
+        } else if ( Analyzer.isString( data ) ) {
+            type = 'string'
+        }
+
+        return type
+    }
+
     static analyze( type, values ) {
 
         switch ( type ) {
@@ -238,11 +257,14 @@ export default class Analyzer {
         return arrayOfObjects.reduce( ( sum, obj ) => {
             return sum + ( Object.keys( obj ).includes( property ) ? obj[ property ] : 0 )
         }, 0 )
+    }
 
+    static avgProperty( arrayOfObjects = [], property = '' ) {
+        return Analyzer.devide( Analyzer.sumProperty( arrayOfObjects, property ), arrayOfObjects.length ) * 1
     }
 
     static avg( values = [] ) {
-        return this.devide( values.reduce( ( sum, v ) => { return sum + v } ), values.length ) * 1
+        return Analyzer.devide( values.reduce( ( sum, v ) => { return sum + v } ), values.length ) * 1
     }
 
 }

@@ -251,7 +251,7 @@ export default class Modeler {
     set rows( rows = [] ) {
         if ( rows.length > 0 ) {
             let keys = rows.map( ( row ) => { return row.key } )
-            if ( !this.table.isHeader( keys ) ) {
+            if ( !this.table.isValidHeaders( keys ) ) {
                 throw "Invalid rows: All headers must be valid headers in the processed file. Check Spelling or misplaced spaces in rows".red
             }
         }
@@ -265,7 +265,7 @@ export default class Modeler {
     set cols( cols ) {
         if ( cols.length > 0 ) {
             let keys = cols.map( ( col ) => { return col.key } )
-            if ( !this.table.isHeader( keys ) ) {
+            if ( !this.table.isValidHeaders( keys ) ) {
                 throw "Invalid cols: All headers must be valid headers in the processed file. Check Spelling or misplaced spaces in cols".red
             }
         }
@@ -278,7 +278,7 @@ export default class Modeler {
 
     set stats( stats ) {
         if ( stats.length > 0 &&
-            !this.table.isHeader( stats.map( ( s ) => { return s.key } ) ) ) {
+            !this.table.isValidHeaders( stats.map( ( s ) => { return s.key } ) ) ) {
             throw "Invalid cols: All headers must be valid headers in the file"
         }
         this._stats = stats

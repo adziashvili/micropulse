@@ -30,7 +30,7 @@ export default class Reporter {
 
     report( isVerbose = false ) {
 
-        let { model, stats } = this.modeler
+        let { model, stats, table } = this.modeler
         let { layout, rh } = this
         // localizing some variables
 
@@ -47,6 +47,10 @@ export default class Reporter {
         // Optimizing the layout to the actual data
 
         rh.addReportTitle()
+        let dh = new DateHelper( table.meta.date )
+        console.log( "Data: %s records as for %s",
+            table.meta.lastDataRow - table.meta.firstDataRow + 1,
+            dh.localeDateString )
         rh.newLine()
         // Adding report title
 
@@ -54,14 +58,14 @@ export default class Reporter {
         rh.newLine()
         // Adding headers
 
-        this.addRowsCascade( model )
-        // adding the data
-
-        let total = this.getStats( "TOTAL" )
+        let total = this.getStats( this.dictionary.get( "TOTAL" ) )
         this.addRow( total, ( s ) => { return s.bold } )
         this.addCustoms( [], 1 )
         rh.newLine()
         // Printing totals first. This is a matter of style.
+
+        this.addRowsCascade( model )
+        // adding the data
 
         if ( isVerbose ) {
             this.addStats( stats )

@@ -8,7 +8,8 @@ import {
 
 export default class Table {
 
-    constructor() {
+    constructor( isVerbose = false ) {
+        this.isVerbose = isVerbose
         this.headers = []
         this.list = []
         this.parser = null
@@ -26,7 +27,7 @@ export default class Table {
             } )
 
         let { headersRow, firstDataRow, lastDataRow } = this.meta
-
+        
         let headers = this.parser.readRow( 1, headersRow )
         // Read header names
 
@@ -41,9 +42,10 @@ export default class Table {
         // Load all records
 
         for ( let i = 0; i < headers.length; i++ ) {
-            let meta = this.colMeta( i + 1, firstDataRow, lastDataRow )
-            meta.header = headers[ i ]
-            this.headers.push( meta )
+            this.headers.push( {
+                type: AI.analyzeType( this.parser.readCol( i + 1, firstDataRow, lastDataRow ) ),
+                header: headers[ i ]
+            } )
         }
         // Guess what type of data is stored in each col
 
@@ -51,13 +53,15 @@ export default class Table {
             this.transform( r )
         } )
         // transform records according tot the headers type
+        if ( this.isVerbose ) {
+            this.logDigest()
+        }
 
-        this.logDigest()
         this.isInitialised = true
         return this
     }
 
-    isHeader( testHeaders = [] ) {
+    isValidHeaders( testHeaders = [] ) {
         return testHeaders.every( ( th ) => {
             return undefined !== this.headers.find( ( h ) => {
                 return h.header === th
@@ -98,26 +102,6 @@ export default class Table {
         return meta === undefined ? "UNKNOWN" : meta.type
     }
 
-    colMeta( col, firstDataRow, lastDataRow ) {
-
-        let data = this.parser.readCol( col, firstDataRow, lastDataRow )
-        let meta = { type: '?' }
-
-        if ( AI.isNumber( data ) ) {
-            meta.type = 'number'
-        } else if ( AI.isCurrency( data ) ) {
-            meta.type = 'currency'
-        } else if ( AI.isDate( data ) ) {
-            meta.type = 'date'
-        } else if ( AI.isBoolean( data ) ) {
-            meta.type = 'boolean'
-        } else if ( AI.isString( data ) ) {
-            meta.type = 'string'
-        }
-
-        return meta
-    }
-
     values( header, transform = null ) {
         return this.list.map( ( r ) => {
             return transform === null ? r.get( header ) : transform( r.get( header ) )
@@ -150,8 +134,7 @@ export default class Table {
     }
 
     analyse() {
-        // return { headersRow: 14, firstDataRow: 15, lastDataRow: 181 }
-
+        // eg. { headersRow: 14, firstDataRow: 15, lastDataRow: 181 }
         let analysis = { headersRow: -1, firstDataRow: -1, lastDataRow: -1 }
 
         let filterMarker = "Filtered By:"
@@ -188,9 +171,8 @@ export default class Table {
     }
 
     logDigest() {
-
         console.log( "\n[MP] Cool! %s records loaded and transformed.".green, this.list.length )
-        console.log( "[MP] Detected data schme:".grey)
+        console.log( "[MP] Detected data schme:".grey )
         console.log( " %s %s".bold, SH.exact( "TYPE", 10 ), "HEADER" )
         this.headers.forEach( ( h ) => {
             console.log( " %s %s".grey, SH.exact( h.type, 10 ), h.header );
