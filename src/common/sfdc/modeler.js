@@ -137,7 +137,7 @@ export default class Modeler {
             let { fValues, settings } = obj
             fValues.forEach( ( f, i ) => {
                 let { key, rollup } = settings[ i ]
-                if ( !!rollup ) {
+                if ( !!rollup && rollup.key === f ) {
                     filterList.push( {
                         key: key,
                         condition: ( v ) => {
