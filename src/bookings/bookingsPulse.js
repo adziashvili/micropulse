@@ -29,7 +29,7 @@ export default class BookingsPulse extends Report {
         this.cols = [ {
             key: 'Effective Date',
             transform: ( d ) => {
-                return DateHelper.getMonthYear( d )
+                return DateHelper.getMonthYear( d, true )
             }
       } ]
         // Defines the report to be based on effective date's month

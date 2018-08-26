@@ -30,7 +30,7 @@ export default class PipelinePulseNew extends Report {
             { key: 'Stage', shortName: 'Stage' },
             { key: 'Is Partner Account Involved?', shortName: 'Partner Attached' } ] )
 
-        this.cols = [ { key: 'Close Date', transform: ( d ) => { return DateHelper.getMonthYear( d ) } } ]
+        this.cols = [ { key: 'Close Date', transform: ( d ) => { return DateHelper.getMonthYear( d, true ) } } ]
         this.rows = [ { key: "Practice", rollup: { values: [ "ANZ", "ASEAN", "S.KOREA" ], key: "APAC" } }, { key: "Stage" } ]
 
         // Stats settings can inlcude the key to indicate which stat we would like to show case

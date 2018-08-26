@@ -1,4 +1,4 @@
-import {StringBuffer} from '../common'
+import { StringBuffer } from '../common'
 
 const monthNames = [
     "Jan",
@@ -41,8 +41,9 @@ export default class DateHelper {
         return monthNames[ month ]
     }
 
-    static getMonthYear( date ) {
-        return monthNames[ date.getMonth() ] + "-" + date.getFullYear()
+    static getMonthYear( date, isShortYear = false ) {
+        let year = !isShortYear ? date.getFullYear() : (""+date.getFullYear()).slice( 2 )
+        return monthNames[ date.getMonth() ] + "-" + year
     }
 
     /**
@@ -80,7 +81,7 @@ export default class DateHelper {
     }
 
     constructor( date ) {
-      this.date = date
+        this.date = date
     }
 
     get localeDateString() {
