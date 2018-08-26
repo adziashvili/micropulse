@@ -1,8 +1,8 @@
 const DEF_LAYOUT = {
     indent: "  ",
-    padding: 3,
+    padding: 1,
     firstColWidth: 10,
-    totalSeperator: "   | ",
+    totalSeperator: "  | ",
     cols: [],
     rows: [],
     lengths: []
