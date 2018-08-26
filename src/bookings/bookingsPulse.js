@@ -15,6 +15,7 @@ export default class BookingsPulse {
         this.file = pathtoFile
 
         this.dictionary = new Dictionary( [
+            { key: 'TOTAL', shortName: 'APJ' },
             { key: 'Project: Practice', shortName: 'Practice' },
             { key: 'Effective Date', shortName: 'Date' },
             { key: 'Amount (converted)', shortName: 'Bookings' },
@@ -40,49 +41,62 @@ export default class BookingsPulse {
                         return DateHelper.getMonthYear( d )
                     }
                 } ]
-                let bookKey = 'Amount (converted)'
+                let bookingsKey = 'Amount (converted)'
+
                 modeler.rows = [ { key: "Project: Practice" } ]
-                modeler.stats = [ { key: bookKey } ]
+                modeler.stats = [ { key: bookingsKey } ]
+                modeler.custom = [
+                    {
+                        key: 'Avergae Bookings Size',
+                        isRowTransformer: true,
+                        transform: ( recs, modeler, series ) => {
+                            return series.map( ( item ) => {
+                                return "$" + StringHelper.toThousands(
+                                    Analyzer.avgProperty( item, bookingsKey ) )
+                            } )
+                        }
+                    },
+                    {
+                        key: 'Engagements Count',
+                        transform: ( recs ) => { return recs.length }
+                    },
+                    {
+                        key: 'vs. Practice Total',
+                        isRowTransformer: true,
+                        transform: ( recs, modeler, series ) => {
 
-                modeler.custom = [ {
-                    key: 'vs. Practice Total',
-                    isRowTransformer: true,
-                    transform: ( recs, modeler, series ) => {
+                            let totals = series.map( ( item ) => {
+                                return item.length === 0 ? 0 : item.reduce(
+                                    ( sum, s ) => { return sum + s[ bookingsKey ] }, 0 )
+                            } )
+                            // This gives us the total of bookings across the cols we have
 
-                        let totals = series.map( ( item ) => {
-                            return item.length === 0 ? 0 : item.reduce(
-                                ( sum, s ) => { return sum + s[ bookKey ] }, 0 )
-                        } )
-                        // This gives us the total of bookings across the cols we have
+                            let allTotal = totals.length > 0 ? totals[ totals.length - 1 ] : 0
+                            // the last record includes all records, so its sum is the TOTAL for all
 
-                        let allTotal = totals.length > 0 ? totals[ totals.length - 1 ] : 0
-                        // the last record includes all records, so its sum is the TOTAL for all
+                            return totals.map( ( total ) => {
+                                return StringHelper.toPercent( Analyzer.devide( total, allTotal ) )
+                            } )
+                        }
+                    },
+                    {
+                        key: 'vs. Area Total',
+                        isRowTransformer: true,
+                        transform: ( recs, modeler, series ) => {
+                            let totals = series.map( ( item ) => {
+                                return item.length === 0 ? 0 : item.reduce(
+                                    ( sum, s ) => { return sum + s[ bookingsKey ] }, 0 )
+                            } )
+                            // This gives us the total of bookings across the cols we have
 
-                        return totals.map( ( total ) => {
-                            return StringHelper.toPercent( Analyzer.devide( total, allTotal ) )
-                        } )
-                    }
-                    }, {
-                    key: 'vs. Area Total',
-                    isRowTransformer: true,
-                    transform: ( recs, modeler, series ) => {
-                        let totals = series.map( ( item ) => {
-                            return item.length === 0 ? 0 : item.reduce(
-                                ( sum, s ) => { return sum + s[ bookKey ] }, 0 )
-                        } )
-                        // This gives us the total of bookings across the cols we have
+                            let allTotal = Analyzer.sumProperty( modeler.model.records, bookingsKey )
+                            // This is precalculated and should give us the sum of all records
 
-                        let allTotal = Analyzer.sumProperty( modeler.model.records, bookKey )
-                        // This is precalculated and should give us the sum of all records
-
-                        return totals.map( ( total ) => {
-                            return StringHelper.toPercent( Analyzer.devide( total, allTotal ) )
-                        } )
-                    }
-                        }, {
-                    key: 'Engagements Count',
-                    transform: ( recs ) => { return recs.length }
-                } ]
+                            return totals.map( ( total ) => {
+                                return StringHelper.toPercent( Analyzer.devide( total, allTotal ) )
+                            } )
+                        }
+                      } ]
                 modeler.build()
                 // We build the models
 
