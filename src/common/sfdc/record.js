@@ -1,16 +1,13 @@
 export default class Record {
+  exist(key) {
+    return Object.keys(this).includes(key)
+  }
 
-    constructor() {}
+  set(key, value) {
+    this[key] = value
+  }
 
-    exist( key ) {
-        return Object.keys( this ).includes( key )
-    }
-
-    set( key, value ) {
-        this[ key ] = value
-    }
-
-    get( key ) {
-        return this[ key ]
-    }
+  get(key) {
+    return this[key]
+  }
 }

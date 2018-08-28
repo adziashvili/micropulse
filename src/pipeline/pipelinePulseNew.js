@@ -14,6 +14,9 @@ export default class PipelinePulseNew extends Report {
     }
 
     setup() {
+
+        let amountKey = 'Total Contract Amount (converted)'
+
         this.dictionary = new Dictionary( [
             { key: 'TOTAL', shortName: 'APJ' },
             { key: 'Practice', shortName: 'Practice' },
@@ -43,17 +46,57 @@ export default class PipelinePulseNew extends Report {
         // We can pass a transformer to caluclate values or to caluclate the entire row.
         // Add isRowTransformer: true for row
         this.custom = [
-            { key: "Record Count", transform: ( records, modeler, allColsRecords ) => { return records.length } },
             {
-                key: "Record Count MoM (| AVG)",
+                key: 'Avergae Deal Size',
                 isRowTransformer: true,
-                transform: ( records, modeler, allColsRecords ) => {
-                    let mom = Analyzer.PoP( allColsRecords, ( v ) => {
-                        return v.length
+                transform: ( recs, modeler, series ) => {
+                    return series.map( ( item ) => {
+                        return "$" + StringHelper.toThousands(
+                            Analyzer.avgProperty( item, amountKey ) )
                     } )
-                    mom[ mom.length - 1 ] = Analyzer.avg( mom.slice( 0, mom.length - 1 ) )
-                    return mom.map( ( m ) => { return StringHelper.toPercent( m ) } )
                 }
-          } ]
+            },
+            {
+                key: "Opportunities Count",
+                transform: ( records, modeler, allColsRecords ) => { return records.length }
+            },
+            {
+                key: 'Pipe Distribution',
+                isRowTransformer: true,
+                transform: ( recs, modeler, series ) => {
+
+                    let totals = series.map( ( item ) => {
+                        return item.length === 0 ? 0 : item.reduce(
+                            ( sum, s ) => { return sum + s[ amountKey ] }, 0 )
+                    } )
+                    // This gives us the total of bookings across the cols we have
+
+                    let allTotal = totals.length > 0 ? totals[ totals.length - 1 ] : 0
+                    // the last record includes all records, so its sum is the TOTAL for all
+
+                    return totals.map( ( total ) => {
+                        return StringHelper.toPercent( Analyzer.devide( total, allTotal ) )
+                    } )
+                }
+            },
+            {
+                key: 'vs. APJ',
+                isRowTransformer: true,
+                transform: ( recs, modeler, series ) => {
+                    let totals = series.map( ( item ) => {
+                        return item.length === 0 ? 0 : item.reduce(
+                            ( sum, s ) => { return sum + s[ amountKey ] }, 0 )
+                    } )
+                    // This gives us the total of pipeline across the cols we have
+
+                    let allTotal = Analyzer.sumProperty( modeler.model.records, amountKey )
+                    // This is precalculated and should give us the sum of all records
+
+                    return totals.map( ( total ) => {
+                        return StringHelper.toPercent( Analyzer.devide( total, allTotal ) )
+                    } )
+                }
+          }
+         ]
     }
 }

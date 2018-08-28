@@ -1,45 +1,77 @@
 export default class PracticeManager {
+  constructor() {
+    this.pdb = [{
+        name: 'ANZ',
+        sets: ['APAC', 'APJ'],
+        sfdc: ['anz'],
+        isSet: false
+      },
+      {
+        name: 'ASEAN',
+        sets: ['APAC', 'APJ'],
+        sfdc: ['asean'],
+        isSet: false
+      },
+      {
+        name: 'INDIA',
+        sets: ['APAC', 'APJ'],
+        sfdc: ['india'],
+        isSet: false
+      },
+      {
+        name: 'S.KOREA',
+        sets: ['APAC', 'APJ'],
+        sfdc: ['s. korea'],
+        isSet: false
+      },
+      {
+        name: 'APAC',
+        sets: ['APJ'],
+        sfdc: ['apac'],
+        isSet: true
+      },
+      {
+        name: 'JAPAN',
+        sets: ['APJ'],
+        sfdc: ['japan'],
+        isSet: false
+      },
+      {
+        name: 'APJ Shared',
+        sets: ['APJ'],
+        sfdc: ['apj shared'],
+        isSet: false
+      },
+      {
+        name: 'APJ',
+        sets: [],
+        sfdc: ['APJ'],
+        isSet: true
+      }
+    ]
+  }
 
-    constructor() {
+  practices(isExcludeSets = false) {
+    return this.names(isExcludeSets ?
+      this.pdb.filter(p => !p.isSet) :
+      this.pdb)
+  }
 
-        this.pdb = [
-            { name: "ANZ", sets: [ "APAC", "APJ" ], sfdc: [ "anz" ], isSet: false },
-            { name: "ASEAN", sets: [ "APAC", "APJ" ], sfdc: [ "asean" ], isSet: false },
-            { name: "INDIA", sets: [ "APAC", "APJ" ], sfdc: [ "india" ], isSet: false },
-            { name: "S.KOREA", sets: [ "APAC", "APJ" ], sfdc: [ "s. korea" ], isSet: false },
-            { name: "APAC", sets: [ "APJ" ], sfdc: [ "apac" ], isSet: true },
-            { name: "JAPAN", sets: [ "APJ" ], sfdc: [ "japan" ], isSet: false },
-            { name: "APJ Shared", sets: [ "APJ" ], sfdc: [ "apj shared" ], isSet: false },
-            { name: "APJ", sets: [], sfdc: [ "APJ" ], isSet: true },
-         ]
-    }
+  expand(practice) {
+    return this.names(
+      this.pdb.filter(p => !p.isSet && (p.name === practice || p.sets.includes(
+        practice
+      )))
+    )
+  }
 
-    practices( isExcludeSets = false ) {
-        return this.names( isExcludeSets ?
-            this.pdb.filter( ( p ) => { return !p.isSet } ) :
-            this.pdb
-        )
-    }
+  names(arr = [], prop = 'name') {
+    return arr.map(a => a[prop])
+  }
 
-    expand( practice ) {
-        return this.names( this.pdb.filter( ( p ) => {
-            return !p.isSet && ( p.name === practice || p.sets.includes( practice ) )
-
-        } ) )
-    }
-
-    names( arr = [], prop = "name" ) {
-        return arr.map( ( a ) => {
-            return a[ prop ]
-        } )
-    }
-
-    lookup( sfdcStr = "" ) {
-        sfdcStr = ( sfdcStr === null || !sfdcStr ) ? "" : sfdcStr
-        let practice = this.pdb.find( ( p ) => {
-            return p.sfdc.includes( sfdcStr.toLowerCase() )
-        } )
-        return !!practice ? practice.name : "UNKNOWN"
-    }
-
+  lookup(sfdcStr = '') {
+    const lookupString = (sfdcStr === null || !sfdcStr) ? '' : sfdcStr
+    const practice = this.pdb.find(p => p.sfdc.includes(lookupString.toLowerCase()))
+    return practice ? practice.name : 'UNKNOWN'
+  }
 }

@@ -1,0 +1,30 @@
+{
+    "extends": "eslint-config-airbnb-base",
+    "rules": {
+      "max-len": [1, 120, 2, {ignoreComments: true}],
+      "semi": "off",
+      "indent": "off",
+      "no-console": "off",
+      "import/prefer-default-export": "off",
+      "no-underscore-dangle": "off",
+      "operator-linebreak": "off",
+      "class-methods-use-this": "off",
+      "import/no-cycle": "off",
+      "no-restricted-globals": "off",
+      "no-param-reassign": ["error",
+        { "props": false }
+      ],
+      "prefer-destructuring": ["error", {
+      "array": false,
+      "object": false
+    }],
+    "no-restricted-syntax":"off",
+      "comma-dangle": ["error", {
+        "arrays": "never",
+        "objects": "never",
+        "imports": "never",
+        "exports": "never",
+        "functions": "ignore"
+    }]
+  }
+}

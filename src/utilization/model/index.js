@@ -5,5 +5,5 @@ import UtilizationReader from './utilizationReader'
 export {
     UtilizationRecord,
     UtilizationStore,
-    UtilizationReader,
+    UtilizationReader
 }
