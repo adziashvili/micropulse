@@ -75,11 +75,17 @@ export default class UtilizationStore {
 
           assert(records.length <= 1)
 
-          const utilization =
-            records.length === 0 ? 0 :
-            type === 'Billable' ? records[0].billable :
-            type === 'Investment' ? records[0].investment :
-            records[0].total
+          let utilization
+
+          if (records.length === 0) {
+            utilization = 0
+          } else if (type === 'Billable') {
+            utilization = records[0].billable
+          } else if (type === 'Investment') {
+            utilization = records[0].investment
+          } else {
+            utilization = records[0].total
+          }
 
           model[name][type][m] = Math.round(utilization * 1000) / 1000
         }
