@@ -1,3 +1,5 @@
 import PracticeManager from './practiceManager'
 
-export { PracticeManager }
+export {
+  PracticeManager
+}

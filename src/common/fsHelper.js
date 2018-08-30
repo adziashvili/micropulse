@@ -125,6 +125,15 @@ export default class FSHelper {
     }
   }
 
+  static readFile(filePath) {
+    if (!filePath) {
+      throw new Error('filePath is undefined')
+    } else if (!fs) {
+      throw new Error('System error. fs is undefined')
+    }
+    return fs.readFileSync(filePath, 'utf8')
+  }
+
   /**
    * Return the file name in a path
    *

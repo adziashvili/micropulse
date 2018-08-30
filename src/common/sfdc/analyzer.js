@@ -210,7 +210,42 @@ export default class Analyzer {
   }
 
   static devide(a, b, fixed = 2) {
-    return (a / (b === 0 ? 1 : b)).toFixed(fixed)
+    if (!b || b === 0) return b
+    return (a / b).toFixed(fixed)
+  }
+
+  static devideArrays(a = [], b = []) {
+    if (!Array.isArray(a) || !Array.isArray(b)) {
+      return undefined
+    }
+
+    if (a.length !== b.length) {
+      return undefined
+    }
+
+    const devisinResultArr = []
+    a.forEach((v, i) => {
+      const x = !v || Number.isNaN(v) ? 0 : v
+      const y = Number.isNaN(b[i]) ? 0 : b[i]
+      devisinResultArr.push(Analyzer.devide(x, y, 3))
+    })
+    return devisinResultArr
+  }
+
+  static mapToRollingSum(arrayOfNumbers, isLastValueTotal = false) {
+    const values = []
+    let sum = 0
+
+    for (let i = 0; i < arrayOfNumbers.length; i += 1) {
+      if (isLastValueTotal && i === arrayOfNumbers.length - 1) {
+        values.push(sum)
+      } else {
+        sum += arrayOfNumbers[i]
+        values.push(sum)
+      }
+    }
+
+    return values
   }
 
   static distinct(values) {

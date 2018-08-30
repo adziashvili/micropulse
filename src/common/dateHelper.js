@@ -110,8 +110,11 @@ export default class DateHelper {
   }
 
   isSameMonth(date) {
-    return this.date.getFullYear() === date.getFullYear() &&
-      this.date.getMonth() === date.getMonth()
+    return this.isSameYear(date) && this.date.getMonth() === date.getMonth()
+  }
+
+  isSameYear(date) {
+    return this.date.getFullYear() === date.getFullYear()
   }
 
   get monthName() {

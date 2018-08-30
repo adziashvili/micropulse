@@ -69,9 +69,10 @@ export default class Reporter {
   }
 
   addTotal() {
-    const total = this.getStats(this.dictionary.get('TOTAL'))
+    const key = 'TOTAL'
+    const total = this.getStats(this.dictionary.get(key))
     this.addRow(total, s => s.bold)
-    this.addCustoms([])
+    this.addCustoms(key, [])
   }
 
   addStats(stats) {
@@ -215,7 +216,7 @@ export default class Reporter {
 
         if (level === 0) {
           // this.rh.newLine( 1, this.modeler.rows.length > 1 )
-          this.addCustoms(filter.concat(newFilter), level + 1)
+          this.addCustoms(row.value, filter.concat(newFilter), level + 1)
           // if ( this.modeler.rows.length > 1 ) {
           this.rh.addDevider()
           console.log()
@@ -226,7 +227,7 @@ export default class Reporter {
     }
   }
 
-  addCustoms(filter, level = 1) {
+  addCustoms(key, filter, level = 1) {
     const { custom } = this.modeler
     custom.forEach((c) => {
       const transformer = this.modeler.transformer(c.key, true)
@@ -235,13 +236,13 @@ export default class Reporter {
         let values = [this.layout.nestedIndent(level) + c.key]
 
         if (transformer.isRowTransformer) {
-          values = [...values, ...transformer.transform([], this.modeler, recs)]
+          values = [...values, ...transformer.transform([], this.modeler, recs, key)]
         } else {
           recs.forEach((colRecords, index, allRecordsArray) => {
-            values.push(transformer.transform(colRecords, this.modeler,
-              allRecordsArray))
+            values.push(transformer.transform(colRecords, this.modeler, allRecordsArray))
           })
         }
+        if (transformer.isBreakLineBefore) this.rh.newLine()
         this.addRow(values)
       }
     })
@@ -265,6 +266,12 @@ export default class Reporter {
       })
       console.log(sb.toString().toUpperCase().bold);
     })
+  }
+
+  getHeaderValues() {
+    const { layout } = this
+    const { cols } = layout
+    return layout.getHeaders(cols.length - 1, this.isAddTotal)
   }
 
   /**

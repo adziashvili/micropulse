@@ -45,15 +45,16 @@ export default class StoreManager {
     return 2
   }
 
-  constructor() {
+  constructor(practiceManager) {
+    this._pm = practiceManager
     this._stores = [{
       key: UtilizationStore.STORE_KEY,
-      store: new UtilizationStore(),
+      store: new UtilizationStore(this.pm),
       path: UTILIZATION_DB,
       newDataFileName: UTILIZATION_NEW_DATA_FILE
     }, {
       key: PipelineStore.STORE_KEY,
-      store: new PipelineStore(),
+      store: new PipelineStore(this.pm),
       path: PIPELINE_DB,
       newDataFileName: PIPELINE_NEW_DATA_FILE
     }]
@@ -61,6 +62,14 @@ export default class StoreManager {
     this.stores.forEach((s) => {
       s.store.initialise(require(StoreManager.path(s.path)))
     })
+  }
+
+  get pm() {
+    return this._pm
+  }
+
+  set pm(pm) {
+    this._pm = pm
   }
 
   get stores() {

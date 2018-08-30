@@ -7,9 +7,10 @@ import {
 } from '../common'
 
 export default class BookingsPulse extends Report {
-  constructor(pathtoFile) {
+  constructor(pathToFile, storeManager) {
     super()
-    this.file = pathtoFile
+    this.file = pathToFile
+    this.sm = storeManager
     this.setup()
   }
 
@@ -42,18 +43,76 @@ export default class BookingsPulse extends Report {
     // Defines the main value we would like to showcase
 
     this.custom = [{
+        key: 'Bookings YTD',
+        isRowTransformer: true,
+        transform: (recs, modeler, series) => {
+          if (series.length === 0) return []
+          const totals = series.map((item) => {
+            if (item.length === 0) {
+              return 0
+            }
+            return item.reduce((sum, s) => sum + s[bookingsKey], 0)
+          })
+
+          const actuals = Analyzer.mapToRollingSum(totals, true)
+
+          return actuals.map((v) => {
+            if (!v) return '-'
+            return StringHelper.toThousands(v)
+          })
+        }
+      },
+      {
+        key: 'Bookings TGT | FY',
+        isRowTransformer: true,
+        transform: (recs, modeler, series, key) => {
+          if (series.length === 0) return []
+          const { pm } = this.sm
+          return pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
+            .map((v) => {
+              if (!v) return '-'
+              return StringHelper.toThousands(v)
+            })
+        }
+      },
+      {
+        key: 'Attainment',
+        isRowTransformer: true,
+        transform: (recs, modeler, series, key) => {
+          if (series.length === 0) return []
+          const { pm } = this.sm
+          const targets = pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
+          const totals = series.map((item) => {
+            if (item.length === 0) {
+              return 0
+            }
+            return item.reduce((sum, s) => sum + s[bookingsKey], 0)
+          })
+
+          const actuals = Analyzer.mapToRollingSum(totals, true)
+
+          return Analyzer.devideArrays(actuals, targets).map((v) => {
+            if (!v) return '-'
+            return StringHelper.toPercent(v)
+          })
+        }
+      },
+      {
         key: 'Avergae Bookings Size',
         isRowTransformer: true,
-        transform: (recs, modeler, series) => series.map(item => `$${
-          StringHelper.toThousands(Analyzer.avgProperty(item, bookingsKey))}`)
+        isBreakLineBefore: true,
+        transform: (recs, modeler, series) => series.map(
+          item => `$${StringHelper.toThousands(Analyzer.avgProperty(item, bookingsKey))}`
+        )
       },
       {
         key: 'Engagements Count',
         transform: recs => recs.length
       },
       {
-        key: 'Booking Distribution',
+        key: 'Distribution vs. Self',
         isRowTransformer: true,
+        isBreakLineBefore: true,
         transform: (recs, modeler, series) => {
           const totals = series.map((item) => {
             if (item.length === 0) return 0
@@ -69,7 +128,7 @@ export default class BookingsPulse extends Report {
         }
       },
       {
-        key: 'vs. APJ',
+        key: 'Distribution vs. APJ',
         isRowTransformer: true,
         transform: (recs, modeler, series) => {
           const totals = series.map((item) => {

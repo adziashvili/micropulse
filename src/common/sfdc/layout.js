@@ -91,7 +91,7 @@ export default class Layout {
    * Returns an array of all header values and their respective layout length.
    *
    * Each value will be represented with an object in the returned array with
-   * value and length properties e.g. {value: 'v', lenght: 6}.
+   * value and length properties e.g. {value: 'v', length: 6}.
    *
    * The first entry value is set to "".
    *
