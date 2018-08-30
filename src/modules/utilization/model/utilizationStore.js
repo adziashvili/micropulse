@@ -1,4 +1,4 @@
-import { JSONHelper } from '../../common'
+import { JSONHelper } from '../../../common'
 import UtilizationRecord from './utilizationRecord'
 import UtilizationReader from './utilizationReader'
 

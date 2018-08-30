@@ -1,4 +1,4 @@
-import { StringHelper as SH } from '.'
+import { StringHelper as SH } from '..'
 
 export default class StringBuffer {
   constructor(str) {

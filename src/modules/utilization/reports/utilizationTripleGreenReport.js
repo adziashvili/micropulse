@@ -1,4 +1,4 @@
-import { ReportHelper, StringHelper } from '../../common'
+import { ReportHelper, StringHelper } from '../../../common'
 
 export default class UtilizationTripleGreenReport {
   constructor(store) {

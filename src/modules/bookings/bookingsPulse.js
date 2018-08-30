@@ -5,7 +5,7 @@ import {
   StringHelper,
   Analyzer,
   Customs
-} from '../common'
+} from '../../common'
 
 export default class BookingsPulse extends Report {
   constructor(pathToFile, storeManager) {

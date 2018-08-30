@@ -6,7 +6,7 @@ import {
 } from './reports'
 
 import { UtilizationRecord, UtilizationStore } from './model'
-import { ReportHelper } from '../common'
+import { ReportHelper } from '../../common'
 
 export default class UtilizationPulse {
   constructor(storeManager, date) {

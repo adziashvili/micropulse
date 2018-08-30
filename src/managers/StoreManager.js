@@ -1,5 +1,5 @@
-import { UtilizationStore } from '../utilization/model'
-import { PipelineStore } from '../pipeline/model'
+import { UtilizationStore } from '../modules/utilization/model'
+import { PipelineStore } from '../modules/pipeline/model'
 import { ExcelReader, FSHelper } from '../common'
 
 const path = require('path')

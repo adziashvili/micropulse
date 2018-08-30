@@ -1,4 +1,4 @@
-import { DateHelper, ReportHelper } from '../../common'
+import { DateHelper, ReportHelper } from '../../../common'
 
 export default class UtilizationTopBottomReport {
   static get BURNOUT_FLAG() {

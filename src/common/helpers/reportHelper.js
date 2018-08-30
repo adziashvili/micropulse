@@ -3,7 +3,7 @@ import {
   StringBuffer,
   DateHelper
 }
-from '.'
+from '..'
 
 const DEFAULT_DIVIDER_LEN = 80
 const DEFAULT_DIVIDER_CH = '-'

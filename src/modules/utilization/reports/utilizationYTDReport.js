@@ -1,4 +1,4 @@
-import { ReportHelper, StringHelper } from '../../common'
+import { ReportHelper, StringHelper } from '../../../common'
 
 const TGT_BILLABLE = 0.4
 const TGT_INVESTMENT = 0.2
@@ -148,23 +148,14 @@ export default class UtilizationYTDReport {
    * @return {String} Formated Mom string with symbol and padding.
    */
   formatMom(v) {
-    return v === 1 ?
-      '  -  '.grey :
-      v > 1 ?
-      this.rh.UP + (' ' + ((v - 1) * 100)
-        .toFixed(
-          v - 1 > 0.1 ?
-          0 :
-          1
-        ) + '%')
-      .grey :
-      this.rh.DOWN + (' ' + ((1 - v) * 100)
-        .toFixed(
-          Math.abs(1 - v) > 0.1 ?
-          0 :
-          1
-        ) + '%')
-      .grey
+    if (v === 1) {
+      return '  -  '.grey
+    }
+    if (v > 1) {
+      return `${this.rh.UP} ${((v - 1) * 100).toFixed(v - 1 > 0.1 ? 0 : 1)}%`.grey
+    }
+
+    return `${this.rh.DOWN} ${((1 - v) * 100).toFixed(Math.abs(1 - v) > 0.1 ? 0 : 1)}%`.grey
   }
 
   /**

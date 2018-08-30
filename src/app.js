@@ -1,8 +1,7 @@
-import { StoreManager } from './store'
-import { UtilizationPulse } from './utilization'
-import { PipelinePulse, PipelinePulseNew } from './pipeline'
-import { BookingsPulse } from './bookings'
-import { PracticeManager } from './managers'
+import { UtilizationPulse } from './modules/utilization'
+import { PipelinePulse, PipelinePulseNew } from './modules/pipeline'
+import { BookingsPulse } from './modules/bookings'
+import { StoreManager, PracticeManager } from './managers'
 
 require('colors')
 

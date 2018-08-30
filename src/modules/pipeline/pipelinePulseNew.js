@@ -5,7 +5,7 @@ import {
   StringHelper,
   Analyzer,
   Customs
-} from '../common'
+} from '../../common'
 
 export default class PipelinePulseNew extends Report {
   constructor(file) {
