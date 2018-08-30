@@ -25,12 +25,14 @@ sm.buildAll(names, REPORT_DATE)
 // // Asks the store manager to build all the data models
 
 const isVerbose = false
+const bookingsYTD = './data/bookingsYTD.xlsx'
+const pipelineYTD = './data/pipelineYTD.xlsx'
 
 Promise.resolve(true)
   .then(new UtilizationPulse(sm, REPORT_DATE).run(isVerbose))
-  .then(new BookingsPulse('./data/bookings2.xlsx', sm).run(isVerbose))
+  .then(new BookingsPulse(bookingsYTD, sm).run(isVerbose))
   .then(new PipelinePulse(sm, REPORT_DATE).run(isVerbose))
-  .then(new PipelinePulseNew('./data/pipelineTest.xlsx', sm).run(isVerbose))
+  .then(new PipelinePulseNew(pipelineYTD, sm).run(isVerbose))
   .then(sm.save())
 
 // Runs pulse reports

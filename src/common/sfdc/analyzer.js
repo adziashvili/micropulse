@@ -286,6 +286,15 @@ export default class Analyzer {
     return change
   }
 
+  static sumArrays(arrayOArrays = [], property = '') {
+    return arrayOArrays.map((array) => {
+      if (array.length === 0) {
+        return 0
+      }
+      return array.reduce((sum, s) => sum + s[property], 0)
+    })
+  }
+
   static sumProperty(arrayOfObjects = [], property = '') {
     if (!Array.isArray(arrayOfObjects) || arrayOfObjects.length === 0) {
       return 0

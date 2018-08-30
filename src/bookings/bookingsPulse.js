@@ -3,7 +3,8 @@ import {
   Dictionary,
   DateHelper,
   StringHelper,
-  Analyzer
+  Analyzer,
+  Customs
 } from '../common'
 
 export default class BookingsPulse extends Report {
@@ -45,22 +46,7 @@ export default class BookingsPulse extends Report {
     this.custom = [{
         key: 'Bookings YTD',
         isRowTransformer: true,
-        transform: (recs, modeler, series) => {
-          if (series.length === 0) return []
-          const totals = series.map((item) => {
-            if (item.length === 0) {
-              return 0
-            }
-            return item.reduce((sum, s) => sum + s[bookingsKey], 0)
-          })
-
-          const actuals = Analyzer.mapToRollingSum(totals, true)
-
-          return actuals.map((v) => {
-            if (!v) return '-'
-            return StringHelper.toThousands(v)
-          })
-        }
+        transform: Customs.sumYTD(bookingsKey)
       },
       {
         key: 'Bookings TGT | FY',
@@ -82,13 +68,7 @@ export default class BookingsPulse extends Report {
           if (series.length === 0) return []
           const { pm } = this.sm
           const targets = pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
-          const totals = series.map((item) => {
-            if (item.length === 0) {
-              return 0
-            }
-            return item.reduce((sum, s) => sum + s[bookingsKey], 0)
-          })
-
+          const totals = Analyzer.sumArrays(series, bookingsKey)
           const actuals = Analyzer.mapToRollingSum(totals, true)
 
           return Analyzer.devideArrays(actuals, targets).map((v) => {
@@ -107,43 +87,18 @@ export default class BookingsPulse extends Report {
       },
       {
         key: 'Engagements Count',
-        transform: recs => recs.length
+        transform: Customs.countPerColunm()
       },
       {
         key: 'Distribution vs. Self',
         isRowTransformer: true,
         isBreakLineBefore: true,
-        transform: (recs, modeler, series) => {
-          const totals = series.map((item) => {
-            if (item.length === 0) return 0
-            return item.reduce((sum, s) => sum + s[bookingsKey],
-              0)
-          })
-          // This gives us the total of bookings across the cols we have
-
-          const allTotal = totals.length > 0 ? totals[totals.length - 1] : 0
-          // the last record includes all records, so its sum is the TOTAL for all
-
-          return totals.map(total => StringHelper.toPercent(Analyzer.devide(total, allTotal)))
-        }
+        transform: Customs.ratioSumVsSelfTotal(bookingsKey)
       },
       {
         key: 'Distribution vs. APJ',
         isRowTransformer: true,
-        transform: (recs, modeler, series) => {
-          const totals = series.map((item) => {
-            if (item.length === 0) {
-              return 0
-            }
-            return item.reduce((sum, s) => sum + s[bookingsKey], 0)
-          })
-          // This gives us the total of bookings across the cols we have
-
-          const allTotal = Analyzer.sumProperty(modeler.model.records, bookingsKey)
-          // This is precalculated and should give us the sum of all records
-
-          return totals.map(total => StringHelper.toPercent(Analyzer.devide(total, allTotal)))
-        }
+        transform: Customs.ratioSumVsTotal(bookingsKey)
       }
     ]
     // Setting up custom analysis

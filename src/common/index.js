@@ -14,22 +14,24 @@ import Reporter from './sfdc/reporter'
 import Report from './sfdc/report'
 import Layout from './sfdc/layout'
 import Dictionary from './sfdc/dictionary'
+import Customs from './sfdc/customs'
 
 export {
-    FSHelper,
-    JSONHelper,
-    StringHelper,
-    StringBuffer,
-    DateHelper,
-    ReportHelper,
-    ExcelReader,
-    Parser,
-    Record,
-    Table,
-    Modeler,
-    Analyzer,
-    Reporter,
-    Report,
-    Layout,
-    Dictionary
+  FSHelper,
+  JSONHelper,
+  StringHelper,
+  StringBuffer,
+  DateHelper,
+  ReportHelper,
+  ExcelReader,
+  Parser,
+  Record,
+  Table,
+  Modeler,
+  Analyzer,
+  Reporter,
+  Report,
+  Layout,
+  Dictionary,
+  Customs
 }
