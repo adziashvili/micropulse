@@ -49,26 +49,86 @@ export default class StringHelper {
     c = StringHelper.PADDING_CHAR,
     isPrefix = false
   ) {
+    let strCopy = `${str}`
     let fixed = `${str}`
+    let isStyled = false
+    let style = []
 
-    if (str.length > max) {
+    if (StringHelper.isStyled(str)) {
+      isStyled = true
+      style = StringHelper.getStyle(str)
+      strCopy = `${str.strip}`
+      fixed = `${str.strip}`
+    }
+    // keeping aside any styling applied on the string in order
+    // to work on the source string
+
+    if (strCopy.length > max) {
       fixed = fixed.substring(0, max)
       if (max > StringHelper.SUFFIX.length) {
-        fixed = fixed.substring(
-          0,
-          max - StringHelper.SUFFIX.length
-        ) + StringHelper.SUFFIX
+        fixed = fixed.substring(0, max - StringHelper.SUFFIX.length) + StringHelper.SUFFIX
       }
     } else {
       const len = max - fixed.length + 1
       const padding = Array(len).join(c)
-      fixed = !isPrefix ? str + padding : padding + str
+      fixed = !isPrefix ? strCopy + padding : padding + strCopy
     }
 
     assert(fixed.length === max,
       `StringHelper.exact: We have a bug with... ${fixed}: ${fixed.length} != ${max}`)
 
-    return fixed
+    return isStyled ? StringHelper.applyStyle(fixed, style) : fixed
+    // reapplying style back - in case there was any ...
+  }
+
+  /**
+   * Detects if a string is styled or not.
+   *
+   * @param {Style} str String to test for styling.
+   *
+   * @return {Boolean} True if it is styled with colors.js.
+   */
+  static isStyled(str) {
+    return typeof str === 'string' && str.startsWith('\x1B')
+  }
+
+  /**
+   * Copies a colors.js style from a string.
+   *
+   * To apply on another string use StringHelper.applyStyle(anotherString, style)
+   *
+   * @param {String} [str=''] String to copy style from
+   *
+   * @return {Array} Style. A Style is array that denotes color and misc. styling guides.
+   */
+  static getStyle(str = '') {
+    if (!StringHelper.isStyled(str)) return []
+    const reg = /\x1B\[\d+m/g
+    const style = []
+    let result = reg.exec(str)
+    while (result !== null) {
+      style.push(result[0])
+      result = reg.exec(str)
+    }
+    return style
+  }
+
+  /**
+   * Applys a style to a string. Make sure to use only the returned
+   * value from getStyle as style input to this function.
+   *
+   * @param {String} [str='']   String to style
+   * @param {Array}  [style=[]] Style, as received by getStyle
+   *
+   * @return {String} Styled string. Note that legnth is changed.
+   */
+  static applyStyle(str = '', style = []) {
+    if (!Array.isArray(style) || style.length === 0 || style.length % 2 !== 0) {
+      return str
+    }
+    const tmp = style.slice()
+    tmp.splice(tmp.length / 2, 0, str)
+    return tmp.join('')
   }
 
   /**

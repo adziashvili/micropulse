@@ -46,7 +46,8 @@ export default class BookingsPulse extends Report {
     this.custom = [{
         key: 'Bookings YTD',
         isRowTransformer: true,
-        transform: Customs.sumYTD(bookingsKey)
+        isBreakLineBefore: true,
+        transform: Customs.sumYTD(bookingsKey, true)
       },
       {
         key: 'Bookings TGT | FY',
@@ -57,7 +58,7 @@ export default class BookingsPulse extends Report {
           return pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
             .map((v) => {
               if (!v) return '-'
-              return StringHelper.toThousands(v)
+              return `$${StringHelper.toThousands(v)}`
             })
         }
       },
@@ -71,9 +72,15 @@ export default class BookingsPulse extends Report {
           const totals = Analyzer.sumArrays(series, bookingsKey)
           const actuals = Analyzer.mapToRollingSum(totals, true)
 
-          return Analyzer.devideArrays(actuals, targets).map((v) => {
-            if (!v) return '-'
-            return StringHelper.toPercent(v)
+          return Analyzer.devideArrays(actuals, targets).map((v, i, values) => {
+            if (!v) return ''.grey
+
+            const percent = StringHelper.toPercent(v)
+            if (i === values.length - 1) return percent.bold.black
+            if (v >= 1.0) return percent.bold.bgGreen.white
+            if (v >= 0.9) return percent.bold.bgGreen.white
+            if (v >= 0.75) return percent.bold.bgYellow.white
+            return percent.bold.bgRed.white
           })
         }
       },

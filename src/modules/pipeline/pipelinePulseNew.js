@@ -56,6 +56,7 @@ export default class PipelinePulseNew extends Report {
     this.custom = [{
         key: 'Avergae Deal Size',
         isRowTransformer: true,
+        isBreakLineBefore: true,
         transform: (recs, modeler, series) => series.map(item => (
           `$${StringHelper.toThousands(Analyzer.avgProperty(item, amountKey))}`))
       },
@@ -66,6 +67,7 @@ export default class PipelinePulseNew extends Report {
       {
         key: 'Pipe Distribution',
         isRowTransformer: true,
+        isBreakLineBefore: true,
         transform: Customs.ratioSumVsSelfTotal(amountKey)
       },
       {
