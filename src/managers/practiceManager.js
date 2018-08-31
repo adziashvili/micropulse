@@ -11,6 +11,9 @@ export default class PracticeManager {
         }
       })
     })
+
+    this.rollupAPAC = { values: ['ANZ', 'ASEAN', 'S.KOREA', 'INDIA'], key: 'APAC' }
+    this.noAPJandSharedOrder = ['ANZ', 'ASEAN', 'S.KOREA', 'INDIA', 'APAC', 'JAPAN']
   }
 
   getByName(name) {

@@ -17,8 +17,8 @@ export default class BookingsPulse extends Report {
 
   setup() {
     const bookingsKey = 'Amount (converted)'
-    this.firstColShrinkBy = 3
-    this.otherColShrinBy = 3
+    this.firstColShrinkBy = 10
+    this.otherColShrinBy = 4
 
     this.dictionary = new Dictionary([
       { key: 'TOTAL', shortName: 'APJ' },
@@ -38,8 +38,8 @@ export default class BookingsPulse extends Report {
 
     this.rows = [{
       key: 'Project: Practice',
-      rollup: { values: ['ANZ', 'ASEAN', 'S.KOREA'], key: 'APAC' },
-      sortby: ['ANZ', 'ASEAN', 'S.KOREA', 'INDIA', 'APAC', 'JAPAN']
+      rollup: this.sm.pm.rollupAPAC,
+      sortby: this.sm.pm.noAPJandSharedOrder
     }]
     // Defines one grouping by practice with rollup for APAC
 

@@ -8,9 +8,10 @@ import {
 } from '../../common'
 
 export default class PipelinePulseNew extends Report {
-  constructor(file) {
+  constructor(file, storeManager) {
     super()
     this.file = file
+    this.sm = storeManager
     this.setup()
   }
 
@@ -39,7 +40,11 @@ export default class PipelinePulseNew extends Report {
     ])
 
     this.cols = [{ key: 'Close Date', transform: d => DateHelper.getMonthYear(d, true) }]
-    this.rows = [{ key: 'Practice', rollup: { values: ['ANZ', 'ASEAN', 'S.KOREA'], key: 'APAC' } },
+    this.rows = [{
+        key: 'Practice',
+        rollup: this.sm.pm.rollupAPAC,
+        sortby: this.sm.pm.noAPJandSharedOrder
+      },
       { key: 'Stage' }
     ]
 
@@ -68,11 +73,13 @@ export default class PipelinePulseNew extends Report {
         key: 'Pipe Distribution',
         isRowTransformer: true,
         isBreakLineBefore: true,
+        isVerbose: true,
         transform: Customs.ratioSumVsSelfTotal(amountKey)
       },
       {
         key: 'vs. APJ',
         isRowTransformer: true,
+        isVerbose: true,
         transform: Customs.ratioSumVsTotal(amountKey)
       }
     ]
