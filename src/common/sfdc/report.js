@@ -13,6 +13,8 @@ export default class Report {
     this.rows = []
     this.stats = []
     this.custom = []
+    this.firstColShrinkBy = 2
+    this.otherColShrinBy = 2
   }
 
   verifySelf() {
@@ -49,6 +51,12 @@ export default class Report {
         if (this.dictionary) {
           reporter.dictionary = this.dictionary
         }
+        // assign dictionary if we have one
+
+        const { layout } = reporter
+        layout.firstColShrinkBy = this.firstColShrinkBy
+        layout.otherColShrinBy = this.otherColShrinBy
+        // adjust layout if needed
 
         return reporter
       })

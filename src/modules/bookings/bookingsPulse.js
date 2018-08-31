@@ -17,6 +17,8 @@ export default class BookingsPulse extends Report {
 
   setup() {
     const bookingsKey = 'Amount (converted)'
+    this.firstColShrinkBy = 5
+    this.otherColShrinBy = 5
 
     this.dictionary = new Dictionary([
       { key: 'TOTAL', shortName: 'APJ' },
