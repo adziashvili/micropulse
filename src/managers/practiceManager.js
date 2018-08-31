@@ -15,7 +15,8 @@ export default class PracticeManager {
 
   getByName(name) {
     if (!name) return undefined
-    return this.pdb.find(p => p.name.toLowerCase() === name.toLowerCase())
+    return this.pdb.find(p => p.name.toLowerCase() === name.toLowerCase() ||
+      (name.toLowerCase() === 'total' && p.isTotal))
   }
 
   /**
