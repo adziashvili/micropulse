@@ -13,8 +13,11 @@ export default class Report {
     this.rows = []
     this.stats = []
     this.custom = []
-    this.firstColShrinkBy = 2
-    this.otherColShrinBy = 2
+
+    // default settings
+    this.firstColShrinkBy = 0
+    this.otherColShrinBy = 0
+    this.isAddTotal = true
   }
 
   verifySelf() {
@@ -46,7 +49,7 @@ export default class Report {
         return modeler
       })
       .then((modeler) => {
-        const reporter = new Reporter(modeler)
+        const reporter = new Reporter(modeler, this.isAddTotal, isVerbose)
 
         if (this.dictionary) {
           reporter.dictionary = this.dictionary

@@ -103,11 +103,13 @@ export default class BookingsPulse extends Report {
         key: 'Distribution vs. Self',
         isRowTransformer: true,
         isBreakLineBefore: true,
+        isVerbose: true,
         transform: Customs.ratioSumVsSelfTotal(bookingsKey)
       },
       {
         key: 'Distribution vs. APJ',
         isRowTransformer: true,
+        isVerbose: true,
         transform: Customs.ratioSumVsTotal(bookingsKey)
       }
     ]

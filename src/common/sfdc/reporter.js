@@ -10,12 +10,13 @@ import {
 from '..'
 
 export default class Reporter {
-  constructor(modeler, isAddTotal = true) {
+  constructor(modeler, isAddTotal = true, isVerbose = false) {
     this.modeler = modeler
     this.isAddTotal = isAddTotal
     this.rh = new ReportHelper(modeler.table.meta.name, modeler.table.meta.date)
     this.layout = new Layout()
     this._dictionary = new Dictionary(Analyzer.dictionary())
+    this.isVerbose = isVerbose
   }
 
   set dictionary(dictionary) {
@@ -230,6 +231,7 @@ export default class Reporter {
   addCustoms(key, filter, level = 1) {
     const { custom } = this.modeler
     custom.forEach((c) => {
+      if (!this.isVerbose && Object.keys(c).includes('isVerbose') && c.isVerbose) return
       const transformer = this.modeler.transformer(c.key, true)
       if (transformer && transformer.transform) {
         const recs = this.getRowData(filter, 'records')
