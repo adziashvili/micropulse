@@ -30,7 +30,7 @@ export default class DateHelper {
 
   static getMonthYear(date, isShortYear = false) {
     const year = !isShortYear ? date.getFullYear() : `${date.getFullYear()}`.slice(2)
-    return `${monthNames[date.getMonth()]} - ${year}`
+    return `${monthNames[date.getMonth()]} ${year}`
   }
 
   /**
