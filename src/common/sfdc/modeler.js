@@ -229,12 +229,18 @@ export default class Modeler {
   addRows(data, rows) {
     if (rows.length === 0) return
 
-    const { key, transform, rollup } = rows[0]
+    const {
+      key,
+      transform,
+      rollup,
+      sortby
+    } = rows[0]
     const type = this.table.getType(key)
 
     if (data.rows) {
-      const values = this.table.distinct(key, transform)
-      if (!!rollup && !!rollup.key) {
+      const values = !sortby ? this.table.distinct(key, transform) : sortby
+
+      if (!!rollup && !!rollup.key && !values.includes(rollup.key)) {
         values.push(rollup.key)
       }
       values.forEach((value) => {
