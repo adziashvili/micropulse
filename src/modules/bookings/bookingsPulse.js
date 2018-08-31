@@ -38,7 +38,8 @@ export default class BookingsPulse extends Report {
 
     this.rows = [{
       key: 'Project: Practice',
-      rollup: { values: ['ANZ', 'ASEAN', 'S.KOREA'], key: 'APAC' }
+      rollup: { values: ['ANZ', 'ASEAN', 'S.KOREA'], key: 'APAC' },
+      sortby: ['ANZ', 'ASEAN', 'S.KOREA', 'INDIA', 'APAC', 'JAPAN']
     }]
     // Defines one grouping by practice with rollup for APAC
 
