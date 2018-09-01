@@ -63,6 +63,8 @@ export default class Reporter {
     rh.newLine()
     // Printing totals
 
+    rh.addDevider()
+
     if (isVerbose) {
       this.addStats(stats)
       // Printins the requested stats
