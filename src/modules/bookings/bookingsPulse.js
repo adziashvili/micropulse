@@ -1,8 +1,9 @@
 import {
-  Report,
-  Dictionary,
   DateHelper,
   StringHelper,
+  ReportHelper,
+  Report,
+  Dictionary,
   Analyzer,
   Customs
 } from '../../common'
@@ -79,10 +80,8 @@ export default class BookingsPulse extends Report {
 
             const percent = StringHelper.toPercent(v)
             if (i === values.length - 1) return percent.bold.black
-            if (v >= 1.0) return percent.bold.bgGreen.white
-            if (v >= 0.9) return percent.bold.bgGreen.white
-            if (v >= 0.75) return percent.bold.bgYellow.white
-            return percent.bold.bgRed.white
+            const rh = new ReportHelper()
+            return rh.addTrafficLights(v, percent, 0.9, 0.75).bold
           })
         }
       },
