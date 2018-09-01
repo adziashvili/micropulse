@@ -33,5 +33,6 @@ Promise.resolve(true)
   .then(new PipelinePulse(sm, REPORT_DATE).run(isVerbose))
   .then(new PipelinePulseNew(pipelineYTD, sm).run(isVerbose))
   .then(sm.save())
+  .catch(e => console.log(e))
 
 // Runs pulse reports

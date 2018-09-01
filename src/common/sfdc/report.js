@@ -65,13 +65,11 @@ export default class Report {
       })
       .then((reporter) => {
         reporter.report(isVerbose)
+        return Promise.resolve(true)
       })
       .catch((e) => {
-        console.log('Ooops! We have an error'.red);
-        console.log(e)
-        throw e
+        e.message = `'Reporter Ooops! ${e.message}`.red.bold
+        throw e // rejects the promise to report
       })
-
-    return Promise.resolve(true)
   }
 }
