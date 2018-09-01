@@ -72,6 +72,8 @@ export default class Reporter {
   addTotal() {
     const key = 'TOTAL'
     const total = this.getStats(this.dictionary.get(key))
+
+    this.rh.addDevider()
     this.addRow(total, s => s.bold)
     this.addCustoms(key, [])
   }
@@ -189,14 +191,31 @@ export default class Reporter {
     }
   }
 
+  isRollup(key) {
+    const { rows } = this.modeler
+    for (let i = 0; i < rows.length; i += 1) {
+      if (Object.keys(rows[i]).includes('rollup') &&
+        // rows[i].rollup.find(r => r.key === key)) {
+        rows[i].rollup.key === key) {
+        return true
+      }
+    }
+    return false
+  }
+
   addRowsCascade(model, filter = [], level = 0) {
     if (model.rows) {
       model.rows.forEach((row) => {
+        const isRollup = this.isRollup(row.value)
         const newFilter = { key: row.key, value: row.value }
         const rowStats = this.getStats(
           this.layout.nestedIndent(level) + row.value,
           filter.concat(newFilter)
         )
+
+        if (level === 0 && isRollup) {
+          this.rh.addDevider()
+        }
 
         this.addRow(rowStats, level !== 0 ? undefined : s => s.bold)
         // Printing data
@@ -211,12 +230,11 @@ export default class Reporter {
         // }
 
         if (level === 0) {
-          // this.rh.newLine( 1, this.modeler.rows.length > 1 )
           this.addCustoms(row.value, filter.concat(newFilter), level + 1)
-          // if ( this.modeler.rows.length > 1 ) {
-          this.rh.addDevider()
-          console.log()
-          // }
+          this.rh.newLine()
+          if (isRollup) {
+            this.rh.newLine(2)
+          }
         }
         // Seperating the groups of rows
       })
