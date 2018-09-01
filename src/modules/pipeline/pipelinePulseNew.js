@@ -39,49 +39,53 @@ export default class PipelinePulseNew extends Report {
       { key: 'Is Partner Account Involved?', shortName: 'Partner Attached' }
     ])
 
-    this.cols = [{ key: 'Close Date', transform: d => DateHelper.getMonthYear(d, true) }]
-    this.rows = [{
-        key: 'Practice',
-        rollup: this.sm.pm.rollupAPAC,
-        sortby: this.sm.pm.noAPJandSharedOrder
-      },
-      { key: 'Stage' }
-    ]
+    this.cols = [{
+        key: 'Close Date',
+        transform: d => DateHelper.getMonthName(d.getMonth())
+      }]
 
-    // Stats settings can inlcude the key to indicate which stat we would like to show case
-    this.stats = [
-      { key: 'Total Contract Amount (converted)' },
-      { key: 'Project Duration (mos)' },
-      { key: 'Is Partner Account Involved?' },
-      { key: 'Close Date' }
-    ]
+      this.rows = [{
+          key: 'Practice',
+          rollup: this.sm.pm.rollupAPAC,
+          sortby: this.sm.pm.noAPJandSharedOrder
+        },
+        { key: 'Stage' }
+      ]
 
-    // We can pass a transformer to caluclate values or to caluclate the entire row.
-    // Add isRowTransformer: true for row
-    this.custom = [{
-        key: 'Avergae Deal Size',
-        isRowTransformer: true,
-        isBreakLineBefore: true,
-        transform: (recs, modeler, series) => series.map(item => (
-          `$${StringHelper.toThousands(Analyzer.avgProperty(item, amountKey))}`))
-      },
-      {
-        key: 'Opportunities Count',
-        transform: Customs.countPerColunm()
-      },
-      {
-        key: 'Pipe Distribution',
-        isRowTransformer: true,
-        isBreakLineBefore: true,
-        isVerbose: true,
-        transform: Customs.ratioSumVsSelfTotal(amountKey)
-      },
-      {
-        key: 'vs. APJ',
-        isRowTransformer: true,
-        isVerbose: true,
-        transform: Customs.ratioSumVsTotal(amountKey)
-      }
-    ]
+      // Stats settings can inlcude the key to indicate which stat we would like to show case
+      this.stats = [
+        { key: 'Total Contract Amount (converted)' },
+        { key: 'Project Duration (mos)' },
+        { key: 'Is Partner Account Involved?' },
+        { key: 'Close Date' }
+      ]
+
+      // We can pass a transformer to caluclate values or to caluclate the entire row.
+      // Add isRowTransformer: true for row
+      this.custom = [{
+          key: 'Avergae Deal Size',
+          isRowTransformer: true,
+          isBreakLineBefore: true,
+          transform: (recs, modeler, series) => series.map(item => (
+            `$${StringHelper.toThousands(Analyzer.avgProperty(item, amountKey))}`))
+        },
+        {
+          key: 'Opportunities Count',
+          transform: Customs.countPerColunm()
+        },
+        {
+          key: 'Pipe Distribution',
+          isRowTransformer: true,
+          isBreakLineBefore: true,
+          isVerbose: true,
+          transform: Customs.ratioSumVsSelfTotal(amountKey)
+        },
+        {
+          key: 'vs. APJ',
+          isRowTransformer: true,
+          isVerbose: true,
+          transform: Customs.ratioSumVsTotal(amountKey)
+        }
+      ]
+    }
   }
-}
