@@ -25,7 +25,7 @@ export default class ReportHelper {
    * @param {String} reportName Name of the report
    * @param {Date} date The daye for which the rpeort is generated for.
    */
-  constructor(reportName, date) {
+  constructor(reportName = '', date = new Date()) {
     this.reportName = reportName
     this.date = date
     this.setDivider()
