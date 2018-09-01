@@ -61,7 +61,7 @@ export default class Reporter {
 
     this.addTotal()
     rh.newLine()
-    // Printing totals first. This is a matter of style.
+    // Printing totals
 
     if (isVerbose) {
       this.addStats(stats)
@@ -192,18 +192,13 @@ export default class Reporter {
   addRowsCascade(model, filter = [], level = 0) {
     if (model.rows) {
       model.rows.forEach((row) => {
-        const newFilter = {
-          key: row.key,
-          value: row.value
-        }
-
-        this.addRow(
-          this.getStats(
-            this.layout.nestedIndent(level) + row.value,
-            filter.concat(newFilter)
-          ),
-          level !== 0 ? undefined : s => s.bold
+        const newFilter = { key: row.key, value: row.value }
+        const rowStats = this.getStats(
+          this.layout.nestedIndent(level) + row.value,
+          filter.concat(newFilter)
         )
+
+        this.addRow(rowStats, level !== 0 ? undefined : s => s.bold)
         // Printing data
 
         if (row.rows) {
@@ -230,9 +225,11 @@ export default class Reporter {
 
   addCustoms(key, filter, level = 1) {
     const { custom } = this.modeler
+
     custom.forEach((c) => {
       if (!this.isVerbose && Object.keys(c).includes('isVerbose') && c.isVerbose) return
       const transformer = this.modeler.transformer(c.key, true)
+
       if (transformer && transformer.transform) {
         const recs = this.getRowData(filter, 'records')
         let values = [this.layout.nestedIndent(level) + c.key]
@@ -244,6 +241,7 @@ export default class Reporter {
             values.push(transformer.transform(colRecords, this.modeler, allRecordsArray))
           })
         }
+
         if (transformer.isBreakLineBefore) this.rh.newLine()
         this.addRow(values)
       }
@@ -266,7 +264,7 @@ export default class Reporter {
           sb.appendExact(h.value, firstColWidth)
         }
       })
-      console.log(sb.toString().toUpperCase().bold);
+      console.log(sb.toString().bold);
     })
   }
 
