@@ -14,6 +14,7 @@ export default class Reporter {
     modeler,
     dictionary,
     isAddTotal = true,
+    isAddTotalRow = true,
     isRepeatHeaders = true,
     firstColShrinkBy = 0,
     otherColShrinBy = 0,
@@ -21,6 +22,7 @@ export default class Reporter {
   } = {}) {
     this.modeler = modeler
     this.isAddTotal = isAddTotal
+    this.isAddTotalRow = isAddTotalRow
     this.isVerbose = isVerbose
     this.isRepeatHeaders = isRepeatHeaders
 
@@ -225,6 +227,8 @@ export default class Reporter {
   addRowsCascade(model, filter = [], level = 0) {
     if (model.rows) {
       model.rows.forEach((row) => {
+        if (row.value === 'TOTAL' && !this.isAddTotalRow) return
+
         const isRollup = this.isRollup(row.value)
         const newFilter = { key: row.key, value: row.value }
         const rowStats = this.getStats(

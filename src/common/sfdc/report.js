@@ -12,6 +12,7 @@ export default class Report {
     firstColShrinkBy = 0,
     otherColShrinBy = 0,
     isAddTotal = true,
+    isAddTotalRow = true,
     isRepeatHeaders = false
   } = {}) {
     this.file = file
@@ -26,6 +27,7 @@ export default class Report {
     this.firstColShrinkBy = firstColShrinkBy
     this.otherColShrinBy = otherColShrinBy
     this.isAddTotal = isAddTotal
+    this.isAddTotalRow = isAddTotalRow
     this.isRepeatHeaders = isRepeatHeaders
   }
 
@@ -62,6 +64,7 @@ export default class Report {
           modeler,
           dictionary: this.dictionary,
           isAddTotal: this.isAddTotal,
+          isAddTotalRow: this.isAddTotalRow,
           isRepeatHeaders: this.isRepeatHeaders,
           firstColShrinkBy: this.firstColShrinkBy,
           otherColShrinBy: this.otherColShrinBy,
