@@ -46,7 +46,6 @@ export default class Customs {
       })
       const actuals = Analyzer.mapToRollingSum(totals, true)
       return actuals.map((v) => {
-        if (!v) return '-'
         const value = StringHelper.toThousands(v)
         return isCurrency ? `$${value}` : value
       })
