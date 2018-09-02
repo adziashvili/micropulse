@@ -10,16 +10,35 @@ import {
 from '..'
 
 export default class Reporter {
-  constructor(modeler, isAddTotal = true, isVerbose = false) {
+  constructor({
+    modeler,
+    dictionary,
+    isAddTotal = true,
+    isRepeatHeaders = true,
+    firstColShrinkBy = 0,
+    otherColShrinBy = 0,
+    isVerbose = false
+  } = {}) {
     this.modeler = modeler
     this.isAddTotal = isAddTotal
+    this.isVerbose = isVerbose
+    this.isRepeatHeaders = isRepeatHeaders
+
+    this.reaptHeaderStyle = ''.dim
     this.rh = new ReportHelper(modeler.table.meta.name, modeler.table.meta.date)
     this.layout = new Layout()
+
+    this.layout.firstColShrinkBy = firstColShrinkBy
+    this.layout.otherColShrinBy = otherColShrinBy
+
     this._dictionary = new Dictionary(Analyzer.dictionary())
-    this.isVerbose = isVerbose
+    this.dictionary = dictionary
+
+    this.summary = []
   }
 
   set dictionary(dictionary) {
+    if (!dictionary) return
     this._dictionary = this.dictionary.add(dictionary)
   }
 
@@ -52,8 +71,10 @@ export default class Reporter {
     rh.newLine()
     // Adding report title
 
-    this.addHeaders()
-    rh.newLine()
+    if (!this.isRepeatHeaders) {
+      this.addHeaders()
+      rh.newLine()
+    }
     // Adding headers
 
     this.addRowsCascade(model)
@@ -69,6 +90,14 @@ export default class Reporter {
       this.addStats(stats)
       // Printins the requested stats
     }
+
+    rh.newLine(2)
+
+    return this.summary
+  }
+
+  addHeadersOnRepeat() {
+    if (this.isRepeatHeaders) this.addHeaders(this.reaptHeaderStyle)
   }
 
   addTotal() {
@@ -76,6 +105,8 @@ export default class Reporter {
     const total = this.getStats(this.dictionary.get(key))
 
     this.rh.addDevider()
+    this.summary.push(total)
+    this.addHeadersOnRepeat()
     this.addRow(total, s => s.bold)
     this.addCustoms(key, [])
   }
@@ -215,8 +246,10 @@ export default class Reporter {
           filter.concat(newFilter)
         )
 
-        if (level === 0 && isRollup) {
-          this.rh.addDevider()
+        if (level === 0) {
+          this.summary.push(rowStats)
+          if (isRollup) this.rh.addDevider()
+          this.addHeadersOnRepeat()
         }
 
         this.addRow(rowStats, level !== 0 ? undefined : s => s.bold)
@@ -233,9 +266,9 @@ export default class Reporter {
 
         if (level === 0) {
           this.addCustoms(row.value, filter.concat(newFilter), level + 1)
-          this.rh.newLine()
+          this.rh.newLine(2)
           if (isRollup) {
-            this.rh.newLine(2)
+            this.rh.newLine(3)
           }
         }
         // Seperating the groups of rows
@@ -268,9 +301,10 @@ export default class Reporter {
     })
   }
 
-  addHeaders() {
+  addHeaders(style = ''.bold) {
     const { layout } = this
     const { cols, totalSeperator, firstColWidth } = layout
+
     cols.forEach((col, i) => {
       const headers = layout.getHeaders(i, this.isAddTotal)
       const sb = new StringBuffer()
@@ -284,7 +318,7 @@ export default class Reporter {
           sb.appendExact(h.value, firstColWidth)
         }
       })
-      console.log(sb.toString().bold);
+      console.log(SH.style(sb.toString(), style));
     })
   }
 

@@ -6,18 +6,27 @@ import {
 } from '..'
 
 export default class Report {
-  constructor() {
-    this.file = undefined
-    this.dictionary = undefined
+  constructor({
+    file = undefined,
+    dictionary = undefined,
+    firstColShrinkBy = 0,
+    otherColShrinBy = 0,
+    isAddTotal = true,
+    isRepeatHeaders = false
+  } = {}) {
+    this.file = file
+    this.dictionary = dictionary
+
     this.cols = []
     this.rows = []
     this.stats = []
     this.custom = []
 
     // default settings
-    this.firstColShrinkBy = 0
-    this.otherColShrinBy = 0
-    this.isAddTotal = true
+    this.firstColShrinkBy = firstColShrinkBy
+    this.otherColShrinBy = otherColShrinBy
+    this.isAddTotal = isAddTotal
+    this.isRepeatHeaders = isRepeatHeaders
   }
 
   verifySelf() {
@@ -34,7 +43,7 @@ export default class Report {
       throw new Error('Invalid report subclassing. Check log.')
     }
 
-    ExcelReader
+    return ExcelReader
       .load(this.file)
       .then(data => new Table().process(data.getWorksheet(data.worksheets[0].id)))
       .then((table) => {
@@ -49,24 +58,18 @@ export default class Report {
         return modeler
       })
       .then((modeler) => {
-        const reporter = new Reporter(modeler, this.isAddTotal, isVerbose)
-
-        if (this.dictionary) {
-          reporter.dictionary = this.dictionary
+        const config = {
+          modeler,
+          dictionary: this.dictionary,
+          isAddTotal: this.isAddTotal,
+          isRepeatHeaders: this.isRepeatHeaders,
+          firstColShrinkBy: this.firstColShrinkBy,
+          otherColShrinBy: this.otherColShrinBy,
+          isVerbose
         }
-        // assign dictionary if we have one
-
-        const { layout } = reporter
-        layout.firstColShrinkBy = this.firstColShrinkBy
-        layout.otherColShrinBy = this.otherColShrinBy
-        // adjust layout if needed
-
-        return reporter
+        return new Reporter(config)
       })
-      .then((reporter) => {
-        reporter.report(isVerbose)
-        return Promise.resolve(true)
-      })
+      .then(reporter => reporter.report(isVerbose))
       .catch((e) => {
         e.message = `'Reporter Ooops! ${e.message}`.red.bold
         throw e // rejects the promise to report
