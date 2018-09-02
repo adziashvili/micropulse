@@ -142,6 +142,11 @@ export default class Modeler {
             key,
             condition: v => rollup.values.includes(v)
           })
+        } else if (f === 'TOTAL') {
+          filterList.push({
+            key,
+            condition: () => true
+          })
         } else {
           filterList.push({
             key,
@@ -156,7 +161,7 @@ export default class Modeler {
 
   describe(model) {
     console.log('\n---\nMODEL\n'.green);
-    console.log(JSONHelper.stringify(model).grey);
+    console.log(JSONHelper.stringify(!model ? this.model : model).grey);
   }
 
   describeAspects(strKey) {
@@ -226,9 +231,8 @@ export default class Modeler {
     return myModel
   }
 
-  addRows(data, rows) {
+  addRows(data, rows, inIsTotalAdded = false) {
     if (rows.length === 0) return
-
     const {
       key,
       transform,
@@ -236,6 +240,7 @@ export default class Modeler {
       sortby
     } = rows[0]
     const type = this.table.getType(key)
+    let isTotalAdded = inIsTotalAdded
 
     if (data.rows) {
       const values = !sortby ? this.table.distinct(key, transform) : sortby
@@ -243,6 +248,12 @@ export default class Modeler {
       if (!!rollup && !!rollup.key && !values.includes(rollup.key)) {
         values.push(rollup.key)
       }
+
+      if (!values.includes('TOTAL') && !isTotalAdded) {
+        values.push('TOTAL')
+        isTotalAdded = true
+      }
+
       values.forEach((value) => {
         const [, ...next] = rows
         const newRow = {
@@ -252,7 +263,7 @@ export default class Modeler {
           rows: []
         }
         data.rows.push(newRow)
-        this.addRows(newRow, next)
+        this.addRows(newRow, next, isTotalAdded)
       })
     }
 

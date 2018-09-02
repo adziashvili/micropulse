@@ -80,10 +80,6 @@ export default class Reporter {
     this.addRowsCascade(model)
     // adding the data
 
-    this.addTotal()
-    rh.newLine()
-    // Printing totals
-
     rh.addDevider()
 
     if (isVerbose) {
@@ -98,17 +94,6 @@ export default class Reporter {
 
   addHeadersOnRepeat() {
     if (this.isRepeatHeaders) this.addHeaders(this.reaptHeaderStyle)
-  }
-
-  addTotal() {
-    const key = 'TOTAL'
-    const total = this.getStats(this.dictionary.get(key))
-
-    this.rh.addDevider()
-    this.summary.push(total)
-    this.addHeadersOnRepeat()
-    this.addRow(total, s => s.bold)
-    this.addCustoms(key, [])
   }
 
   addStats(stats) {
@@ -156,6 +141,7 @@ export default class Reporter {
       const v = this.modeler.find(property, rowFilter, [])
       if (v !== undefined) values.push(v)
     }
+    // Adding total to the row
 
     return values
   }
@@ -248,7 +234,7 @@ export default class Reporter {
 
         if (level === 0) {
           this.summary.push(rowStats)
-          if (isRollup) this.rh.addDevider()
+          if (isRollup || row.value === 'TOTAL') this.rh.addDevider()
           this.addHeadersOnRepeat()
         }
 
@@ -350,6 +336,9 @@ export default class Reporter {
 
     const sb = new StringBuffer()
     for (let i = 0; i < values.length; i += 1) {
+      if (i === 0) {
+        values[0] = this.dictionary.get(values[0])
+      }
       if (i === values.length - 1 && values.length > 1) {
         sb.append(totalSeperator)
       }
