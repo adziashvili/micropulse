@@ -131,6 +131,10 @@ export default class StringHelper {
     return tmp.join('')
   }
 
+  static style(targetStr = '', styledStr = '') {
+    return StringHelper.applyStyle(targetStr, StringHelper.getStyle(styledStr))
+  }
+
   /**
    * Adds a prefix to a string up to a specfiied length.
    *
