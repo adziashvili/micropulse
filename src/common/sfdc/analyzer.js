@@ -223,13 +223,31 @@ export default class Analyzer {
       return undefined
     }
 
-    const devisinResultArr = []
+    const devideResultArr = []
     a.forEach((v, i) => {
       const x = !v || Number.isNaN(v) ? 0 : v
       const y = Number.isNaN(b[i]) ? 0 : b[i]
-      devisinResultArr.push(Analyzer.devide(x, y, 3))
+      devideResultArr.push(Analyzer.devide(x, y, 3))
     })
-    return devisinResultArr
+    return devideResultArr
+  }
+
+  static subtract(a, b, fixed = 2) {
+    const x = !a || Number.isNaN(a) ? 0 : a
+    const y = !b || Number.isNaN(b) ? 0 : b
+    return (x - y).toFixed(fixed)
+  }
+
+  static subtractArrays(a = [], b = []) {
+    if (!Array.isArray(a) || !Array.isArray(b)) {
+      return undefined
+    }
+
+    if (a.length !== b.length) {
+      return undefined
+    }
+
+    return a.map((v, i) => Analyzer.subtract(v, b[i], 1))
   }
 
   static mapToRollingSum(arrayOfNumbers, isLastValueTotal = false) {
