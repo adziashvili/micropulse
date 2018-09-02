@@ -241,6 +241,23 @@ export default class StringHelper {
   }
 
   /**
+   * Strips the $ and , characters if exists and multiplies by scale.
+   *
+   * e.g. $1,514.12 with scale 1 => 1514.12
+   * e.g. $1,514.12 with scale 1000 => 1514120.00
+   *
+   * @param {[type]} amountStr  An amount that can be $1,513.12
+   * @param {Number} [scale=1]  Used to scale back the amount. Pass 1000 to get
+   *                            back the thoughsands value.
+   *
+   * @return {Number} Scaled number
+   */
+  static toNumberFromAmount(amountStr, scale = 1) {
+    const amountWithNoDollar = `${amountStr}`.replace('$', '')
+    return amountWithNoDollar.replace(',', '') * scale
+  }
+
+  /**
    * Formats a number ratio as a percent e.g. 0.3 => 30.0%, 1.153 => 115.3%
    *
    * @param {Number}                  ratio A ratio to format
