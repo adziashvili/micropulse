@@ -29,10 +29,12 @@ const pipelineYTD = './data/pipelineYTD.xlsx'
 
 Promise.resolve(true)
   .then(new UtilizationPulse(sm, REPORT_DATE).run(isVerbose))
-  .then(new BookingsPulse(bookingsYTD, sm).run(isVerbose))
-  .then(new PipelinePulse(sm, REPORT_DATE).run(isVerbose))
-  .then(new PipelinePulseNew(pipelineYTD, sm).run(isVerbose))
+  // .then(new PipelinePulse(sm, REPORT_DATE).run(isVerbose))
   .then(sm.save())
   .catch(e => console.log(e))
+
+  const analyzePipelinePromise = new PipelinePulseNew(pipelineYTD, sm).run(isVerbose)
+  analyzePipelinePromise.then(result => new BookingsPulse(bookingsYTD, sm, result).run(isVerbose))
+
 
 // Runs pulse reports
