@@ -16,6 +16,22 @@ export default class PracticeManager {
     this.noAPJandSharedOrder = ['ANZ', 'ASEAN', 'S.KOREA', 'INDIA', 'APAC', 'JAPAN']
   }
 
+  getTargetIndex(monthIndex = 0) {
+    if (monthIndex <= 2) return 2
+    if (monthIndex <= 5) return 5
+    if (monthIndex <= 8) return 8
+    return 11
+  }
+
+  /**
+   * Returns the pdb entry by name.
+   *
+   * Also, if you pass 'TOTAL', the entry with isTotal=true, will be returned.
+   *
+   * @param {String} name To match the entry's name (lowercase used to match)
+   *
+   * @return {Object} The entry in our db
+   */
   getByName(name) {
     if (!name) return undefined
     return this.pdb.find(p => p.name.toLowerCase() === name.toLowerCase() ||
@@ -77,6 +93,12 @@ export default class PracticeManager {
 
   getTarget(name, metric, month) {
     const targets = this.getTargets(name, metric)
+    const findByIndex = (!Number.isNaN(month) && month >= 0 && month <= 11)
+
+    if (findByIndex) {
+      const targetMonthIndex = this.getTargetIndex(month)
+      return targets.find(t => t.motnh.getMonth() === targetMonthIndex)
+    }
     const dh = new DateHelper(month)
     return targets.find(t => dh.isSameMonth(t.motnh))
   }
