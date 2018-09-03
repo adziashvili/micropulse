@@ -121,14 +121,16 @@ export default class Parser {
    *
    * @param {[type]} [condition=null] Condition to halt on.
    * @param {String} [col="A"]        Colunm to scan, by default 'A'
-   * @param {Number} [startRow=1]          Starting row, by default 1
-   * @param {Number} [attempts=100]   Attempts before giving up
+   * @param {Number} [startRow=1]     Starting row, by default 1
+   * @param {Number} [attempts]       Attempts before giving up.
+   *                                  If not provided defaults to sheets rowCount.
    *
    * @return {[type]} The first row number where the condition is met.
    *                  -1 if failed to meet condition for 1000 rows
    *                  scanned below 'row'
    */
-  lookDownCondition(condition = null, col = 'A', startRow = 1, attempts = 1000) {
+  lookDownCondition(condition = null, col = 'A', startRow = 1, inAttempts) {
+    const attempts = !inAttempts ? this.ws.rowCount : inAttempts
     let row = startRow
     let { value } = this.ws.getCell(col + row)
     let isTrue = condition === null ? value !== null : condition(value)
