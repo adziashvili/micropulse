@@ -311,7 +311,7 @@ export default class Modeler {
     if (rows.length > 0) {
       const keys = rows.map(row => row.key)
       if (!this.table.isValidHeaders(keys)) {
-        throw new Error('Invalid rows. Check Spelling or misplaced spaces in rows headers'.red)
+        throw new Error(`Invalid row keys: ${keys}`.red)
       }
     }
     this._rows = rows
