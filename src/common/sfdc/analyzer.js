@@ -211,7 +211,7 @@ export default class Analyzer {
 
   static devide(a, b, fixed = 2) {
     if (!b || b === 0) return b
-    return (a / b).toFixed(fixed)
+    return (a / b).toFixed(fixed) * 1
   }
 
   static devideArrays(a = [], b = []) {
