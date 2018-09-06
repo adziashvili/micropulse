@@ -35,7 +35,7 @@ export default class Customs {
     }
   }
 
-  static sumYTD(property, isCurrency = false) {
+  static sumYTD(property, isCurrency = false, isToThousands = false) {
     return (recs, modeler, series) => {
       if (series.length === 0) return []
       const totals = series.map((item) => {
@@ -46,7 +46,7 @@ export default class Customs {
       })
       const actuals = Analyzer.mapToRollingSum(totals, true)
       return actuals.map((v) => {
-        const value = StringHelper.toThousands(v)
+        const value = isToThousands ? StringHelper.toThousands(v) : v
         return isCurrency ? `$${value}` : value
       })
     }
