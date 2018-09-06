@@ -231,15 +231,18 @@ export default class Reporter {
 
         const isRollup = this.isRollup(row.value)
         const newFilter = { key: row.key, value: row.value }
-        const rowStats = this.getStats(
+        let rowStats = this.getStats(
           this.layout.nestedIndent(level) + row.value,
           filter.concat(newFilter)
         )
 
         if (level === 0) {
-          this.summary.push(rowStats)
+          rowStats = rowStats.map(m => (m === 'N/A' ? '' : m))
+          // Removing N/A for the first row
+
           if (isRollup || row.value === 'TOTAL') this.rh.addDevider()
           this.addHeadersOnRepeat()
+          this.summary.push(rowStats)
         }
 
         this.addRow(rowStats, level !== 0 ? undefined : s => s.bold)
@@ -250,15 +253,11 @@ export default class Reporter {
         }
         // Forking for other children
 
-        // if ( level !== 0 && index === rows.length - 1 ) {
-        //     console.log( this.layout.nestedIndent( level ) + "Total" );
-        // }
-
         if (level === 0) {
           this.addCustoms(row.value, filter.concat(newFilter), level + 1)
           this.rh.newLine(2)
           if (isRollup) {
-            this.rh.newLine(3)
+            this.rh.newLine(2)
           }
         }
         // Seperating the groups of rows

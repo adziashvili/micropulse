@@ -1,4 +1,4 @@
-import { UtilizationPulse } from './modules/utilization'
+import { UtilizationPulse, UtilizationPulseNew } from './modules/utilization'
 import { PipelinePulse, PipelinePulseNew } from './modules/pipeline'
 import { BookingsPulse } from './modules/bookings'
 import { StoreManager, PracticeManager } from './managers'
@@ -26,15 +26,18 @@ sm.buildAll(names, REPORT_DATE)
 const isVerbose = false
 const bookingsYTD = './data/bookingsYTD.xlsx'
 const pipelineYTD = './data/pipelineYTD.xlsx'
+const utilizationYTD = './data/utilizationYTD.xlsx'
 
-Promise.resolve(true)
-  .then(new UtilizationPulse(sm, REPORT_DATE).run(isVerbose))
+// Promise.resolve(true)
+  // .then(new UtilizationPulse(sm, REPORT_DATE).run(isVerbose))
   // .then(new PipelinePulse(sm, REPORT_DATE).run(isVerbose))
-  .then(sm.save())
+  // .then(sm.save())
+  // .catch(e => console.log(e))
+
+const analyzePipelinePromise = new PipelinePulseNew(pipelineYTD, sm).run(isVerbose)
+analyzePipelinePromise
+  .then(result => new BookingsPulse(bookingsYTD, sm, result).run(isVerbose))
+  .then(new UtilizationPulseNew(utilizationYTD, sm).run(isVerbose))
   .catch(e => console.log(e))
-
-  const analyzePipelinePromise = new PipelinePulseNew(pipelineYTD, sm).run(isVerbose)
-  analyzePipelinePromise.then(result => new BookingsPulse(bookingsYTD, sm, result).run(isVerbose))
-
 
 // Runs pulse reports

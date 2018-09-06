@@ -23,8 +23,8 @@ export default class BookingsPulse extends Report {
     super({
       file: pathToFile,
       dictionary: new Dictionary(BOOKINGS_DICTIONARY_DATA),
-      firstColShrinkBy: 10,
-      otherColShrinBy: 4,
+      firstColShrinkBy: 14,
+      otherColShrinBy: 5,
       isRepeatHeaders: true
     })
 
@@ -52,7 +52,7 @@ export default class BookingsPulse extends Report {
     // Defines the main value we would like to showcase
 
     this.custom = [{
-        key: '$ Avergae Bookings Size',
+        key: '$ Average Bookings Size',
         isRowTransformer: true,
         transform: (recs, modeler, series) => series.map((item) => {
           const avg = StringHelper.toThousands(Analyzer.avgProperty(item, this.bookingsKey))
@@ -67,7 +67,7 @@ export default class BookingsPulse extends Report {
         key: '$ Bookings YTD',
         isRowTransformer: true,
         isBreakLineBefore: true,
-        transform: Customs.sumYTD(this.bookingsKey, true)
+        transform: Customs.sumYTD(this.bookingsKey, true, true)
       },
       {
         key: '$ Bookings TGT | FY',

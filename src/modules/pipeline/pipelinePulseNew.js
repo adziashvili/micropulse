@@ -62,7 +62,7 @@ export default class PipelinePulseNew extends Report {
     // We can pass a transformer to caluclate values or to caluclate the entire row.
     // Add isRowTransformer: true for row
     this.custom = [{
-        key: '$ Avergae Deal Size',
+        key: '$ Average Deal Size',
         isRowTransformer: true,
         isBreakLineBefore: true,
         transform: (recs, modeler, series) => series.map(item => (
