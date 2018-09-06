@@ -14,6 +14,7 @@ export default class PracticeManager {
 
     this.rollupAPAC = { values: ['ANZ', 'ASEAN', 'S.KOREA', 'INDIA'], key: 'APAC' }
     this.noAPJandSharedOrder = ['ANZ', 'ASEAN', 'S.KOREA', 'INDIA', 'APAC', 'JAPAN']
+    this.noAPJOrder = ['ANZ', 'ASEAN', 'S.KOREA', 'INDIA', 'APAC', 'JAPAN', 'APJ Shared']
   }
 
   getTargetIndex(monthIndex = 0) {
