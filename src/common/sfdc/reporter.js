@@ -1,4 +1,5 @@
 import {
+  TableReporter,
   ReportHelper,
   DateHelper,
   StringHelper as SH,
@@ -18,6 +19,7 @@ export default class Reporter {
     isRepeatHeaders = true,
     firstColShrinkBy = 0,
     otherColShrinBy = 0,
+    listConfig = undefined,
     isVerbose = false
   } = {}) {
     this.modeler = modeler
@@ -25,6 +27,7 @@ export default class Reporter {
     this.isAddTotalRow = isAddTotalRow
     this.isVerbose = isVerbose
     this.isRepeatHeaders = isRepeatHeaders
+    this.listConfig = listConfig
 
     this.reaptHeaderStyle = ''.dim
     this.rh = new ReportHelper(modeler.table.meta.name, modeler.table.meta.date)
@@ -212,6 +215,23 @@ export default class Reporter {
     }
   }
 
+  defaultFormatList(type = 'number', value) {
+    switch (type) {
+      case 'currency':
+        return `$${SH.toThousands(value)}`
+      case 'percent':
+        return SH.toPercent(value)
+      case 'date':
+        return new DateHelper(value).shortDate
+      case 'number':
+        return SH.toNumber(value)
+      case 'string':
+      case 'boolean':
+      default:
+        return value
+    }
+  }
+
   isRollup(key) {
     const { rows } = this.modeler
     for (let i = 0; i < rows.length; i += 1) {
@@ -255,6 +275,7 @@ export default class Reporter {
 
         if (level === 0) {
           this.addCustoms(row.value, filter.concat(newFilter), level + 1)
+          this.list(row, level + 1)
           this.rh.newLine(2)
           if (isRollup) {
             this.rh.newLine(2)
@@ -352,5 +373,26 @@ export default class Reporter {
       }
     }
     console.log(!decorator ? sb.toString() : decorator(sb.toString()))
+  }
+
+  /**
+   * Lists the records per listConfig
+   *
+   * @param {Object} row     Row that holds records
+   * @param {Number} nesting Nesting level
+   *
+   * @return {undefined} None
+   */
+  list(row, nesting) {
+    if (!this.listConfig || !Array.isArray(row.records)) return
+
+    const { listConfig: conf } = this
+    const padding = this.layout.nestedIndent(nesting)
+
+    const trConf = Object.assign({}, conf)
+    trConf.headers = conf.displayKeys.map(m => this.dictionary.get(m))
+    trConf.types = conf.displayKeys.map(m => this.modeler.table.getType(m))
+    trConf.padding = padding
+    new TableReporter(row.records, trConf).report()
   }
 }

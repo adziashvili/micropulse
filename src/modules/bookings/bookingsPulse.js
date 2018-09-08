@@ -18,6 +18,14 @@ const BOOKINGS_DICTIONARY_DATA = [
   { key: 'Project: Partner Account', shortName: 'Partner' }
 ]
 
+const TOP_10_LIST_CONFIG = {
+  title: 'TOP 10 Bookings YTD',
+  filterBeforeSort: undefined,
+  sortBy: (ra, rb) => rb['Amount (converted)'] - ra['Amount (converted)'],
+  filterAfterSort: (r, i) => i < 10,
+  displayKeys: ['Effective Date', 'Amount (converted)']
+}
+
 export default class BookingsPulse extends Report {
   constructor(pathToFile, storeManager, pipeline) {
     super({
@@ -25,7 +33,8 @@ export default class BookingsPulse extends Report {
       dictionary: new Dictionary(BOOKINGS_DICTIONARY_DATA),
       firstColShrinkBy: 14,
       otherColShrinBy: 5,
-      isRepeatHeaders: true
+      isRepeatHeaders: true,
+      // listConfig: TOP_10_LIST_CONFIG
     })
 
     this.sm = storeManager
@@ -101,9 +110,23 @@ export default class BookingsPulse extends Report {
         }
       },
       {
-        key: '$ Bookings Gap',
+        key: '$ Pipeline (upto EOQ)',
         isRowTransformer: true,
         isBreakLineBefore: true,
+        transform: (recs, modeler, series, key) => series.map((s, i) => {
+          if (i === series.length - 1) {
+            return `$${StringHelper.toThousands(this.pipelineValue(key))}`
+          }
+          if (i === series.length - 2) {
+            const nextQMonthIndex = this.sm.pm.getTargetIndex(i)
+            return `$${StringHelper.toThousands(this.pipelineValue(key, nextQMonthIndex))}`
+          }
+          return ''
+        })
+      },
+      {
+        key: '$ Bookings Gap',
+        isRowTransformer: true,
         transform: (recs, modeler, series, key) => {
           if (series.length === 0) return []
           const includeIndexes = [series.length - 1, series.length - 2]
@@ -116,20 +139,6 @@ export default class BookingsPulse extends Report {
             return `$${StringHelper.toThousands(Math.abs(v))}`.red.bold
           })
         }
-      },
-      {
-        key: '$ Pipeline (upto EOQ)',
-        isRowTransformer: true,
-        transform: (recs, modeler, series, key) => series.map((s, i) => {
-          if (i === series.length - 1) {
-            return `$${StringHelper.toThousands(this.pipelineValue(key))}`
-          }
-          if (i === series.length - 2) {
-            const nextQMonthIndex = this.sm.pm.getTargetIndex(i)
-            return `$${StringHelper.toThousands(this.pipelineValue(key, nextQMonthIndex))}`
-          }
-          return ''
-        })
       },
       {
         key: '% Pipline / Gap',

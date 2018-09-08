@@ -13,7 +13,8 @@ export default class Report {
     otherColShrinBy = 0,
     isAddTotal = true,
     isAddTotalRow = true,
-    isRepeatHeaders = false
+    isRepeatHeaders = false,
+    listConfig = undefined
   } = {}) {
     this.file = file
     this.dictionary = dictionary
@@ -29,6 +30,9 @@ export default class Report {
     this.isAddTotal = isAddTotal
     this.isAddTotalRow = isAddTotalRow
     this.isRepeatHeaders = isRepeatHeaders
+
+    // default list settings
+    this.listConfig = listConfig
   }
 
   verifySelf() {
@@ -68,6 +72,7 @@ export default class Report {
           isRepeatHeaders: this.isRepeatHeaders,
           firstColShrinkBy: this.firstColShrinkBy,
           otherColShrinBy: this.otherColShrinBy,
+          listConfig: this.listConfig,
           isVerbose
         }
         return new Reporter(config)

@@ -24,12 +24,23 @@ const PIPELINE_DICTIONARY_DATA = [
   { key: 'Is Partner Account Involved?', shortName: 'Partner Attached' }
 ]
 
+const PRIME_KEY = 'Total Contract Amount (converted)'
+
+const TOP_10_LIST_CONFIG = {
+  title: 'TOP 10 Opportunities',
+  filterBeforeSort: undefined,
+  sortBy: (ra, rb) => rb[PRIME_KEY] - ra[PRIME_KEY],
+  filterAfterSort: (r, i) => i < 10,
+  displayKeys: ['Close Date', PRIME_KEY, 'Account Name']
+}
+
 export default class PipelinePulseNew extends Report {
   constructor(file, storeManager) {
     super({
       file,
       dictionary: new Dictionary(PIPELINE_DICTIONARY_DATA),
-      isRepeatHeaders: true
+      isRepeatHeaders: true,
+      listConfig: TOP_10_LIST_CONFIG
     })
 
     this.sm = storeManager
@@ -49,6 +60,10 @@ export default class PipelinePulseNew extends Report {
         sortby: this.sm.pm.noAPJandSharedOrder
       },
       { key: 'Stage' }
+      // {
+      //   key: 'Forecast Status',
+      //   sortby: ['In Forecast', 'In Forecast At Risk', 'Strong Upside', 'Upside', '-']
+      // }
     ]
 
     // Stats settings can inlcude the key to indicate which stat we would like to show case
