@@ -78,10 +78,12 @@ export default class ReportHelper {
   }
 
   /**
-   * [addChangeSymbol description]
+   * Adds up arrow to Str if v if greater than 0 and down arrow if it is negative.
    *
-   * @param {[type]} v    [description]
-   * @param {[type]} vStr [description]
+   * @param {Number} v    Value to test
+   * @param {String} vStr String to format
+   *
+   * @return {String} New string with up or down arrow depending on the value of v
    */
   addChangeSymbol(v, vStr) {
     if (v > 0) return `${this.UP} ${vStr}`
@@ -89,6 +91,17 @@ export default class ReportHelper {
     return `${this.NO_CHANGE} ${vStr}`
   }
 
+  /**
+   * Returns
+   * Green Str if v if greater than 0,
+   * Red  if it is negative,
+   * Grey otherwise
+   *
+   * @param {Number} v            Value to test
+   * @param {String} valueString  String to color
+   *
+   * @return {String} New colored string depending on the value of v
+   */
   addChangeColor(value, valueString) {
     if (value > 0) return valueString.green
     if (value < 0) return valueString.red
@@ -261,6 +274,11 @@ export default class ReportHelper {
     }
   }
 
+  /**
+   * Prints str to stdout.
+   *
+   * @param {String} [str=''] String to print.
+   */
   add(str = '') {
     console.log(str);
   }
