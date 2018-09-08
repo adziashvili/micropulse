@@ -98,7 +98,9 @@ export default class Reporter {
   }
 
   addHeadersOnRepeat() {
-    if (this.isRepeatHeaders) this.addHeaders(this.reaptHeaderStyle)
+    if (this.isRepeatHeaders) {
+      this.addHeaders(this.reaptHeaderStyle)
+    }
   }
 
   addStats(stats) {
@@ -155,9 +157,7 @@ export default class Reporter {
     const { stats } = this.modeler
     const NA = 'N/A'
 
-    if (!objStats ||
-      !Array.isArray(stats) ||
-      stats.length === 0) {
+    if (!objStats || !Array.isArray(stats) || stats.length === 0) {
       values.push(NA)
       return
     }
@@ -212,23 +212,6 @@ export default class Reporter {
       case 'boolean':
       default:
         return SH.toNumber(value)
-    }
-  }
-
-  defaultFormatList(type = 'number', value) {
-    switch (type) {
-      case 'currency':
-        return `$${SH.toThousands(value)}`
-      case 'percent':
-        return SH.toPercent(value)
-      case 'date':
-        return new DateHelper(value).shortDate
-      case 'number':
-        return SH.toNumber(value)
-      case 'string':
-      case 'boolean':
-      default:
-        return value
     }
   }
 
@@ -393,6 +376,7 @@ export default class Reporter {
     trConf.headers = conf.displayKeys.map(m => this.dictionary.get(m))
     trConf.types = conf.displayKeys.map(m => this.modeler.table.getType(m))
     trConf.padding = padding
+
     new TableReporter(row.records, trConf).report()
   }
 }
