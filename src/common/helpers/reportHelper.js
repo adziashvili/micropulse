@@ -260,4 +260,8 @@ export default class ReportHelper {
       }
     }
   }
+
+  add(str = '') {
+    console.log(str);
+  }
 }
