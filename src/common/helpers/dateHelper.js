@@ -126,7 +126,8 @@ export default class DateHelper {
   }
 
   get shortDate() {
-    return `${this.day}-${this.monthName}-${this.year}`
+    const day = this.day < 10 ? `0${this.day}` : this.day
+    return `${day}-${this.monthName}-${this.year}`
   }
 
   get date() {
