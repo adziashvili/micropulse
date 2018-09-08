@@ -31,7 +31,7 @@ const TOP_10_LIST_CONFIG = {
   filterBeforeSort: undefined,
   sortBy: (ra, rb) => rb[PRIME_KEY] - ra[PRIME_KEY],
   filterAfterSort: (r, i) => i < 10,
-  displayKeys: ['Close Date', PRIME_KEY, 'Account Name']
+  displayKeys: [PRIME_KEY, 'Close Date', 'Account Name']
 }
 
 export default class PipelinePulseNew extends Report {
