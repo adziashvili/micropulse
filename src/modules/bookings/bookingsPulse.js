@@ -18,13 +18,13 @@ const BOOKINGS_DICTIONARY_DATA = [
   { key: 'Project: Partner Account', shortName: 'Partner' }
 ]
 
-const TOP_10_LIST_CONFIG = {
-  title: 'TOP 10 Bookings YTD',
-  filterBeforeSort: undefined,
-  sortBy: (ra, rb) => rb['Amount (converted)'] - ra['Amount (converted)'],
-  filterAfterSort: (r, i) => i < 10,
-  displayKeys: ['Effective Date', 'Amount (converted)']
-}
+// const TOP_10_LIST_CONFIG = {
+//   title: 'TOP 10 Bookings YTD',
+//   filterBeforeSort: undefined,
+//   sortBy: (ra, rb) => rb['Amount (converted)'] - ra['Amount (converted)'],
+//   filterAfterSort: (r, i) => i < 10,
+//   displayKeys: ['Effective Date', 'Amount (converted)']
+// }
 
 export default class BookingsPulse extends Report {
   constructor(pathToFile, storeManager, pipeline) {
@@ -33,7 +33,7 @@ export default class BookingsPulse extends Report {
       dictionary: new Dictionary(BOOKINGS_DICTIONARY_DATA),
       firstColShrinkBy: 14,
       otherColShrinBy: 5,
-      isRepeatHeaders: true,
+      isRepeatHeaders: true
       // listConfig: TOP_10_LIST_CONFIG
     })
 
