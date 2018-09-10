@@ -25,8 +25,18 @@ export default class Dictionary {
     return this.dic.find(item => item.key === key)
   }
 
+  /**
+   * Tests to see if a set of keys or a key are in the dictionary
+   * by matching their key property to the ones stored in the dictionary instance.
+   *
+   * @param {String or Array of Strings} key key or keys to test
+   *
+   * @return {Boolean} True if all keys exist in the dictionary.
+   */
   exist(key) {
-    return !!this.find(key)
+    return Array.isArray(key) ?
+      key.every(k => !!this.find(k)) :
+      !!this.find(key)
   }
 
   get(key, prop = 'shortName') {
@@ -37,8 +47,12 @@ export default class Dictionary {
     return item[prop]
   }
 
+  get keys() {
+    return this.dic.map(item => item.key)
+  }
+
   set(dicObj) {
-    if (!dicObj || !dicObj.key || !dicObj.shortName) {
+    if (!dicObj || !dicObj.key) {
       console.log('Invalid dictionary item. Ignored'.yellow, dicObj);
     }
 
@@ -47,7 +61,11 @@ export default class Dictionary {
     if (index === -1) {
       this.dic.push(dicObj)
     } else {
-      this.dic[index] = dicObj
+      Object.assign(this.dic[index], dicObj)
     }
+  }
+
+  forEach(func) {
+    this.dic.forEach(item => func(item))
   }
 }

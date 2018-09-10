@@ -269,6 +269,48 @@ export default class Reporter {
     }
   }
 
+  /**
+   * Adds a custom calculation to the report.
+   *
+   * Each custom calculation is expected to have a configuraiotn object with the following:
+   *
+   *  isVerbose:  Optional boolean, defaults to false.
+   *              If true, the custom calculation will be included only when the report
+   *              runs in verbose mode as controlled by Reporter's isVerbose property.
+   *
+   *  key:  Required string, the Name used to idenfity this custom calculation.
+   *        This key will be used to lookup details about the this custom function, so it is always required.
+   *        When isRowTransformer=true, key will apear in the report as the row name.
+   *
+   *  transform: Required function.
+   *             Based isRowTransformer, trasnform will be invoked with these parameters to
+   *             perfrom its analysis:
+   *     records:     The records array matching to the row-col pair being calculated.
+   *                  When isRowTransformer = true, this is and empty array, []
+   *     modeler:     The modeler object that is used to calculate the report data.
+   *                  This provides access to all the data available to the reporter.
+   *     allRecords:  An array of all the colunms records for the matching row including total.
+   *     key:         The key of the row being analysed
+   *
+   *     All trasnform functions are expected to return a value or an array of values
+   *     depending on isRowTransformer field.
+   *
+   *  isRowTransformer: Optional boolean, defaults to false.
+   *    When true,
+   *        Reporter will invoke transform with four argements: [], modeler, allRecords and key.
+   *        tranfrom function should return as array of ready to print values.
+   *        Before printing key and padding at the begining of the row.
+   *    When false,
+   *        Reporter will invoke transform for each matcihng colunm expcting a single return value.
+   *
+   *  isBreakLineBefore: Optional bollena, defaults to false.
+   *                     If true, a line break id added before the custom row.
+   *
+   *
+   * @param {[type]} key       [description]
+   * @param {[type]} filter    [description]
+   * @param {Number} [level=1] [description]
+   */
   addCustoms(key, filter, level = 1) {
     const { custom } = this.modeler
 

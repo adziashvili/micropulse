@@ -209,4 +209,53 @@ export default class Parser {
   static get ZERO_OR_MISSING() {
     return [null, '', '-']
   }
+
+  /**
+   * Extract the key Meta data of the parsed parsed file and return an object
+   * with the following properties:
+   *  name: Name of the report
+   *  date: Date of the report
+   *  headersRow: The row number that includes the headers (-1 if not found).
+   *  firstDataRow: The row number that includes the frist data row (-1 if not found)
+   *  lastDataRow: The row number that includes the last data row (-1 if not found)
+   *
+   * @return {Object} Files metadata object.
+   */
+  get meta() {
+    const filterMarker = 'Filtered By:'
+    const filterBlank = '   '
+    const analysis = { headersRow: -1, firstDataRow: -1, lastDataRow: -1 }
+    const filterRow = this.lookDown(filterMarker, 'A')
+
+    if (filterRow !== -1) { // This is first pass for files with filters
+      let result = this.lookDownCondition(c => c !== filterBlank, 'A', filterRow + 1)
+      if (result.row !== -1) {
+        analysis.headersRow = result.row
+        analysis.firstDataRow = result.row + 1
+        result = this.lookDownCondition(
+          c => c === null || c.toLowerCase().startsWith('Grand Totals'.toLowerCase()),
+          'A',
+          analysis.firstDataRow + 1
+        )
+        if (result.row !== -1) {
+          analysis.lastDataRow = result.row - 1
+        }
+      }
+    } else {
+      // TODO: What should we do if there is no filter?
+    }
+
+    for (const key in analysis) {
+      if (analysis[key] === -1) {
+        console.log('Analysis of file failed:'.red, analysis);
+        throw new Error(`Analysis of file failed. Unable to detemine ${key}`)
+      }
+    }
+
+    return Object.assign({},
+      analysis, {
+        name: this.getReportName(),
+        date: this.getReportDate()
+      })
+  }
 }

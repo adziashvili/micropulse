@@ -29,7 +29,7 @@ export default class Analyzer {
     return TYPE_SENSITIVE_STATS
   }
 
-  static analyzeType(data = []) {
+  static guessType(data = []) {
     let type = 'string'
 
     if (Analyzer.isNumber(data)) {
