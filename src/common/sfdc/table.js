@@ -14,12 +14,24 @@ export default class Table {
     this.parser = null
     this.meta = {}
     this.dictionary = new Dictionary()
+    // TODO: move data and parser as input to constructure
   }
 
+  /**
+   * Processes the data received and making it ready for queries.
+   *
+   * It analyses the data to decide the on the meta objet.
+   * It builds a dictionary that includes key and type for each colunm
+   * It transforms (cleans) the values based on data type
+   *
+   * @param {Object} data Data that can be parsed by Parser.
+   *
+   * @return {Table} Reference to this.
+   */
   process(data) {
     this.parser = new Parser(data)
     this.meta = this.parser.meta
-    const keys = this.setupDictionary()
+    const keys = this.buildDictionary()
 
     const { firstDataRow, lastDataRow } = this.meta
 
@@ -29,7 +41,7 @@ export default class Table {
       for (let j = 0; j < values.length; j += 1) {
         record.set(keys[j], values[j])
       }
-      this.list.push(this.transform(record))
+      this.list.push(this.transformRecord(record))
     }
     // Load all transformed records
 
@@ -41,7 +53,16 @@ export default class Table {
     return this
   }
 
-  setupDictionary() {
+  /**
+   * Builds the dictionary for underlying data.
+   * Based on meta.headersRow reds the headers from data and populates
+   * the dictionary with {key, type}.
+   *  key is the value read from the Data
+   *  type is the type of data as guessed by Analyzer
+   *
+   * @return {Array} Keys all all entries in the built dictionary
+   */
+  buildDictionary() {
     const { headersRow, firstDataRow, lastDataRow } = this.meta
     const headers = this.parser.readRow(1, headersRow)
 
@@ -56,11 +77,28 @@ export default class Table {
     return this.dictionary.keys
   }
 
-  isValidHeaders(testHeaders = []) {
-    return this.dictionary.exist(testHeaders)
+  /**
+   * Tests is an array of keys (strings) or a key (string) are valid keys for this table.
+   *
+   * @param {Array} [keys=[]] can also pass a single string representing a tested key
+   *
+   * @return {Boolean} True if all tested keys are valied, otherwise false.
+   */
+  isValidKeys(keys = []) {
+    return this.dictionary.exist(keys)
   }
 
-  transform(record) {
+  /**
+   * Transformes all values in record based on their type to the normalised value.
+   * This cleans up raw data read to cleaned data we can work with where e.g.
+   *  boolean will be either true of false
+   *  date will be a valid date object etc...
+   *
+   * @param {Record} record Record to transform
+   *
+   * @return {Record} Transformed record.
+   */
+  transformRecord(record) {
     Object.keys(record).forEach((key) => {
       let lookup = 'UNKNOWN'
       const type = this.getType(key)
@@ -89,19 +127,6 @@ export default class Table {
     return record
   }
 
-  getType(key) {
-    const dicItem = this.dictionary.find(key)
-    return dicItem === undefined ? 'UNKNOWN' : dicItem.type
-  }
-
-  values(key, transform = null) {
-    return this.list.map((r) => {
-      const value = r.get(key)
-      if (transform === null) return value
-      return transform(value)
-    })
-  }
-
   sort(key, data) {
     if (this.getType(key) === 'date') {
       return data.sort((a, b) => a.valueOf() - b.valueOf())
@@ -110,6 +135,45 @@ export default class Table {
     // return data.sort()
   }
 
+  /**
+   * Gets the type of data for a given key.
+   *
+   * If key is not a valid key, it returns 'UNKNOWN'.
+   *
+   * @param {string} key Key to get type for.
+   *
+   * @return {string} String representing its type.
+   */
+  getType(key) {
+    const dicItem = this.dictionary.find(key)
+    return dicItem === undefined ? 'UNKNOWN' : dicItem.type
+  }
+
+  /**
+   * Gets all value from the table for a given key.
+   * Consider key as the colunm name.
+   *
+   * @param {String} key Key to read values for.
+   * @param {Function} [transform=null] If passed, transform (value) is returned for each value
+   *
+   * @return {Array} Array of values for a given key
+   */
+  values(key, transform = null) {
+    return this.list.map((r) => {
+      const value = r.get(key)
+      if (transform === null) return value
+      return transform(value)
+    })
+  }
+
+  /**
+   * Return distinct values for a given key.
+   *
+   * @param {String} key Key to read values for.
+   * @param {Function} [transform=null] If passed, transform (value) is returned for each value
+   *
+   * @return {[type]} [description]
+   */
   distinct(key, transform = null) {
     const data = this.sort(key, this.values(key))
     const values = []

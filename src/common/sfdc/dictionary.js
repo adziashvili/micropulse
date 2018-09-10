@@ -68,4 +68,8 @@ export default class Dictionary {
   forEach(func) {
     this.dic.forEach(item => func(item))
   }
+
+  filter(func) {
+    return this.dic.filter(item => func(item))
+  }
 }

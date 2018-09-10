@@ -89,8 +89,8 @@ export default class Modeler {
       // Adding number of matching records
 
       headersToUse.forEach((h) => {
-        stats[h.header] = Analyzer.analyze(h.type,
-          model.records.map(r => r[h.header]))
+        stats[h.key] = Analyzer.analyze(h.type,
+          model.records.map(r => r[h.key]))
       })
       // Based on the type of the values, all values for each header are analysed
 
@@ -310,7 +310,7 @@ export default class Modeler {
   set rows(rows = []) {
     if (rows.length > 0) {
       const keys = rows.map(row => row.key)
-      if (!this.table.isValidHeaders(keys)) {
+      if (!this.table.isValidKeys(keys)) {
         throw new Error(`Invalid row keys: ${keys}`.red)
       }
     }
@@ -324,7 +324,7 @@ export default class Modeler {
   set cols(cols) {
     if (cols.length > 0) {
       const keys = cols.map(col => col.key)
-      if (!this.table.isValidHeaders(keys)) {
+      if (!this.table.isValidKeys(keys)) {
         throw new Error('Invalid cols. Check Spelling or misplaced spaces in cols headers'.red)
       }
     }
@@ -336,7 +336,7 @@ export default class Modeler {
   }
 
   set stats(stats) {
-    if (stats.length > 0 && !this.table.isValidHeaders(stats.map(s => s.key))) {
+    if (stats.length > 0 && !this.table.isValidKeys(stats.map(s => s.key))) {
       throw new Error('Invalid cols: All headers must be valid headers in the file')
     }
     this._stats = stats
@@ -355,11 +355,12 @@ export default class Modeler {
   }
 
   get statsHeaders() {
-    return this.table.headers.filter((h) => {
-      const isRows = this.rows.some(r => r.key === h.header)
-      const isCols = this.cols.some(c => c.key === h.header)
-      return ['date', 'number', 'currency'].includes(h.type) || (!isRows && !isCols)
+    const filtered = this.table.dictionary.filter((item) => {
+      const isRows = this.rows.some(r => r.key === item.key)
+      const isCols = this.cols.some(c => c.key === item.key)
+      return ['date', 'number', 'currency'].includes(item.type) || (!isRows && !isCols)
     })
+    return filtered
   }
 
   get table() {
