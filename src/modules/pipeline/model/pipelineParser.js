@@ -23,7 +23,7 @@ export default class PipelineParser extends Parser {
       // read all data
 
       if (data.length > 0) {
-        data[0] = this.lookupPractice(data[0])
+        data[0] = this.lookup(data[0])
       }
       // fix SFDC name
 

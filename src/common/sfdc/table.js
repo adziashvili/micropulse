@@ -35,7 +35,7 @@ export default class Table {
 
     for (let i = firstDataRow; i <= lastDataRow; i += 1) {
       const record = new Record()
-      const values = this.parser.readRow(1, i)
+      const values = this.parser.getRowValues(i)
       for (let j = 0; j < values.length; j += 1) {
         record.set(keys[j], values[j])
       }
@@ -62,14 +62,12 @@ export default class Table {
    */
   buildDictionary() {
     const dictionary = new Dictionary()
-
-    const { headersRow, firstDataRow, lastDataRow } = this.meta
-    const headers = this.parser.readRow(1, headersRow)
+    const headers = this.parser.getHeaderNames()
 
     for (let i = 0; i < headers.length; i += 1) {
       dictionary.set({
         key: headers[i],
-        type: AI.guessType(this.parser.readCol(i + 1, firstDataRow, lastDataRow))
+        type: AI.guessType(this.parser.getColValues(i))
         // Guess what type of data is stored in each col
       })
     }
@@ -108,7 +106,7 @@ export default class Table {
         case 'date':
           break
         case 'string':
-          lookup = this.parser.lookupPractice(record.get(key))
+          lookup = this.parser.lookup(record.get(key))
           if (lookup !== 'UNKNOWN') {
             record.set(key, lookup)
           }

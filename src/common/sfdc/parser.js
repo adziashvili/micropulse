@@ -7,7 +7,7 @@ export default class Parser {
   constructor(ws) {
     this.ws = ws
     this.records = []
-    this.practices = [
+    this.lookups = [
       { name: 'ANZ', lookup: 'ANZ' },
       { name: 'ASEAN', lookup: 'ASEAN' },
       { name: 'INDIA', lookup: 'INDIA' },
@@ -17,6 +17,9 @@ export default class Parser {
       { name: 'APJ Shared', lookup: 'APJ Shared' },
       { name: 'APJ', lookup: 'APJ' }
     ]
+
+    this.meta = this.buildMeta()
+    this.firstDataColIndex = 1
   }
 
   get CELLS() {
@@ -35,28 +38,62 @@ export default class Parser {
   }
 
   /**
-   * Lookups the practice name based on SFDC practice name convention
+   * Lookups the value name based on SFDC value name convention
    *
    * @param {String} str Practice name as in SFDC input file
    *
-   * @return {String} The Micropulse convention for the practice name.
+   * @return {String} The Micropulse convention for the value name.
    *                  "UNKNOWN" if not found or if lookup str is null or 'undefined'
    */
-  lookupPractice(str) {
+  lookup(str) {
     const UNKNOWN = 'UNKNOWN'
-    let practice = UNKNOWN
+    let value = UNKNOWN
 
     if (str === null || !str) {
       return UNKNOWN
     }
 
-    const lookup = this.practices.filter(p => p.lookup.toLowerCase() === str.toLowerCase())
+    const lookup = this.lookups.filter(p => p.lookup.toLowerCase() === str.toLowerCase())
 
     if (lookup.length === 1) {
-      practice = lookup[0].name
+      value = lookup[0].name
     }
 
-    return practice
+    return value
+  }
+
+  /**
+   * Returns headers names.
+   *
+   * @return {Array} Array of strings representing the header names
+   */
+  getHeaderNames() {
+    const { headersRow } = this.meta
+    if (!headersRow) return undefined
+    return this.getRowValues(headersRow)
+  }
+
+  /**
+   * Reads values of a given row from col = 1 until null is reached.
+   *
+   * @param {Number} rowIndex The index of the row.
+   *
+   * @return {Array} Array of values as read for the row.
+   */
+  getRowValues(rowIndex) {
+    return this.readRow(this.firstDataColIndex, rowIndex)
+  }
+
+  /**
+   * Reads a colunm values
+   *
+   * @param {Number} colIndex Zero based index of the col to read
+   *
+   * @return {Array} Array of values for that specfic row
+   */
+  getColValues(colIndex) {
+    const { firstDataRow, lastDataRow } = this.meta
+    return this.readCol(colIndex + 1, firstDataRow, lastDataRow)
   }
 
   /**
@@ -221,7 +258,7 @@ export default class Parser {
    *
    * @return {Object} Files metadata object.
    */
-  get meta() {
+  buildMeta() {
     const filterMarker = 'Filtered By:'
     const filterBlank = '   '
     const analysis = { headersRow: -1, firstDataRow: -1, lastDataRow: -1 }
@@ -257,5 +294,13 @@ export default class Parser {
         name: this.getReportName(),
         date: this.getReportDate()
       })
+  }
+
+  get meta() {
+    return this._meta
+  }
+
+  set meta(meta) {
+    this._meta = meta
   }
 }
