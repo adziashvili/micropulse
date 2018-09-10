@@ -1,5 +1,4 @@
 import {
-  Parser,
   Record,
   Dictionary,
   StringHelper as SH,
@@ -7,14 +6,16 @@ import {
 } from '..'
 
 export default class Table {
-  constructor(isVerbose = false) {
+  constructor(data, ParserClass, isVerbose = false) {
+    this.parser = new ParserClass(data)
     this.isVerbose = isVerbose
-    this.headers = []
+
+    this.isInitialised = false
+    this.meta = this.parser.meta
+    this.dictionary = this.buildDictionary()
     this.list = []
-    this.parser = null
-    this.meta = {}
-    this.dictionary = new Dictionary()
-    // TODO: move data and parser as input to constructure
+
+    this.process()
   }
 
   /**
@@ -28,11 +29,8 @@ export default class Table {
    *
    * @return {Table} Reference to this.
    */
-  process(data) {
-    this.parser = new Parser(data)
-    this.meta = this.parser.meta
-    const keys = this.buildDictionary()
-
+  process() {
+    const { keys } = this.dictionary
     const { firstDataRow, lastDataRow } = this.meta
 
     for (let i = firstDataRow; i <= lastDataRow; i += 1) {
@@ -63,18 +61,20 @@ export default class Table {
    * @return {Array} Keys all all entries in the built dictionary
    */
   buildDictionary() {
+    const dictionary = new Dictionary()
+
     const { headersRow, firstDataRow, lastDataRow } = this.meta
     const headers = this.parser.readRow(1, headersRow)
 
     for (let i = 0; i < headers.length; i += 1) {
-      this.dictionary.set({
+      dictionary.set({
         key: headers[i],
         type: AI.guessType(this.parser.readCol(i + 1, firstDataRow, lastDataRow))
         // Guess what type of data is stored in each col
       })
     }
 
-    return this.dictionary.keys
+    return dictionary
   }
 
   /**
@@ -127,6 +127,15 @@ export default class Table {
     return record
   }
 
+  /**
+   * Sorts an array based on data.
+   *
+   * @param {String} key  The key for the data.
+   * @param {Array} data array of objects or values
+   *
+   * @return {Array} If type of data, based on key, is date, returns a sorted array.
+   *                  Otherwise, returns the data without sorting.
+   */
   sort(key, data) {
     if (this.getType(key) === 'date') {
       return data.sort((a, b) => a.valueOf() - b.valueOf())
@@ -188,10 +197,15 @@ export default class Table {
     return values
   }
 
+  /**
+   * Prints a simple report aboud the data processed listing type and key.
+   *
+   * @return {Nothing} undefined
+   */
   logDigest() {
     console.log('\n[MP] Cool! %s records loaded and transformed.'.green, this.list.length)
     console.log('[MP] Detected data schme:'.grey)
-    console.log(' %s %s'.bold, SH.exact('TYPE', 10), 'HEADER')
+    console.log(' %s %s'.bold, SH.exact('TYPE', 10), 'KEY')
 
     this.dictionary.forEach((h) => {
       console.log(' %s %s'.grey, SH.exact(h.type, 10), h.key);

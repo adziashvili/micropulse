@@ -1,5 +1,6 @@
 import {
   ExcelReader,
+  Parser,
   Modeler,
   Table,
   Reporter
@@ -51,7 +52,7 @@ export default class Report {
 
     return ExcelReader
       .load(this.file)
-      .then(data => new Table().process(data.getWorksheet(data.worksheets[0].id)))
+      .then(data => new Table(data.getWorksheet(data.worksheets[0].id), Parser))
       .then((table) => {
         const modeler = new Modeler(table)
         const keys = ['cols', 'rows', 'stats', 'custom']
