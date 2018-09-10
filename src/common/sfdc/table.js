@@ -6,8 +6,8 @@ import {
 } from '..'
 
 export default class Table {
-  constructor(data, ParserClass, isVerbose = false) {
-    this.parser = new ParserClass(data)
+  constructor(data, Parser, isVerbose = false) {
+    this.parser = new Parser(data)
     this.isVerbose = isVerbose
 
     this.isInitialised = false
