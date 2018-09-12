@@ -2,9 +2,9 @@ import {
   DateHelper,
   StringHelper,
   ReportHelper,
+  MathHelper,
   Report,
   Dictionary,
-  Analyzer,
   Customs
 } from '../../common'
 
@@ -64,7 +64,7 @@ export default class BookingsPulse extends Report {
         key: '$ Average Bookings Size',
         isRowTransformer: true,
         transform: (recs, modeler, series) => series.map((item) => {
-          const avg = StringHelper.toThousands(Analyzer.avgProperty(item, this.bookingsKey))
+          const avg = StringHelper.toThousands(MathHelper.avgProperty(item, this.bookingsKey))
           return `$${avg}`
         })
       },
@@ -98,10 +98,10 @@ export default class BookingsPulse extends Report {
           if (series.length === 0) return []
           const { pm } = this.sm
           const targets = pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
-          const totals = Analyzer.sumArrays(series, this.bookingsKey)
-          const actuals = Analyzer.mapToRollingSum(totals, true)
+          const totals = MathHelper.sumArrays(series, this.bookingsKey)
+          const actuals = MathHelper.mapToRollingSum(totals, true)
 
-          return Analyzer.devideArrays(actuals, targets).map((v) => {
+          return MathHelper.devideArrays(actuals, targets).map((v) => {
             if (!v) return ''
             const percent = StringHelper.toPercent(v)
             const rh = new ReportHelper()
@@ -155,7 +155,7 @@ export default class BookingsPulse extends Report {
               this.pipelineValue(key) :
               this.pipelineValue(key, this.sm.pm.getTargetIndex(i))
 
-            const ratio = Analyzer.devide(pipeline, Math.abs(v))
+            const ratio = MathHelper.devide(pipeline, Math.abs(v))
             const rh = new ReportHelper()
             const colored = rh.addTrafficLights(ratio, `${ratio}`, 2.5, 2)
             return `${colored}x`.bold
@@ -188,9 +188,9 @@ export default class BookingsPulse extends Report {
     if (series.length === 0) return []
     const { pm } = this.sm
     const targets = pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
-    const totals = Analyzer.sumArrays(series, this.bookingsKey)
-    const actuals = Analyzer.mapToRollingSum(totals, true)
-    return Analyzer.subtractArrays(actuals, targets)
+    const totals = MathHelper.sumArrays(series, this.bookingsKey)
+    const actuals = MathHelper.mapToRollingSum(totals, true)
+    return MathHelper.subtractArrays(actuals, targets)
   }
 
   setupPipeline(pipeline) {
@@ -205,7 +205,7 @@ export default class BookingsPulse extends Report {
         monthly.unshift(0)
       }
 
-      const ytd = Analyzer.mapToRollingSum(
+      const ytd = MathHelper.mapToRollingSum(
         monthly.map(m => StringHelper.toNumberFromAmount(m, 1000))
       )
 

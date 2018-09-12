@@ -3,7 +3,7 @@ import {
   Dictionary,
   DateHelper,
   StringHelper,
-  Analyzer,
+  MathHelper,
   Customs
 } from '../../common'
 
@@ -31,7 +31,7 @@ const TOP_10_LIST_CONFIG = {
   filterBeforeSort: undefined,
   sortBy: (ra, rb) => rb[PRIME_KEY] - ra[PRIME_KEY],
   filterAfterSort: (r, i) => i < 10,
-  displayKeys: [PRIME_KEY, 'Close Date', 'Account Name']
+  displayKeys: [PRIME_KEY, 'Close Date', 'Forecast Status', 'Account Name']
 }
 
 export default class PipelinePulseNew extends Report {
@@ -81,7 +81,7 @@ export default class PipelinePulseNew extends Report {
         isRowTransformer: true,
         isBreakLineBefore: true,
         transform: (recs, modeler, series) => series.map(item => (
-          `$${StringHelper.toThousands(Analyzer.avgProperty(item, this.amountKey))}`))
+          `$${StringHelper.toThousands(MathHelper.avgProperty(item, this.amountKey))}`))
       },
       {
         key: '# Opportunities',

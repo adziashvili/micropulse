@@ -1,4 +1,7 @@
-import { StringHelper, Analyzer } from '..'
+import {
+  StringHelper,
+  MathHelper
+} from '..'
 
 export default class Customs {
   static countPerColunm() {
@@ -16,7 +19,7 @@ export default class Customs {
       const allTotal = totals.length > 0 ? totals[totals.length - 1] : 0
       // the last record includes all records, so its sum is the TOTAL for all
 
-      return totals.map(total => StringHelper.toPercent(Analyzer.devide(total, allTotal)))
+      return totals.map(total => StringHelper.toPercent(MathHelper.devide(total, allTotal)))
     }
   }
 
@@ -28,10 +31,10 @@ export default class Customs {
       })
       // This gives us the total of pipeline across the cols we have
 
-      const allTotal = Analyzer.sumProperty(modeler.model.records, property)
+      const allTotal = MathHelper.sumProperty(modeler.model.records, property)
       // This is precalculated and should give us the sum of all records
 
-      return totals.map(total => StringHelper.toPercent(Analyzer.devide(total, allTotal)))
+      return totals.map(total => StringHelper.toPercent(MathHelper.devide(total, allTotal)))
     }
   }
 
@@ -44,7 +47,7 @@ export default class Customs {
         }
         return item.reduce((sum, s) => sum + s[property], 0)
       })
-      const actuals = Analyzer.mapToRollingSum(totals, true)
+      const actuals = MathHelper.mapToRollingSum(totals, true)
       return actuals.map((v) => {
         const value = isToThousands ? StringHelper.toThousands(v) : v
         return isCurrency ? `$${value}` : value

@@ -4,7 +4,7 @@ import {
   DateHelper,
   StringHelper as SH,
   ReportHelper,
-  Analyzer,
+  MathHelper,
   Customs
 } from '../../common'
 
@@ -60,7 +60,7 @@ export default class UtilizationPulseNew extends Report {
           const invYTD = Customs.sumYTD(this.invKey)(recs, modeler, series)
           const totalUtilYTD = billYTD.map((b, i) => b + invYTD[i])
           const totalYTD = this.totalHoursYTD(series)
-          const result = Analyzer.devideArrays(totalUtilYTD, totalYTD)
+          const result = MathHelper.devideArrays(totalUtilYTD, totalYTD)
           return result.map(m => this.rh.addTrafficLights(m, SH.toPercent(m), 0.6, 0.9).bold)
         }
       },
@@ -70,7 +70,7 @@ export default class UtilizationPulseNew extends Report {
         transform: (recs, modeler, series) => {
           const billYTD = Customs.sumYTD(this.billKey)(recs, modeler, series)
           const totalYTD = this.totalHoursYTD(series)
-          const result = Analyzer.devideArrays(billYTD, totalYTD)
+          const result = MathHelper.devideArrays(billYTD, totalYTD)
           return result.map(m => this.rh.addTrafficLights(m, SH.toPercent(m), 0.4, 0.9))
         }
       },
@@ -80,7 +80,7 @@ export default class UtilizationPulseNew extends Report {
         transform: (recs, modeler, series) => {
           const invYTD = Customs.sumYTD(this.invKey)(recs, modeler, series)
           const totalYTD = this.totalHoursYTD(series)
-          const result = Analyzer.devideArrays(invYTD, totalYTD)
+          const result = MathHelper.devideArrays(invYTD, totalYTD)
           return result.map(m => this.rh.addTrafficLights(m, SH.toPercent(m), 0.2, 0.9))
         }
       },
@@ -97,9 +97,9 @@ export default class UtilizationPulseNew extends Report {
         key: '% MON Billable',
         isRowTransformer: true,
         transform: (recs, modeler, series) => {
-          const totalBilable = series.map(s => Analyzer.sumProperty(s, this.billKey))
+          const totalBilable = series.map(s => MathHelper.sumProperty(s, this.billKey))
           const totalHours = this.totalHours(series)
-          const billable = Analyzer.devideArrays(totalBilable, totalHours)
+          const billable = MathHelper.devideArrays(totalBilable, totalHours)
           return billable.map(m => this.rh.addTrafficLights(m, SH.toPercent(m), 0.4, 0.9))
         }
       },
@@ -107,9 +107,9 @@ export default class UtilizationPulseNew extends Report {
         key: '% MON Investment',
         isRowTransformer: true,
         transform: (recs, modeler, series) => {
-          const totalInv = series.map(s => Analyzer.sumProperty(s, this.invKey))
+          const totalInv = series.map(s => MathHelper.sumProperty(s, this.invKey))
           const totalHours = this.totalHours(series)
-          const investment = Analyzer.devideArrays(totalInv, totalHours)
+          const investment = MathHelper.devideArrays(totalInv, totalHours)
           return investment.map(m => this.rh.addTrafficLights(m, SH.toPercent(m), 0.2, 0.9))
         }
       },
@@ -118,14 +118,14 @@ export default class UtilizationPulseNew extends Report {
         isRowTransformer: true,
         isBreakLineBefore: true,
         transform: (recs, modeler, series) => {
-          const totalUtilYTD = Analyzer.PoP(this.totalYTD(series))
+          const totalUtilYTD = MathHelper.PoP(this.totalYTD(series))
           return totalUtilYTD.map(m => this.rh.addChangeSymbol(m, SH.toPercent(m)))
         }
       }, {
         key: '% MON MoM',
         isRowTransformer: true,
         transform: (recs, modeler, series) => {
-          const mom = Analyzer.PoP(this.totalMonthly(series))
+          const mom = MathHelper.PoP(this.totalMonthly(series))
           return mom.map(m => this.rh.addChangeSymbol(m, SH.toPercent(m)))
         }
       }
@@ -133,11 +133,11 @@ export default class UtilizationPulseNew extends Report {
   }
 
   totalMonthly(series) {
-    const totalBilable = series.map(s => Analyzer.sumProperty(s, this.billKey))
-    const totalInv = series.map(s => Analyzer.sumProperty(s, this.invKey))
+    const totalBilable = series.map(s => MathHelper.sumProperty(s, this.billKey))
+    const totalInv = series.map(s => MathHelper.sumProperty(s, this.invKey))
     const totalUtilized = totalBilable.map((m, i) => m + totalInv[i])
     const totalHours = this.totalHours(series)
-    return Analyzer.devideArrays(totalUtilized, totalHours)
+    return MathHelper.devideArrays(totalUtilized, totalHours)
   }
 
   totalYTD(series) {
@@ -145,7 +145,7 @@ export default class UtilizationPulseNew extends Report {
     const invYTD = Customs.sumYTD(this.invKey)(undefined, undefined, series)
     const totalUtilYTD = billYTD.map((b, i) => b + invYTD[i])
     const totalYTD = this.totalHoursYTD(series)
-    return Analyzer.devideArrays(totalUtilYTD, totalYTD)
+    return MathHelper.devideArrays(totalUtilYTD, totalYTD)
   }
 
   totalHoursYTD(series) {
@@ -155,8 +155,8 @@ export default class UtilizationPulseNew extends Report {
   }
 
   totalHours(series) {
-    const calendarHours = series.map(s => Analyzer.sumProperty(s, this.calKey))
-    const excludedHours = series.map(s => Analyzer.sumProperty(s, this.exKey))
+    const calendarHours = series.map(s => MathHelper.sumProperty(s, this.calKey))
+    const excludedHours = series.map(s => MathHelper.sumProperty(s, this.exKey))
     return calendarHours.map((m, i) => m - excludedHours[i])
   }
 }

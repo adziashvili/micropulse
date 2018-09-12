@@ -5,6 +5,7 @@ import StringBuffer from './helpers/stringBuffer'
 import DateHelper from './helpers/dateHelper'
 import ReportHelper from './helpers/reportHelper'
 import ExcelReader from './helpers/excelReader'
+import MathHelper from './helpers/mathHelper'
 import Parser from './sfdc/parser'
 import Record from './sfdc/record'
 import Table from './sfdc/table'
@@ -25,6 +26,7 @@ export {
   DateHelper,
   ReportHelper,
   ExcelReader,
+  MathHelper,
   Parser,
   Record,
   Table,
