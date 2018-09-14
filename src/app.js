@@ -26,6 +26,7 @@ sm.buildAll(names, REPORT_DATE)
 const isVerbose = false
 const bookingsYTD = './data/bookingsYTD.xlsx'
 const pipelineYTD = './data/pipelineYTD.xlsx'
+const pipeline6Months = './data/pipeline6months.xlsx'
 const utilizationYTD = './data/utilizationYTD.xlsx'
 
 // Promise.resolve(true)
@@ -36,8 +37,9 @@ const utilizationYTD = './data/utilizationYTD.xlsx'
 
 const analyzePipelinePromise = new PipelinePulseNew(pipelineYTD, sm).run(isVerbose)
 analyzePipelinePromise
-  .then(result => new BookingsPulse(bookingsYTD, sm, result).run(isVerbose))
+  .then(config => new BookingsPulse(bookingsYTD, sm, config.result).run(isVerbose))
   .then(new UtilizationPulseNew(utilizationYTD, sm).run(isVerbose))
+  .then(promise => promise.then(new PipelinePulseNew(pipeline6Months, sm).run(isVerbose)))
   .catch(e => console.log(e))
 
 // Runs pulse reports
