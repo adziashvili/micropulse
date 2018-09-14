@@ -45,6 +45,20 @@ export default class Report {
     return true
   }
 
+  /**
+   * Sets up a report and runs it.
+   * Return value includes:
+   *  table: The table instance used to feed modeler
+   *  modeler: The build Modeler intance
+   *  reporterConfig: The config used to feed reporter
+   *  reporter: Intance of a Reporter used for the report
+   *  result: The result of running the report.
+   *
+   * @param {Boolean} [isVerbose=false] Prints verbose if true
+   *
+   * @return {Object}  Return the various building blocks used to
+   *                   build this report.
+   */
   run(isVerbose = false) {
     if (!this.verifySelf()) {
       throw new Error('Invalid report subclassing. Check log.')
@@ -52,9 +66,9 @@ export default class Report {
 
     return ExcelReader
       .load(this.file)
-      .then(data => new Table(data.getWorksheet(data.worksheets[0].id), Parser))
-      .then((table) => {
-        const modeler = new Modeler(table)
+      .then(data => ({ table: new Table(data.getWorksheet(data.worksheets[0].id), Parser) }))
+      .then((config) => {
+        const modeler = new Modeler(config.table)
         const keys = ['cols', 'rows', 'stats', 'custom']
         keys.forEach((key) => {
           if (this[key].length > 0) {
@@ -62,11 +76,12 @@ export default class Report {
           }
         })
         modeler.build()
-        return modeler
+        config.modeler = modeler
+        return config
       })
-      .then((modeler) => {
-        const config = {
-          modeler,
+      .then((config) => {
+        const reporterConfig = {
+          modeler: config.modeler,
           dictionary: this.dictionary,
           isAddTotal: this.isAddTotal,
           isAddTotalRow: this.isAddTotalRow,
@@ -76,9 +91,12 @@ export default class Report {
           listConfig: this.listConfig,
           isVerbose
         }
-        return new Reporter(config)
+        return Object.assign(config, {
+          reporterConfig,
+          reporter: new Reporter(reporterConfig)
+        })
       })
-      .then(reporter => reporter.report(isVerbose))
+      .then(config => Object.assign(config, { result: config.reporter.report(isVerbose) }))
       .catch((e) => {
         e.message = `'Reporter Ooops! ${e.message}`.red.bold
         throw e // rejects the promise to report
