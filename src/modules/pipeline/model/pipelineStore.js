@@ -1,7 +1,7 @@
+import { DateHelper } from 'ika-helpers'
+
 import PipelineRecord from './pipelineRecord'
 import PipelineParser from './pipelineParser'
-
-import { DateHelper } from '../../../common'
 
 export default class PipelineStore {
   static get STORE_KEY() {

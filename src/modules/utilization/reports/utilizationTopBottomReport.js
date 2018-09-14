@@ -1,4 +1,4 @@
-import { DateHelper, ReportHelper } from '../../../common'
+import { DateHelper, ReportHelper } from 'ika-helpers'
 
 export default class UtilizationTopBottomReport {
   static get BURNOUT_FLAG() {

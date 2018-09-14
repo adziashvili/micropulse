@@ -1,9 +1,12 @@
 import {
-  TableReporter,
-  ReportHelper,
-  DateHelper,
   StringHelper as SH,
   StringBuffer,
+  DateHelper,
+  ReportHelper
+} from 'ika-helpers'
+
+import {
+  TableReporter,
   Layout,
   Dictionary,
   Analyzer

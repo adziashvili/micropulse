@@ -1,4 +1,4 @@
-import { ReportHelper, StringHelper } from '../../../common'
+import { ReportHelper, StringHelper } from 'ika-helpers'
 
 const TGT_BILLABLE = 0.4
 const TGT_INVESTMENT = 0.2

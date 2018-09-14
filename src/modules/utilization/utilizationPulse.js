@@ -1,3 +1,5 @@
+import { ReportHelper } from 'ika-helpers'
+
 import {
   UtilizationYTDReport,
   UtilizationTripleGreenReport,
@@ -6,7 +8,6 @@ import {
 } from './reports'
 
 import { UtilizationRecord, UtilizationStore } from './model'
-import { ReportHelper } from '../../common'
 
 export default class UtilizationPulse {
   constructor(storeManager, date) {

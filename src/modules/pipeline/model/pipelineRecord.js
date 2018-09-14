@@ -1,4 +1,4 @@
-import { DateHelper, StringHelper } from '../../../common'
+import { DateHelper, StringHelper } from 'ika-helpers'
 
 const EMPTY = ''
 

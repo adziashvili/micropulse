@@ -1,7 +1,5 @@
-import {
-  JSONHelper,
-  Analyzer
-} from '..'
+import { JSONHelper } from 'ika-helpers'
+import { Analyzer } from '..'
 
 export default class Modeler {
   constructor(table) {

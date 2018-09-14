@@ -3,7 +3,7 @@ import {
   ReportHelper,
   DateHelper,
   StringHelper as SH
-} from '..'
+} from 'ika-helpers'
 
 export default class TableReporter {
   constructor(array = [], {

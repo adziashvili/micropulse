@@ -1,4 +1,4 @@
-import { StringHelper, ReportHelper } from '../../../common'
+import { StringHelper, ReportHelper } from 'ika-helpers'
 import { UtilizationRecord } from '../model'
 
 export default class UtilizationAboveSixtyReport {

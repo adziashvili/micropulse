@@ -1,7 +1,7 @@
+import { StringHelper as SH } from 'ika-helpers'
 import {
   Record,
   Dictionary,
-  StringHelper as SH,
   Analyzer as AI
 } from '..'
 

@@ -1,5 +1,6 @@
+import { StringHelper as SH, ReportHelper, DateHelper } from 'ika-helpers'
+
 import { PipelineStore } from './model'
-import { StringHelper as SH, ReportHelper, DateHelper } from '../../common'
 import { PipelineReport } from './reports'
 
 export default class PipelinePulse {

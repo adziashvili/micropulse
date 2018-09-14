@@ -1,4 +1,4 @@
-import { ReportHelper, StringBuffer, StringHelper as SH } from '../../../common'
+import { ReportHelper, StringBuffer, StringHelper as SH } from 'ika-helpers'
 
 export default class PipelineReport {
   constructor(store) {

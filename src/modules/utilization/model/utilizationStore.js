@@ -1,4 +1,5 @@
-import { JSONHelper } from '../../../common'
+import { JSONHelper } from 'ika-helpers'
+
 import UtilizationRecord from './utilizationRecord'
 import UtilizationReader from './utilizationReader'
 

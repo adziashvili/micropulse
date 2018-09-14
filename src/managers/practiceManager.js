@@ -1,4 +1,4 @@
-import { FSHelper, DateHelper } from '../common'
+import { FSHelper, DateHelper } from 'ika-helpers'
 
 export default class PracticeManager {
   constructor(filePath) {

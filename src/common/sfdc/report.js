@@ -1,5 +1,5 @@
+import { ExcelReader } from 'ika-helpers'
 import {
-  ExcelReader,
   Parser,
   Modeler,
   Table,

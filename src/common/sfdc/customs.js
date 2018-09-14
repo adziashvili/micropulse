@@ -1,7 +1,7 @@
 import {
   StringHelper,
   MathHelper
-} from '..'
+} from 'ika-helpers'
 
 export default class Customs {
   static countPerColunm() {

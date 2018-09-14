@@ -1,4 +1,5 @@
-import { Parser, MathHelper } from '..'
+import { MathHelper } from 'ika-helpers'
+import { Parser } from '..'
 
 const DICTIONARY = [
   { key: 'countTotal', shortName: 'Count' },
