@@ -52,7 +52,7 @@ export default class Modeler {
     }
 
     const filterList = this.getFilterList(fRows, fCols)
-    model.records = this.table.list.filter(r => filterList.every((f) => {
+    model.records = this.table.records.filter(r => filterList.every((f) => {
       const transformer = this.transformer(f.key)
       return f.condition(transformer ? transformer(r[f.key]) : r[f.key])
     }))
@@ -165,7 +165,7 @@ export default class Modeler {
   describeAspects(strKey) {
     const description = []
     this[strKey].forEach((aspect) => {
-      const distinctValues = this.table.distinct(aspect.key, this.transformer(aspect.key))
+      const distinctValues = this.table.keyDistinctValues(aspect.key, this.transformer(aspect.key))
       const maxStringLength = Math.max(...distinctValues.map(v => `${v}`.length))
       const count = distinctValues.length
       description.push({
@@ -237,11 +237,11 @@ export default class Modeler {
       rollup,
       sortby
     } = rows[0]
-    const type = this.table.getType(key)
+    const type = this.table.keyType(key)
     let isTotalAdded = inIsTotalAdded
 
     if (data.rows) {
-      const values = !sortby ? this.table.distinct(key, transform) : sortby
+      const values = !sortby ? this.table.keyDistinctValues(key, transform) : sortby
 
       if (!!rollup && !!rollup.key && !values.includes(rollup.key)) {
         values.push(rollup.key)
@@ -278,8 +278,8 @@ export default class Modeler {
     // nothing to add
 
     const { key, transform } = cols[0]
-    const type = this.table.getType(key)
-    const values = this.table.distinct(key, transform)
+    const type = this.table.keyType(key)
+    const values = this.table.keyDistinctValues(key, transform)
 
     data.cols = []
     values.forEach((value) => {
@@ -308,7 +308,7 @@ export default class Modeler {
   set rows(rows = []) {
     if (rows.length > 0) {
       const keys = rows.map(row => row.key)
-      if (!this.table.isValidKeys(keys)) {
+      if (!this.table.hasKeys(keys)) {
         throw new Error(`Invalid row keys: ${keys}`.red)
       }
     }
@@ -322,7 +322,7 @@ export default class Modeler {
   set cols(cols) {
     if (cols.length > 0) {
       const keys = cols.map(col => col.key)
-      if (!this.table.isValidKeys(keys)) {
+      if (!this.table.hasKeys(keys)) {
         throw new Error('Invalid cols. Check Spelling or misplaced spaces in cols headers'.red)
       }
     }
@@ -334,7 +334,7 @@ export default class Modeler {
   }
 
   set stats(stats) {
-    if (stats.length > 0 && !this.table.isValidKeys(stats.map(s => s.key))) {
+    if (stats.length > 0 && !this.table.hasKeys(stats.map(s => s.key))) {
       throw new Error('Invalid cols: All headers must be valid headers in the file')
     }
     this._stats = stats

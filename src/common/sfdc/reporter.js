@@ -169,7 +169,7 @@ export default class Reporter {
     let { stat } = stats[0]
 
     if (!stat) {
-      stat = Analyzer.getDefaultStatKey(this.modeler.table.getType(key))
+      stat = Analyzer.getDefaultStatKey(this.modeler.table.keyType(key))
     }
 
     if (!Object.keys(objStats).includes(key) || !Object.keys(objStats[key]).includes(stat)) {
@@ -185,7 +185,7 @@ export default class Reporter {
     if (transformer) {
       return transformer(value)
     }
-    return this.defaultFormat(this.modeler.table.getType(key), value)
+    return this.defaultFormat(this.modeler.table.keyType(key), value)
   }
 
   getStatFormatType(key, property) {
@@ -193,7 +193,7 @@ export default class Reporter {
       return 'number'
     }
 
-    const type = this.modeler.table.getType(key)
+    const type = this.modeler.table.keyType(key)
 
     if (type === 'boolean' && ['avg', 'avgNonEmpty'].includes(property)) {
       return 'percent'
@@ -419,7 +419,7 @@ export default class Reporter {
 
     const trConf = Object.assign({}, conf)
     trConf.headers = conf.displayKeys.map(m => this.dictionary.get(m))
-    trConf.types = conf.displayKeys.map(m => this.modeler.table.getType(m))
+    trConf.types = conf.displayKeys.map(m => this.modeler.table.keyType(m))
     trConf.padding = padding
 
     new TableReporter(row.records, trConf).report()

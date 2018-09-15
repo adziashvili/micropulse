@@ -22,17 +22,6 @@ export default class Parser {
     this.firstDataColIndex = 1
   }
 
-  get CELLS() {
-    return ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
-      'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
-      'W', 'X', 'Y', 'Z'
-    ]
-  }
-
-  get NOT_FOUND() {
-    return -1
-  }
-
   parse() {
     throw new Error('Exception: You need to implement this method')
   }
@@ -122,6 +111,16 @@ export default class Parser {
     return values
   }
 
+  /**
+   * Reads colunm values starting from row number - inRow through
+   * inrowEnd.
+   *
+   * @param {Number} col    Number of colunm to read, first col is 1
+   * @param {Number} inRow  Row number to start reading from
+   * @param {Number} rowEnd Row number to read through (included in the result)
+   *
+   * @return {Array} Array of values read from the worksheet for a give colunm.
+   */
   readCol(col, inRow, rowEnd) {
     const values = []
     let row = inRow
@@ -136,6 +135,17 @@ export default class Parser {
       }
     }
     return values
+  }
+
+  /**
+   * Reads a cell value
+   *
+   * @param {String} cell e.g. A7
+   *
+   * @return {any} As read from the file
+   */
+  readCell(cell) {
+    return this.ws.getCell(cell).value
   }
 
   /**
@@ -181,26 +191,6 @@ export default class Parser {
   }
 
   /**
-   * Reads a cell value
-   *
-   * @param {String} cell e.g. A7
-   *
-   * @return {any} As read from the file
-   */
-  readCell(cell) {
-    return this.ws.getCell(cell).value
-  }
-
-  /**
-   * Returns the size of the records loaded
-   *
-   * @return {[type]} [description]
-   */
-  get size() {
-    return this.records.length
-  }
-
-  /**
    * Clones records. Assumes the record have clone method.
    *
    * @return {[type]} [description]
@@ -237,14 +227,6 @@ export default class Parser {
   getReportName() {
     const name = this.readCell(REPORT_NAME_CELL)
     return name === null ? 'UNKNOWN REPORT NAME' : name
-  }
-
-  /**
-   * Number colunm values that represent 0 without explicity setting it
-   * to z
-   */
-  static get ZERO_OR_MISSING() {
-    return [null, '', '-']
   }
 
   /**
@@ -296,11 +278,39 @@ export default class Parser {
       })
   }
 
+  /**
+   * Number colunm values that represent 0 without explicity setting it
+   * to z
+   */
+  static get ZERO_OR_MISSING() {
+    return [null, '', '-']
+  }
+
+  /**
+   * Returns the size of the records loaded
+   *
+   * @return {[type]} [description]
+   */
+  get size() {
+    return this.records.length
+  }
+
   get meta() {
     return this._meta
   }
 
   set meta(meta) {
     this._meta = meta
+  }
+
+  get CELLS() {
+    return ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
+      'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+      'W', 'X', 'Y', 'Z'
+    ]
+  }
+
+  get NOT_FOUND() {
+    return -1
   }
 }

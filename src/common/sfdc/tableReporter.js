@@ -92,7 +92,7 @@ export default class TableReporter {
     return lengths
   }
 
-  getType(key) {
+  keyType(key) {
     // console.log(this.types);
     const index = this.displayKeys.findIndex(dk => dk === key)
     if (index >= 0 && index < this.types.length - 1) {
@@ -102,7 +102,7 @@ export default class TableReporter {
   }
 
   format(key, value) {
-    const type = this.getType(key)
+    const type = this.keyType(key)
     const v = type === 'date' ? new Date(value) : value
 
     return this.defaultFormatList(v, type)

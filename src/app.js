@@ -39,7 +39,8 @@ const analyzePipelinePromise = new PipelinePulseNew(pipelineYTD, sm).run(isVerbo
 analyzePipelinePromise
   .then(config => new BookingsPulse(bookingsYTD, sm, config.result).run(isVerbose))
   .then(new UtilizationPulseNew(utilizationYTD, sm).run(isVerbose))
-  .then(promise => promise.then(new PipelinePulseNew(pipeline6Months, sm).run(isVerbose)))
+  .then(new PipelinePulseNew(pipeline6Months, sm).run(isVerbose))
   .catch(e => console.log(e))
+
 
 // Runs pulse reports
