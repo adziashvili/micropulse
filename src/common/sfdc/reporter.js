@@ -2,14 +2,14 @@ import {
   StringHelper as SH,
   StringBuffer,
   DateHelper,
-  ReportHelper
+  ReportHelper,
+  Statistics
 } from 'ika-helpers'
 
 import {
   TableReporter,
   Layout,
-  Dictionary,
-  Analyzer
+  Dictionary
 }
 from '..'
 
@@ -39,7 +39,7 @@ export default class Reporter {
     this.layout.firstColShrinkBy = firstColShrinkBy
     this.layout.otherColShrinBy = otherColShrinBy
 
-    this._dictionary = new Dictionary(Analyzer.dictionary())
+    this._dictionary = new Dictionary(Statistics.dictionary())
     this.dictionary = dictionary
 
     this.summary = []
@@ -169,7 +169,7 @@ export default class Reporter {
     let { stat } = stats[0]
 
     if (!stat) {
-      stat = Analyzer.getDefaultStatKey(this.modeler.table.keyType(key))
+      stat = Statistics.getDefaultStatKey(this.modeler.table.keyType(key))
     }
 
     if (!Object.keys(objStats).includes(key) || !Object.keys(objStats[key]).includes(stat)) {
@@ -189,7 +189,7 @@ export default class Reporter {
   }
 
   getStatFormatType(key, property) {
-    if (!Analyzer.typeSensitiveStats().includes(property)) {
+    if (!Statistics.typeSensitiveStats().includes(property)) {
       return 'number'
     }
 

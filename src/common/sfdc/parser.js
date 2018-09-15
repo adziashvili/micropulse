@@ -279,14 +279,6 @@ export default class Parser {
   }
 
   /**
-   * Number colunm values that represent 0 without explicity setting it
-   * to z
-   */
-  static get ZERO_OR_MISSING() {
-    return [null, '', '-']
-  }
-
-  /**
    * Returns the size of the records loaded
    *
    * @return {[type]} [description]

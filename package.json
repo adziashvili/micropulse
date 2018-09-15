@@ -28,6 +28,6 @@
   "dependencies": {
     "colors": "^1.3.2",
     "exceljs": "^1.6.2",
-    "ika-helpers": "^1.0.10"
+    "ika-helpers": "^1.0.11"
   }
 }
