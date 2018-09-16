@@ -1,15 +1,12 @@
 import { ExcelReader, FSHelper } from 'ika-helpers'
 
-import { UtilizationStore } from '../modules/utilization/model'
-import { PipelineStore } from '../modules/pipeline/model'
+import { UtilizationStore } from '../reports/utilization/model'
 
 const path = require('path')
 
 const UTILIZATION_NEW_DATA_FILE = 'utilization.xlsx'
-const PIPELINE_NEW_DATA_FILE = 'pipeline.xlsx'
 
 const UTILIZATION_DB = 'utilizationDB.json'
-const PIPELINE_DB = 'pipelineDB.json'
 
 const _STORAGE_ROOT = '../../data'
 const _ARCHIVE_FOLDER = 'archive'
@@ -53,11 +50,6 @@ export default class StoreManager {
       store: new UtilizationStore(this.pm),
       path: UTILIZATION_DB,
       newDataFileName: UTILIZATION_NEW_DATA_FILE
-    }, {
-      key: PipelineStore.STORE_KEY,
-      store: new PipelineStore(this.pm),
-      path: PIPELINE_DB,
-      newDataFileName: PIPELINE_NEW_DATA_FILE
     }]
 
     this.stores.forEach((s) => {

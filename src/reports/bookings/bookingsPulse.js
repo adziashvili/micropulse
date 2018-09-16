@@ -30,7 +30,7 @@ const BOOKINGS_DICTIONARY_DATA = [
 // }
 
 export default class BookingsPulse extends Report {
-  constructor(pathToFile, storeManager, pipeline) {
+  constructor(pathToFile, storeManager, pipelineConfig) {
     super({
       file: pathToFile,
       dictionary: new Dictionary(BOOKINGS_DICTIONARY_DATA),
@@ -41,7 +41,7 @@ export default class BookingsPulse extends Report {
     })
 
     this.sm = storeManager
-    this.pipeline = this.setupPipeline(pipeline)
+    this.pipeline = this.setupPipeline(pipelineConfig)
     this.bookingsKey = 'Amount (converted)'
     this.setup()
   }
@@ -196,8 +196,9 @@ export default class BookingsPulse extends Report {
     return MathHelper.subtractArrays(actuals, targets)
   }
 
-  setupPipeline(pipeline) {
-    if (!pipeline) return []
+  setupPipeline(pipelineConfig) {
+    if (!pipelineConfig || !pipelineConfig.result) return []
+    const pipeline = pipelineConfig.result
 
     return pipeline.map((item) => {
       const key = item[0]

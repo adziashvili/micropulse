@@ -37,7 +37,7 @@ const TOP_10_LIST_CONFIG = {
   displayKeys: [PRIME_KEY, 'Close Date', 'Forecast Status', 'Account Name']
 }
 
-export default class PipelinePulseNew extends Report {
+export default class PipelinePulse extends Report {
   constructor(file, storeManager) {
     super({
       file,
