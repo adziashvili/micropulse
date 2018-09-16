@@ -43,6 +43,7 @@ export default class Reporter {
     this.dictionary = dictionary
 
     this.summary = []
+    this.verbatim = []
   }
 
   set dictionary(dictionary) {
@@ -97,7 +98,7 @@ export default class Reporter {
 
     rh.newLine(2)
 
-    return this.summary
+    return { summary: this.summary, verbatim: this.verbatim }
   }
 
   addHeadersOnRepeat() {
@@ -386,6 +387,7 @@ export default class Reporter {
       throw new Error(msg)
     }
 
+    const verbatimValues = []
     const sb = new StringBuffer()
     for (let i = 0; i < values.length; i += 1) {
       if (i === 0) {
@@ -399,7 +401,10 @@ export default class Reporter {
       } else {
         sb.appendExact(values[i], vLengths[i])
       }
+      verbatimValues.push(values[i])
     }
+
+    this.verbatim.push(verbatimValues)
     console.log(!decorator ? sb.toString() : decorator(sb.toString()))
   }
 

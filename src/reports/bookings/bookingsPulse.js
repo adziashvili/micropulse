@@ -197,8 +197,8 @@ export default class BookingsPulse extends Report {
   }
 
   setupPipeline(pipelineConfig) {
-    if (!pipelineConfig || !pipelineConfig.result) return []
-    const pipeline = pipelineConfig.result
+    if (!pipelineConfig || !pipelineConfig.result || !pipelineConfig.result.summary) return []
+    const pipeline = pipelineConfig.result.summary
 
     return pipeline.map((item) => {
       const key = item[0]
