@@ -1,11 +1,12 @@
-import UtilizationYTDReport from './utilizationYTDReport'
 import UtilizationTripleGreenReport from './utilizationTripleGreenReport'
 import UtilizationAboveSixtyReport from './utilizationAboveSixtyReport'
-import UtilizationTopBottomReport from './utilizationTopBottomReport'
+import UtilizationTopXReport from './utilizationTopXReport'
+import UtFollowupReport from './utFollowupReport'
+
 
 export {
-    UtilizationYTDReport,
     UtilizationTripleGreenReport,
     UtilizationAboveSixtyReport,
-    UtilizationTopBottomReport
+    UtilizationTopXReport,
+    UtFollowupReport
 }

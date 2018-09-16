@@ -9,6 +9,7 @@ import TableReporter from './sfdc/tableReporter'
 import Report from './sfdc/report'
 import Layout from './sfdc/layout'
 import Customs from './sfdc/customs'
+import Verbatim from './sfdc/verbatim'
 
 export {
   Record,
@@ -21,5 +22,6 @@ export {
   TableReporter,
   Report,
   Layout,
-  Customs
+  Customs,
+  Verbatim
 }

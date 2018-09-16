@@ -1,31 +1,24 @@
-import { StringHelper, ReportHelper } from 'ika-helpers'
-import { UtilizationRecord } from '../model'
+import { ReportHelper, StringHelper } from 'ika-helpers'
+import UtFollowupReport from './utFollowupReport'
 
-export default class UtilizationAboveSixtyReport {
-  constructor(store, type) {
-    this.store = store
-    this.type = type
+export default class UtAboveSixtyReport extends UtFollowupReport {
+  constructor(config = undefined, storeManager) {
+    super(config, storeManager)
+
     this.leaderboard = []
-    this.rounds = this.store.date.getMonth()
-    this.rh = new ReportHelper(`${type} ABOVE 60% LEADERBOARD`, this.store
-      .date)
-    this.initialise()
+    this.rounds = this.verbatim.colCount - 2
+    this.rh = new ReportHelper('LEADERBOARD: TOTAL MONTHLY UT ABOVE 60%')
+    this._build()
   }
 
-  initialise() {
-    const store = this.store
-    const model = this.type === UtilizationRecord.TYPE_YTD ?
-      store.ytd :
-      store.monthly
-    const date = store.date
+  _build() {
+    this.names.forEach(name => this.leaderboard.push({ name, score: 0 }))
 
-    store.names.forEach(name => this.leaderboard.push({ name, score: 0 }))
-
-    store.names.forEach((name) => {
-      for (let m = 0; m < date.getMonth(); m += 1) {
-        if (model[name].Total[m] >= 0.6) {
-          this.leaderboard.find(candidate => candidate.name === name).score += 1
-        }
+    this.names.forEach((name) => {
+      const utValues = this.getYTDTotalUtilization(name)
+      const timesAboveSixty = this.getTimesAbove(utValues, 60)
+      if (timesAboveSixty) {
+        this.leaderboard.find(candidate => candidate.name === name).score += timesAboveSixty
       }
     })
 
@@ -34,7 +27,7 @@ export default class UtilizationAboveSixtyReport {
 
   report() {
     this.rh.addReportTitle()
-    this.rh.addSubtitle(`Times ${this.type} utilization was above 60%`)
+    this.rh.addSubtitle('Times monthy utilization was above 60%')
 
     let i = 0
     let leader = 1
@@ -52,7 +45,7 @@ export default class UtilizationAboveSixtyReport {
   addPosition(leader) {
     const successRatio = leader.score / this.rounds * 100
     const name = StringHelper.exact(leader.name, 10).bold
-    const successRatioStr = successRatio.toFixed(1)
-    return `${name} ${leader.score} times\t${successRatioStr}% of ${this.rounds} rounds`
+    const successRatioStr = successRatio.toFixed(0)
+    return `${name} ${leader.score} times \t ${successRatioStr}% of ${this.rounds} rounds`
   }
 }

@@ -1,26 +1,22 @@
 import { ReportHelper, StringHelper } from 'ika-helpers'
+import UtFollowupReport from './utFollowupReport'
 
-export default class UtilizationTripleGreenReport {
-  constructor(store) {
-    this.store = store
+export default class UtilizationTripleGreenReport extends UtFollowupReport {
+  constructor(config = undefined, storeManager) {
+    super(config, storeManager)
     this.leaderboard = []
-    this.rounds = this.store.date.getMonth()
-    this.rh = new ReportHelper('TRIPLE GREEN LEADERBOARD', this.store.date)
-    this.initialise()
+    this.rounds = this.verbatim.colCount - 2
+    this.rh = new ReportHelper('LEADERBOARD: TRIPLE GREENS')
+    this._build()
   }
 
-  initialise() {
-    const store = this.store
-    const monthly = store.monthly
-    const date = store.date
-
-    store.names.forEach((name) => {
-      this.leaderboard.push({ name, score: 0 })
-    })
-
-    store.names.forEach((name) => {
-      for (let m = 0; m < date.getMonth(); m += 1) {
-        if (monthly[name].Billable[m] >= 0.4 && monthly[name].Investment[m] >= 0.2) {
+  _build() {
+    this.names.forEach(name => this.leaderboard.push({ name, score: 0 }))
+    this.names.forEach((name) => {
+      const billables = this.getMonthlyBillableUtilization(name)
+      const investments = this.getMonthlyInvestmentUtilization(name)
+      for (let m = 0; m < this.rounds; m += 1) {
+        if (billables[m + 1] >= 40 && investments[m + 1] >= 20) {
           this.leaderboard.find(candidate => candidate.name === name).score += 1
         }
       }
@@ -32,7 +28,8 @@ export default class UtilizationTripleGreenReport {
   report() {
     this.rh.addReportTitle()
     const green = 'Green'.green.italic
-    this.rh.addSubtitle(`Practice is ${green} on Billable, Investment and Total Utilization`.grey.italic)
+    this.rh.addSubtitle(`Times a Practice is ${green} on Billable, Investment and Total Utilization`.grey
+      .italic)
 
     let i = 0
     let leader = 1
@@ -49,8 +46,8 @@ export default class UtilizationTripleGreenReport {
   }
 
   addPosition(leader) {
-    const successRatioStr = (leader.score / this.rounds * 100).toFixed(1)
     const nameStr = StringHelper.exact(leader.name, 10).bold
-    return `${nameStr}$${leader.score} times\t${successRatioStr} % of ${this.rounds} rounds`
+    const successRatioStr = (leader.score / this.rounds * 100).toFixed(0)
+    return `${nameStr} ${leader.score} times \t ${successRatioStr}% of ${this.rounds} rounds`
   }
 }

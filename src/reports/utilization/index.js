@@ -1,7 +1,15 @@
-import UtilizationPulse from './utilizationPulse'
+import {
+  UtFollowupReport,
+  UtilizationAboveSixtyReport,
+  UtilizationTripleGreenReport,
+  UtilizationTopXReport
+} from './reports'
 import UtilizationPulseNew from './utilizationPulseNew'
 
 export {
-    UtilizationPulse,
-    UtilizationPulseNew
+  UtFollowupReport,
+  UtilizationAboveSixtyReport,
+  UtilizationTripleGreenReport,
+  UtilizationTopXReport,
+  UtilizationPulseNew
 }

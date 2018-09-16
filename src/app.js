@@ -1,8 +1,4 @@
-import {
-  UtilizationPulse,
-  MicroPulse
-} from './reports'
-
+import { MicroPulse } from './reports'
 import { StoreManager, PracticeManager } from './managers'
 
 require('colors')
@@ -24,10 +20,5 @@ function start() {
 }
 
 start()
-
-// Promise.resolve(true)
-//   .then(new UtilizationPulse(sm, REPORT_DATE).run(isVerbose))
-//   .then(sm.save())
-//   .catch(e => console.log(e))
 
 // Runs pulse reports
