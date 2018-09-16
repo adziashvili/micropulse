@@ -1,7 +1,5 @@
 import { ExcelReader, FSHelper } from 'ika-helpers'
 
-import { UtilizationStore } from '../reports/utilization/model'
-
 const path = require('path')
 
 const UTILIZATION_NEW_DATA_FILE = 'utilization.xlsx'
@@ -45,12 +43,14 @@ export default class StoreManager {
 
   constructor(practiceManager) {
     this._pm = practiceManager
-    this._stores = [{
-      key: UtilizationStore.STORE_KEY,
-      store: new UtilizationStore(this.pm),
-      path: UTILIZATION_DB,
-      newDataFileName: UTILIZATION_NEW_DATA_FILE
-    }]
+    this._stores = [
+    //   {
+    //   key: UtilizationStore.STORE_KEY,
+    //   store: new UtilizationStore(this.pm),
+    //   path: UTILIZATION_DB,
+    //   newDataFileName: UTILIZATION_NEW_DATA_FILE
+    // }
+  ]
 
     this.stores.forEach((s) => {
       s.store.initialise(require(StoreManager.path(s.path)))
@@ -81,10 +81,6 @@ export default class StoreManager {
   getStoreEntry(key) {
     const matchingStores = this.stores.filter(store => store.key === key)
     return matchingStores.length === 1 ? matchingStores[0] : null
-  }
-
-  get utilizationStore() {
-    return this.getStore(UtilizationStore.STORE_KEY)
   }
 
   buildAll(names, date) {

@@ -22,7 +22,7 @@ const UTILIZATION_DICTIONARY_DATA = [
   { key: 'Historical Credited Hours', shortName: 'Investment' }
 ]
 
-export default class UtilizationPulseNew extends Report {
+export default class UtilizationPulse extends Report {
   constructor(file, storeManager) {
     super({
       file,

@@ -1,7 +1,7 @@
 import { BookingsPulse } from './bookings'
 import { PipelinePulse } from './pipeline'
 import {
-  UtilizationPulseNew,
+  UtilizationPulse,
   UtilizationAboveSixtyReport,
   UtilizationTripleGreenReport,
   UtilizationTopXReport
@@ -11,7 +11,7 @@ import MicroPulse from './micropulse'
 export {
   BookingsPulse,
   PipelinePulse,
-  UtilizationPulseNew,
+  UtilizationPulse,
   UtilizationAboveSixtyReport,
   UtilizationTripleGreenReport,
   UtilizationTopXReport,

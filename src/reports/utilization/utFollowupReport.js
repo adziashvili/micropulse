@@ -1,4 +1,4 @@
-import { Verbatim } from '../../../common'
+import { Verbatim } from '../../common'
 
 export default class UtFollowupReport {
   constructor(config = undefined, storeManager = undefined) {

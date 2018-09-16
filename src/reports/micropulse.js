@@ -1,7 +1,7 @@
 import {
   BookingsPulse,
   PipelinePulse,
-  UtilizationPulseNew,
+  UtilizationPulse,
   UtilizationAboveSixtyReport,
   UtilizationTripleGreenReport,
   UtilizationTopXReport
@@ -20,7 +20,7 @@ export default class MicroPulse {
       { class: PipelinePulse, path: pipelineYTD },
       { class: BookingsPulse, path: bookingsYTD },
       {
-        class: UtilizationPulseNew,
+        class: UtilizationPulse,
         path: utilizationYTD,
         followups: [
           UtilizationAboveSixtyReport,
