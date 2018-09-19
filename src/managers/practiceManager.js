@@ -17,6 +17,13 @@ export default class PracticeManager {
     this.noAPJOrder = ['ANZ', 'ASEAN', 'S.KOREA', 'INDIA', 'APAC', 'JAPAN', 'APJ Shared']
   }
 
+  /**
+   * Reqtunes the quertarly target index based on the month requested.
+   *
+   * @param {Number} [monthIndex=0] Month index 0..11
+   *
+   * @return {Number} The index of the next quertar 0..11
+   */
   getTargetIndex(monthIndex = 0) {
     if (monthIndex <= 2) return 2
     if (monthIndex <= 5) return 5
@@ -92,6 +99,15 @@ export default class PracticeManager {
     )
   }
 
+  /**
+   * Retrives a monthly target for a given practice metric.
+   *
+   * @param {String} name   Practice Name
+   * @param {String} metric Metric name
+   * @param {Number} month  Month index (0..11)
+   *
+   * @return {Object} The entry for the target matching name, metric and month
+   */
   getTarget(name, metric, month) {
     const targets = this.getTargets(name, metric)
     const findByIndex = (!Number.isNaN(month) && month >= 0 && month <= 11)
@@ -104,12 +120,37 @@ export default class PracticeManager {
     return targets.find(t => dh.isSameMonth(t.motnh))
   }
 
+  /**
+   * Retrives the targets for a given practice (denoted by name) for a given metric.
+   *
+   * @param {String} name   Practice name
+   * @param {String} metric Metric name
+   *
+   * @return {Array} Array of targets for a given practice
+   */
   getTargets(name, metric) {
     const practice = this.getByName(name)
     if (!practice || !practice.targets) return []
     return practice.targets.filter(t => t.metric === metric)
   }
 
+  /**
+   * Returns an array of targets for a given practice metric.
+   *
+   * @param {String}  name                  Name of practice
+   * @param {String}  metric                Metric name
+   * @param {Number}  inYear                Optional. Year to lookup targets for, e.g. 2018
+   *                                        If ommitted, current year will be used.
+   * @param {Number}  [inUpToMonthIndex=11] Optional defaults to 11, month index: 0..11.
+   *                                        If provided, targets upto inUpToMonthIndex
+   *                                        will be returned.
+   * @param {Boolean} [isAddFY=true]        Optional, defaults to true.
+   *                                        If true, an annual target is provided for the
+   *                                        metric as the last element in the result array.
+   *
+   * @return {[type]}  [description]        Array of targets upto specfied month and
+   *                                        optionally a FY tgt as the last element.
+   */
   getAnnualTargetsbyMonth(name, metric, inYear, inUpToMonthIndex = 11, isAddFY = true) {
     const NOP_TARGET = undefined
     const year = !inYear ? new Date(Date.now()).getFullYear() : inYear
@@ -130,7 +171,7 @@ export default class PracticeManager {
       const lastValueIndex = values.length - 1
       values[lastValueIndex] = lastMonth ? lastMonth.target : values[lastValueIndex]
     }
-    // This add the next months target to the list
+    // This adds the next months target to the list
 
     if (isAddFY) {
       const fy = targets.find(t => t.index === 11)
@@ -154,6 +195,13 @@ export default class PracticeManager {
     return practice ? practice.name : 'UNKNOWN'
   }
 
+  /**
+   * Saves the practice manager to a sepcfic path.
+   *
+   * @param {String} path Path to file to save to
+   *
+   * @return {Nothing} Does not return a value
+   */
   save(path) {
     if (path) {
       FSHelper.save(this.pdb, path)
