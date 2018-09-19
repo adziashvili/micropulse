@@ -30,7 +30,7 @@ const BOOKINGS_DICTIONARY_DATA = [
 // }
 
 export default class BookingsPulse extends Report {
-  constructor(pathToFile, storeManager, pipelineConfig) {
+  constructor(pathToFile, practiceManager, pipelineConfig) {
     super({
       file: pathToFile,
       dictionary: new Dictionary(BOOKINGS_DICTIONARY_DATA),
@@ -40,7 +40,7 @@ export default class BookingsPulse extends Report {
       // listConfig: TOP_10_LIST_CONFIG
     })
 
-    this.sm = storeManager
+    this.pm = practiceManager
     this.pipeline = this.setupPipeline(pipelineConfig)
     this.bookingsKey = 'Amount (converted)'
     this.setup()
@@ -55,8 +55,8 @@ export default class BookingsPulse extends Report {
 
     this.rows = [{
       key: 'Project: Practice',
-      rollup: this.sm.pm.rollupAPAC,
-      sortby: this.sm.pm.noAPJandSharedOrder
+      rollup: this.pm.rollupAPAC,
+      sortby: this.pm.noAPJandSharedOrder
     }]
     // Defines one grouping by practice with rollup for APAC
 
@@ -86,8 +86,7 @@ export default class BookingsPulse extends Report {
         isRowTransformer: true,
         transform: (recs, modeler, series, key) => {
           if (series.length === 0) return []
-          const { pm } = this.sm
-          return pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
+          return this.pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
             .map((v) => {
               if (!v) return ''
               return `$${StringHelper.toThousands(v)}`
@@ -99,8 +98,7 @@ export default class BookingsPulse extends Report {
         isRowTransformer: true,
         transform: (recs, modeler, series, key) => {
           if (series.length === 0) return []
-          const { pm } = this.sm
-          const targets = pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
+          const targets = this.pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
           const totals = MathHelper.sumArrays(series, this.bookingsKey)
           const actuals = MathHelper.mapToRollingSum(totals, true)
 
@@ -121,7 +119,7 @@ export default class BookingsPulse extends Report {
             return `$${StringHelper.toThousands(this.pipelineValue(key))}`
           }
           if (i === series.length - 2) {
-            const nextQMonthIndex = this.sm.pm.getTargetIndex(i)
+            const nextQMonthIndex = this.pm.getTargetIndex(i)
             return `$${StringHelper.toThousands(this.pipelineValue(key, nextQMonthIndex))}`
           }
           return ''
@@ -156,7 +154,7 @@ export default class BookingsPulse extends Report {
             }
             const pipeline = i === series.length - 1 ?
               this.pipelineValue(key) :
-              this.pipelineValue(key, this.sm.pm.getTargetIndex(i))
+              this.pipelineValue(key, this.pm.getTargetIndex(i))
 
             const ratio = MathHelper.devide(pipeline, Math.abs(v))
             const rh = new ReportHelper()
@@ -189,8 +187,7 @@ export default class BookingsPulse extends Report {
 
   bookingsGaps(key, series) {
     if (series.length === 0) return []
-    const { pm } = this.sm
-    const targets = pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
+    const targets = this.pm.getAnnualTargetsbyMonth(key, 'bookings', 2018, series.length - 2)
     const totals = MathHelper.sumArrays(series, this.bookingsKey)
     const actuals = MathHelper.mapToRollingSum(totals, true)
     return MathHelper.subtractArrays(actuals, targets)

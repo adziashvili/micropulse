@@ -1,14 +1,14 @@
 import { Verbatim } from '../../common'
 
 export default class UtFollowupReport {
-  constructor(config = undefined, storeManager = undefined) {
+  constructor(config = undefined, practiceManager = undefined) {
     let verbatimData = []
     if (config && config.result && config.result.verbatim) {
       verbatimData = config.result.verbatim
     }
 
     this.verbatim = new Verbatim(verbatimData)
-    this.names = !storeManager || !storeManager.pm ? [] : storeManager.pm.all
+    this.names = !practiceManager ? [] : practiceManager.all
     this.clean()
   }
 

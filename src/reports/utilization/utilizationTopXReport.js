@@ -6,8 +6,8 @@ const NEW_ENTRANT = '\u25B4'.green
 const BLACK_LIST = ['APJ', 'APAC', 'APJ Shared']
 
 export default class UtilizationTopXReport extends UtFollowupReport {
-  constructor(config = undefined, storeManager) {
-    super(config, storeManager)
+  constructor(config = undefined, practiceManager) {
+    super(config, practiceManager)
 
     this.leaderboard = []
     this.rh = new ReportHelper('LEADERBOARD: TOP MONTHLY PERFORMENCES')

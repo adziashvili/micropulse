@@ -23,7 +23,7 @@ const UTILIZATION_DICTIONARY_DATA = [
 ]
 
 export default class UtilizationPulse extends Report {
-  constructor(file, storeManager) {
+  constructor(file, practiceManager) {
     super({
       file,
       dictionary: new Dictionary(UTILIZATION_DICTIONARY_DATA),
@@ -38,7 +38,7 @@ export default class UtilizationPulse extends Report {
     this.exKey = 'Historical Excluded Hours'
     this.rh = new ReportHelper()
 
-    this.sm = storeManager
+    this.pm = practiceManager
     this.amountKey = 'Historical Billable Hours'
     this.setup()
   }
@@ -51,8 +51,8 @@ export default class UtilizationPulse extends Report {
 
     this.rows = [{
       key: 'Resource: Practice',
-      rollup: this.sm.pm.rollupAPAC,
-      sortby: this.sm.pm.noAPJOrder
+      rollup: this.pm.rollupAPAC,
+      sortby: this.pm.noAPJOrder
     }]
 
     this.custom = [{

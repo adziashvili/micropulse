@@ -38,7 +38,7 @@ const TOP_10_LIST_CONFIG = {
 }
 
 export default class PipelinePulse extends Report {
-  constructor(file, storeManager) {
+  constructor(file, practiceManager) {
     super({
       file,
       dictionary: new Dictionary(PIPELINE_DICTIONARY_DATA),
@@ -46,7 +46,7 @@ export default class PipelinePulse extends Report {
       listConfig: TOP_10_LIST_CONFIG
     })
 
-    this.sm = storeManager
+    this.pm = practiceManager
     this.amountKey = 'Total Contract Amount (converted)'
     this.setup()
   }
@@ -59,8 +59,8 @@ export default class PipelinePulse extends Report {
 
     this.rows = [{
         key: 'Practice',
-        rollup: this.sm.pm.rollupAPAC,
-        sortby: this.sm.pm.noAPJandSharedOrder
+        rollup: this.pm.rollupAPAC,
+        sortby: this.pm.noAPJandSharedOrder
       },
       { key: 'Stage' }
       // {

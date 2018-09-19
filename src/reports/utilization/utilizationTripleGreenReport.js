@@ -2,8 +2,8 @@ import { ReportHelper, StringHelper } from 'ika-helpers'
 import UtFollowupReport from './utFollowupReport'
 
 export default class UtilizationTripleGreenReport extends UtFollowupReport {
-  constructor(config = undefined, storeManager) {
-    super(config, storeManager)
+  constructor(config = undefined, practiceManager) {
+    super(config, practiceManager)
     this.leaderboard = []
     this.rounds = this.verbatim.colCount - 2
     this.rh = new ReportHelper('LEADERBOARD: TRIPLE GREENS')

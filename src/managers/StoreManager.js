@@ -2,10 +2,6 @@ import { ExcelReader, FSHelper } from 'ika-helpers'
 
 const path = require('path')
 
-const UTILIZATION_NEW_DATA_FILE = 'utilization.xlsx'
-
-const UTILIZATION_DB = 'utilizationDB.json'
-
 const _STORAGE_ROOT = '../../data'
 const _ARCHIVE_FOLDER = 'archive'
 

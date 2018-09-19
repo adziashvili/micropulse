@@ -16,8 +16,8 @@ const WAIT_INTERVAL = 100
 const TIMEOUT = 2000
 
 export default class MicroPulse {
-  constructor(sm) {
-    this.sm = sm
+  constructor(pm) {
+    this.pm = pm
 
     this.reports = [
       { class: PipelinePulse, path: pipelineYTD },
@@ -54,10 +54,10 @@ export default class MicroPulse {
   report(isVerbose = false) {
     if (this.nextReportIndex === this.reports.length) return undefined
 
-    const { sm, lastReportResult: config } = this
+    const { pm, lastReportResult: config } = this
     const nextReportEntry = this.reports[this.nextReportIndex]
     const { class: PulseReport, path, followups } = nextReportEntry
-    const report = new PulseReport(path, sm, config)
+    const report = new PulseReport(path, pm, config)
 
     const promise = report.configure()
     promise
@@ -83,10 +83,10 @@ export default class MicroPulse {
 
   _followup(followups) {
     if (followups) {
-      const { sm, lastReportResult: config } = this
+      const { pm, lastReportResult: config } = this
       followups.forEach((f) => {
         const FollowupReport = f
-        const followup = new FollowupReport(config, sm)
+        const followup = new FollowupReport(config, pm)
         followup.report()
       })
     }
