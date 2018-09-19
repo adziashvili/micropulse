@@ -16,9 +16,7 @@ function start() {
   const isVerbose = false
 
   const mp = new MicroPulse(sm)
-  mp.report(isVerbose)
+  mp.run(isVerbose)
 }
 
 start()
-
-// Runs pulse reports
