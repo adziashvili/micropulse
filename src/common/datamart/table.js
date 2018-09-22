@@ -6,11 +6,11 @@ import {
 } from '..'
 
 export default class Table {
-  constructor(data, Parser, isVerbose = false) {
+  constructor(data, parser, isVerbose = false) {
     this._records = []
     this.isInitialised = false
 
-    this.parser = new Parser(data)
+    this.parser = parser
     this.isVerbose = isVerbose
 
     this.meta = this.parser.meta

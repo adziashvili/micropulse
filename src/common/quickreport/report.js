@@ -1,6 +1,6 @@
 import { ExcelReader } from 'ika-helpers'
 import {
-  Parser,
+  ParserFactory,
   Modeler,
   Table,
   Reporter
@@ -69,7 +69,15 @@ export default class Report {
 
     return ExcelReader
       .load(this.file)
-      .then(data => ({ table: new Table(data.getWorksheet(data.worksheets[0].id), Parser) }))
+      .then((data) => {
+        const ws = data.getWorksheet(data.worksheets[0].id)
+        const parser = ParserFactory.getParser(ws)
+        if (!parser) {
+          throw new Error('Unable to find a suitable parser')
+        }
+        return { ws, parser }
+      })
+      .then(result => ({ table: new Table(result.ws, result.parser) }))
       .then((config) => {
         const modeler = new Modeler(config.table)
         const keys = ['cols', 'rows', 'stats', 'custom']
@@ -131,49 +139,5 @@ export default class Report {
     }
     const { config } = this
     return Object.assign(config, { result: config.reporter.report(isVerbose) })
-  }
-
-  run(isVerbose = false) {
-    if (!this.verifySelf()) {
-      throw new Error('Invalid report subclassing. Check log.')
-    }
-
-    return ExcelReader
-      .load(this.file)
-      .then(data => ({ table: new Table(data.getWorksheet(data.worksheets[0].id), Parser) }))
-      .then((config) => {
-        const modeler = new Modeler(config.table)
-        const keys = ['cols', 'rows', 'stats', 'custom']
-        keys.forEach((key) => {
-          if (this[key].length > 0) {
-            modeler[key] = this[key]
-          }
-        })
-        modeler.build()
-        config.modeler = modeler
-        return config
-      })
-      .then((config) => {
-        const reporterConfig = {
-          modeler: config.modeler,
-          dictionary: this.dictionary,
-          isAddTotal: this.isAddTotal,
-          isAddTotalRow: this.isAddTotalRow,
-          isRepeatHeaders: this.isRepeatHeaders,
-          firstColShrinkBy: this.firstColShrinkBy,
-          otherColShrinBy: this.otherColShrinBy,
-          listConfig: this.listConfig,
-          isVerbose
-        }
-        return Object.assign(config, {
-          reporterConfig,
-          reporter: new Reporter(reporterConfig)
-        })
-      })
-      .then(config => Object.assign(config, { result: config.reporter.report(isVerbose) }))
-      .catch((e) => {
-        e.message = `'Reporter Ooops! ${e.message}`.red.bold
-        throw e // rejects the promise to report
-      })
   }
 }

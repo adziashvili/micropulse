@@ -1,29 +1,11 @@
-const assert = require('assert')
+const UNKNOWN = 'UNKNOWN'
 
-const REPORT_NAME_CELL = 'A1'
-const REPORT_DATE_CELL = 'A6'
-
-export default class Parser {
+export default class BaseExcelParser {
   constructor(ws) {
     this.ws = ws
-    this.records = []
-    this.lookups = [
-      { name: 'ANZ', lookup: 'ANZ' },
-      { name: 'ASEAN', lookup: 'ASEAN' },
-      { name: 'INDIA', lookup: 'INDIA' },
-      { name: 'S.KOREA', lookup: 'S. KOREA' },
-      { name: 'APAC', lookup: 'APAC' },
-      { name: 'JAPAN', lookup: 'JAPAN' },
-      { name: 'APJ Shared', lookup: 'APJ Shared' },
-      { name: 'APJ', lookup: 'APJ' }
-    ]
+    this.lookups = []
 
-    this.meta = this.buildMeta()
-    this.firstDataColIndex = 1
-  }
-
-  parse() {
-    throw new Error('Exception: You need to implement this method')
+    this.meta = this.parseMeta()
   }
 
   /**
@@ -35,7 +17,6 @@ export default class Parser {
    *                  "UNKNOWN" if not found or if lookup str is null or 'undefined'
    */
   lookup(str) {
-    const UNKNOWN = 'UNKNOWN'
     let value = UNKNOWN
 
     if (str === null || !str) {
@@ -70,7 +51,11 @@ export default class Parser {
    * @return {Array} Array of values as read for the row.
    */
   getRowValues(rowIndex) {
-    return this.readRow(this.firstDataColIndex, rowIndex)
+    let { firstDataCol } = this.meta
+    if (!firstDataCol) {
+      firstDataCol = 1
+    }
+    return this.readRow(firstDataCol, rowIndex)
   }
 
   /**
@@ -99,7 +84,7 @@ export default class Parser {
     const forever = true
 
     while (forever) {
-      const { value } = this.ws.getCell(`${this.CELLS[colunm - 1]}${row}`)
+      const { value } = this.ws.getCell(`${this.COLUMNS[colunm - 1]}${row}`)
 
       if (value !== null) {
         values.push(value)
@@ -126,7 +111,7 @@ export default class Parser {
     let row = inRow
 
     while (row <= rowEnd) {
-      const { value } = this.ws.getCell(`${this.CELLS[col - 1]}${row}`)
+      const { value } = this.ws.getCell(`${this.COLUMNS[col - 1]}${row}`)
       if (value !== null) {
         values.push(value)
         row += 1
@@ -163,6 +148,30 @@ export default class Parser {
   }
 
   /**
+   * Scans down for a first non-null value
+   *
+   * @param {String} [col='A'] Column to scale
+   * @param {Number} [row=1]   Starting row
+   *
+   * @return {[type]} Row number for first match
+   */
+  lookDownAny(col = 'A', row = 1) {
+    return this.lookDownCondition(v => v !== null, col, row).row
+  }
+
+  /**
+   * Scans down for a first null value from a given row for a given column
+   *
+   * @param {String} [col='A'] Column to scale
+   * @param {Number} [row=1]   Starting row
+   *
+   * @return {[type]} First row number who's value is null
+   */
+  lookDownNull(col = 'A', row = 1) {
+    return this.lookDownCondition(v => v === null, col, row).row
+  }
+
+  /**
    * Scans values from col:row downwards untill condition is met. If
    * condition is null, none null value is searched for - i.e. ANY value.
    *
@@ -191,32 +200,15 @@ export default class Parser {
   }
 
   /**
-   * Clones records. Assumes the record have clone method.
-   *
-   * @return {[type]} [description]
-   */
-  cloneRecords() {
-    const newRecords = []
-    this.records.forEach((r) => {
-      assert(typeof r.clone === 'function')
-      newRecords.push(r.clone())
-    })
-    return newRecords
-  }
-
-  /**
    * Reads the report date.
    *
    * @return {Date} Report date
    */
   getReportDate() {
-    const date = this.readCell(REPORT_DATE_CELL)
-    if (date === null) {
-      throw new Error(`Can't find report data in ${REPORT_DATE_CELL}`)
-    } else {
-      // SFDC reports are offset
-      return new Date(`${date.trim()} UTC`)
+    if (!this.meta || !this.meta.date) {
+      return new Date(Date.now())
     }
+    return this.meta.date
   }
 
   /**
@@ -225,49 +217,45 @@ export default class Parser {
    * @return {String} The report name or "UNKNOWN REPORT NAME" if not found
    */
   getReportName() {
-    const name = this.readCell(REPORT_NAME_CELL)
-    return name === null ? 'UNKNOWN REPORT NAME' : name
+    if (!this.meta || !this.meta.name) {
+      return this.ws.sheetName
+    }
+    return this.meta.name
+  }
+
+  isCompatible() {
+    return Object.keys(this.meta).every(v => v !== -1)
   }
 
   /**
-   * Extract the key Meta data of the parsed parsed file and return an object
+   * Extract the key Meta data of the worksheet and returns an object
    * with the following properties:
    *  name: Name of the report
    *  date: Date of the report
    *  headersRow: The row number that includes the headers (-1 if not found).
    *  firstDataRow: The row number that includes the frist data row (-1 if not found)
    *  lastDataRow: The row number that includes the last data row (-1 if not found)
+   *  firstDataCol: The first data column index (assumed 1 for now)
    *
-   * @return {Object} Files metadata object.
+   * @return {Object} Worksheet metadata object.
    */
-  buildMeta() {
-    const filterMarker = 'Filtered By:'
-    const filterBlank = '   '
-    const analysis = { headersRow: -1, firstDataRow: -1, lastDataRow: -1 }
-    const filterRow = this.lookDown(filterMarker, 'A')
-
-    if (filterRow !== -1) { // This is first pass for files with filters
-      let result = this.lookDownCondition(c => c !== filterBlank, 'A', filterRow + 1)
-      if (result.row !== -1) {
-        analysis.headersRow = result.row
-        analysis.firstDataRow = result.row + 1
-        result = this.lookDownCondition(
-          c => c === null || c.toLowerCase().startsWith('Grand Totals'.toLowerCase()),
-          'A',
-          analysis.firstDataRow + 1
-        )
-        if (result.row !== -1) {
-          analysis.lastDataRow = result.row - 1
-        }
-      }
-    } else {
-      // TODO: What should we do if there is no filter?
+  parseMeta() {
+    const analysis = {
+      headersRow: -1,
+      firstDataRow: -1,
+      lastDataRow: -1,
+      firstDataCol: 1 // naive assumption
     }
+    const firstRow = this.lookDownAny()
 
-    for (const key in analysis) {
-      if (analysis[key] === -1) {
-        console.log('Analysis of file failed:'.red, analysis);
-        throw new Error(`Analysis of file failed. Unable to detemine ${key}`)
+    if (firstRow !== -1) {
+      analysis.firstDataRow = firstRow + 1
+      const lastRow = this.lookDownNull('A', firstRow)
+      if (lastRow !== -1) {
+        analysis.lastDataRow = lastRow
+        if (lastRow > firstRow) {
+          analysis.headersRow = firstRow
+        }
       }
     }
 
@@ -278,15 +266,6 @@ export default class Parser {
       })
   }
 
-  /**
-   * Returns the size of the records loaded
-   *
-   * @return {[type]} [description]
-   */
-  get size() {
-    return this.records.length
-  }
-
   get meta() {
     return this._meta
   }
@@ -295,7 +274,7 @@ export default class Parser {
     this._meta = meta
   }
 
-  get CELLS() {
+  get COLUMNS() {
     return ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
       'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
       'W', 'X', 'Y', 'Z'
