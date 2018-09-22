@@ -236,6 +236,7 @@ export default class BaseExcelParser {
     }
     const firstRow = this.lookDownAny()
     const lastRow = this.ws.rowCount - 1
+    // We can read this.ws.columnCount and this.ws.rowCount
 
     if (firstRow !== -1) {
       analysis.firstDataRow = firstRow + 1

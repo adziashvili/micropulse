@@ -57,7 +57,12 @@ export default class SFDCExcelParser extends BaseExcelParser {
   parseMeta() {
     const filterMarker = 'Filtered By:'
     const filterBlank = '   '
-    const analysis = { headersRow: -1, firstDataRow: -1, lastDataRow: -1 }
+    const analysis = {
+      headersRow: -1,
+      firstDataRow: -1,
+      lastDataRow: -1,
+      firstDataCol: 1
+    }
     const filterRow = this.lookDown(filterMarker, 'A')
 
     if (filterRow !== -1) { // This is first pass for files with filters
