@@ -7,10 +7,13 @@ import {
   UtilizationTopXReport
 } from '.'
 
+import TestPulse from './testPulse'
+
 const bookingsYTD = './data/bookingsYTD.xlsx'
 const pipelineYTD = './data/pipelineYTD.xlsx'
 const pipeline6Months = './data/pipeline6months.xlsx'
 const utilizationYTD = './data/utilizationYTD.xlsx'
+const testFile = './data/test.xlsx'
 
 const WAIT_INTERVAL = 100
 const TIMEOUT = 2000
@@ -20,6 +23,7 @@ export default class MicroPulse {
     this.pm = pm
 
     this.reports = [
+      // { class: TestPulse, path: testFile },
       { class: PipelinePulse, path: pipelineYTD },
       { class: BookingsPulse, path: bookingsYTD },
       {

@@ -218,7 +218,7 @@ export default class Table {
           record.set(key, SH.parseBoolean(record.get(key)))
           break
         default:
-          throw new Error(`Oops, UNKNOWN key type:'${type}'`)
+          throw new Error(`UNKNOWN key type:'${type}'`)
       }
     })
 

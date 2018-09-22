@@ -74,15 +74,6 @@ export default class SFDCExcelParser extends BaseExcelParser {
           analysis.lastDataRow = result.row - 1
         }
       }
-    } else {
-      // TODO: What should we do if there is no filter?
-    }
-
-    for (const key in analysis) {
-      if (analysis[key] === -1) {
-        console.log('Analysis of file failed:'.red, analysis);
-        throw new Error(`Analysis of file failed. Unable to detemine ${key}`)
-      }
     }
 
     return Object.assign({},

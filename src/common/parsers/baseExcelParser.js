@@ -160,18 +160,6 @@ export default class BaseExcelParser {
   }
 
   /**
-   * Scans down for a first null value from a given row for a given column
-   *
-   * @param {String} [col='A'] Column to scale
-   * @param {Number} [row=1]   Starting row
-   *
-   * @return {[type]} First row number who's value is null
-   */
-  lookDownNull(col = 'A', row = 1) {
-    return this.lookDownCondition(v => v === null, col, row).row
-  }
-
-  /**
    * Scans values from col:row downwards untill condition is met. If
    * condition is null, none null value is searched for - i.e. ANY value.
    *
@@ -218,13 +206,13 @@ export default class BaseExcelParser {
    */
   getReportName() {
     if (!this.meta || !this.meta.name) {
-      return this.ws.sheetName
+      return this.ws.name
     }
     return this.meta.name
   }
 
   isCompatible() {
-    return Object.keys(this.meta).every(v => v !== -1)
+    return Object.keys(this.meta).every(key => this.meta[key] !== -1)
   }
 
   /**
@@ -247,15 +235,13 @@ export default class BaseExcelParser {
       firstDataCol: 1 // naive assumption
     }
     const firstRow = this.lookDownAny()
+    const lastRow = this.ws.rowCount - 1
 
     if (firstRow !== -1) {
       analysis.firstDataRow = firstRow + 1
-      const lastRow = this.lookDownNull('A', firstRow)
-      if (lastRow !== -1) {
-        analysis.lastDataRow = lastRow
-        if (lastRow > firstRow) {
-          analysis.headersRow = firstRow
-        }
+      analysis.lastDataRow = lastRow
+      if (lastRow > firstRow) {
+        analysis.headersRow = firstRow
       }
     }
 
