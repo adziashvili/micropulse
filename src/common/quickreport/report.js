@@ -112,7 +112,8 @@ export default class Report {
         return this.config
       })
       .catch((e) => {
-        e.message = `'Failed configure report for ${this.file}: ${e.message}`.red.bold
+        const str = `Report.configure() failed on ${this.file} -> `
+        e.message = `${str} ${e.message.red}`
         throw e // rejects the promise to report
       })
   }

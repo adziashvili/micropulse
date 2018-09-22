@@ -40,7 +40,9 @@ export default class MicroPulse {
 
     this.nextReportIndex = 0
     this.lastReportResult = {}
+
     this.timeout = 0
+    this.isError = false
   }
 
   get isDone() {
@@ -49,13 +51,15 @@ export default class MicroPulse {
 
   run(isVerbose = false) {
     this.timeout = 0
+    this.isError = false
+
     return new Promise((resolve, reject) => {
-      this.report(isVerbose)
+      this.report(resolve, reject, isVerbose)
       this._resolveWhenDone(resolve, reject)
     })
   }
 
-  report(isVerbose = false) {
+  report(resolve, reject, isVerbose = false) {
     if (this.nextReportIndex === this.reports.length) return undefined
 
     const { pm, lastReportResult: config } = this
@@ -64,22 +68,19 @@ export default class MicroPulse {
     const report = new PulseReport(path, pm, config)
 
     const promise = report.configure()
+
     promise
-      .then(result => report.report(isVerbose))
-      .then((result) => {
-        this.lastReportResult = result
+      .then(() => {
+        this.lastReportResult = report.report(isVerbose)
         this.nextReportIndex += 1
         this._followup(followups)
+        return this.report(isVerbose)
       })
-      .then(result => this.report(isVerbose))
-      .then(result => Object.assign(nextReportEntry, {
-        report,
-        result: this.lastReportResult,
-        isDone: true
-      }))
+      .then(() => Object.assign(nextReportEntry, { report, result: this.lastReportResult, isDone: true }))
       .catch((e) => {
-        e.message = `'MicroPulse Ooops! ${e.message}`.red.bold
-        throw e
+        this.isError = true
+        this.error = e
+        reject(e)
       })
 
     return promise
@@ -97,19 +98,20 @@ export default class MicroPulse {
   }
 
   _resolveWhenDone(resolve, reject) {
+    if (this.isError) {
+      return
+    }
+
     if (this.isDone) {
-      this.timeout = 0
       resolve(this.reports)
       return
     }
 
     this.timeout += WAIT_INTERVAL
     if (this.timeout <= TIMEOUT) {
-      setTimeout(() => { this._resolveWhenDone(resolve) }, WAIT_INTERVAL)
+      setTimeout(() => { this._resolveWhenDone(resolve, reject) }, WAIT_INTERVAL)
     } else {
-      console.log(`WARNING: Could not complete in ${this.timeout} ms`.red)
-      this.timeout = 0
-      reject({})
+      reject(new Error(`TIMEOUT: MicroPulse could not complete within ${this.timeout} ms`.red))
     }
   }
 }

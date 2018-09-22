@@ -17,6 +17,14 @@ function start() {
 
   const mp = new MicroPulse(pm)
   mp.run(isVerbose)
+    .then(() => {
+      console.log('MicroPulse - success.'.green)
+    }).catch((err) => {
+      console.log('MicroPulse - failed.'.red)
+      console.log(err)
+    }).finally(() => {
+      console.log('MicroPulse - done.'.grey.italic)
+    })
 }
 
 start()
