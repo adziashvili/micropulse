@@ -7,7 +7,7 @@ import {
   UtilizationTopXReport
 } from '.'
 
-import TestPulse from './testPulse'
+import TestPulse from './test/testPulse'
 
 const bookingsYTD = './data/bookingsYTD.xlsx'
 const pipelineYTD = './data/pipelineYTD.xlsx'

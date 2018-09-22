@@ -1,4 +1,4 @@
-import { Report } from '../common'
+import { Report } from '../../common'
 
 export default class TestPulse extends Report {
   constructor(pathToFile) {
