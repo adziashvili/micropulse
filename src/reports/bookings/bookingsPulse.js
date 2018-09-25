@@ -13,7 +13,7 @@ import {
 
 const BOOKINGS_DICTIONARY_DATA = [
   { key: 'TOTAL', shortName: 'APJ' },
-  { key: 'Project: Practice', shortName: 'Practice' },
+  { key: 'Project: Practice Name', shortName: 'Practice' },
   { key: 'Effective Date', shortName: 'Date' },
   { key: 'Amount (converted)', shortName: 'Bookings' },
   { key: 'Project: Discount Percentage', shortName: 'Discount' },
@@ -54,7 +54,7 @@ export default class BookingsPulse extends Report {
     // Defines the report to be based on effective date's month
 
     this.rows = [{
-      key: 'Project: Practice',
+      key: 'Project: Practice Name',
       rollup: this.pm.rollupAPAC,
       sortby: this.pm.noAPJandSharedOrder
     }]
