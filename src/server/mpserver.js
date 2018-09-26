@@ -7,12 +7,16 @@ const path = require('path')
 const config = require('../../package.json')
 
 const ROOT = '../../'
+const WWW_FOLDER = path.join(__dirname, ROOT, 'www')
+const IMAGES_FOLDER = 'images'
+const FAVICON = 'favicon.ico'
+const PORT = 3000
 
 export default class MPServer {
-  constructor() {
+  constructor(mp) {
+    this.mp = mp
     this.app = express()
-    this.port = 3000
-    this.www = path.join(__dirname, ROOT, 'www')
+    this.port = PORT
     this.setup()
   }
 
@@ -22,13 +26,14 @@ export default class MPServer {
     // Middlewares
     app.use(morgan('tiny'))
     app.use(cors())
-    app.use(favicon(path.join(this.www, 'images', 'favicon.ico')))
-    app.use(serveStatic(path.join(this.www)))
-    app.use(serveStatic(path.join(this.www, 'images')))
+    app.use(favicon(path.join(WWW_FOLDER, IMAGES_FOLDER, FAVICON)))
+    app.use(serveStatic(path.join(WWW_FOLDER)))
+    app.use(serveStatic(path.join(WWW_FOLDER, IMAGES_FOLDER)))
 
     // Services
     app.get(['/', '/whoami'], (req, res) => res.send(this.whoami()))
     app.get('/version', (req, res) => res.send(config.version))
+    app.get('/practices', (req, res) => res.send(this.mp.pm.pdb))
   }
 
   start() {

@@ -16,25 +16,22 @@ function start() {
 
   // Looking for runtime mode
   // Add --mpmode=server t0 command line to run server mode
-  if (argv.mpmode && argv.mpmode === 'server') {
-    // Server mode
-    const mpServer = new MPServer()
-    mpServer.start()
-  } else {
-    // local mode, printing to STD out
-    const isVerbose = false
-    const mp = new MicroPulse(pm)
 
-    mp.run(isVerbose)
-      .then(() => {
-        console.log('MicroPulse - success.'.green)
-      }).catch((err) => {
-        console.log('MicroPulse - failed.'.red)
-        console.log(err)
-      }).finally(() => {
-        console.log('MicroPulse - done.'.grey.italic)
-      })
-  }
+  // local mode, printing to STD out
+  const isVerbose = false
+  const isServer = argv.mpmode && argv.mpmode === 'server'
+  const mp = new MicroPulse(pm)
+
+  mp.run(isVerbose)
+    .then(() => {
+      console.log('MicroPulse - success.'.green)
+      if (isServer) { // requested to run server
+        new MPServer(mp).start()
+      }
+    }).catch((err) => {
+      console.log('MicroPulse - failed.'.red)
+      console.log(err)
+    })
 }
 
 start()
