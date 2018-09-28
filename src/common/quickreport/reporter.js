@@ -8,6 +8,7 @@ import {
 
 import {
   TableReporter,
+  TableSummeriser,
   Layout,
   Dictionary
 }
@@ -426,6 +427,9 @@ export default class Reporter {
     trConf.headers = conf.displayKeys.map(m => this.dictionary.get(m))
     trConf.types = conf.displayKeys.map(m => this.modeler.table.keyType(m))
     trConf.padding = padding
+    if (conf.summerise) {
+      trConf.summeriser = new TableSummeriser(conf.summerise)
+    }
 
     new TableReporter(row.records, trConf).report()
   }

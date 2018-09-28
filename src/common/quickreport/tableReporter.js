@@ -15,7 +15,8 @@ export default class TableReporter {
     headers = [],
     types = [],
     padding = '',
-    colounmSpaceCount = 3
+    colounmSpaceCount = 3,
+    summeriser = undefined
   } = {}) {
     this.array = array
     this.title = title
@@ -27,6 +28,7 @@ export default class TableReporter {
     this.types = types
     this.padding = padding
     this.colounmSpaceCount = colounmSpaceCount
+    this.summeriser = summeriser
 
     this.rh = new ReportHelper()
   }
@@ -75,6 +77,12 @@ export default class TableReporter {
       entry.forEach((value, i) => sb.appendExact(`${value}`, lengths[i]))
       console.log(isHeaders && entryIndex === 0 ? sb.toString().dim : sb.toString());
     })
+
+    if (this.summeriser) {
+      this.summeriser.array = records
+      this.summeriser.padding = padding
+      this.summeriser.report()
+    }
   }
 
   getMaxStringLengths(objects) {

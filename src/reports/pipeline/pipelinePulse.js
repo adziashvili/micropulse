@@ -28,13 +28,21 @@ const PIPELINE_DICTIONARY_DATA = [
 ]
 
 const PRIME_KEY = 'Total Contract Amount (converted)'
+const TOP_X = 10
+const TOP_TITLE = `TOP ${TOP_X}`
 
-const TOP_10_LIST_CONFIG = {
-  title: 'TOP 10 Opportunities',
+const TOP_X_LIST_CONFIG = {
+  title: `${TOP_TITLE} Opportunities`,
   filterBeforeSort: undefined,
   sortBy: (ra, rb) => rb[PRIME_KEY] - ra[PRIME_KEY],
-  filterAfterSort: (r, i) => i < 10,
-  displayKeys: [PRIME_KEY, 'Close Date', 'Forecast Status', 'Account Name']
+  filterAfterSort: (r, i) => i < TOP_X,
+  displayKeys: [PRIME_KEY, 'Close Date', 'Forecast Status', 'Account Name'],
+  summerise: {
+    summeriseKey: PRIME_KEY,
+    byKey: 'Forecast Status',
+    displayAs: 'currency',
+    title: `${TOP_TITLE} Forecast Status`
+  }
 }
 
 export default class PipelinePulse extends Report {
@@ -43,7 +51,7 @@ export default class PipelinePulse extends Report {
       file,
       dictionary: new Dictionary(PIPELINE_DICTIONARY_DATA),
       isRepeatHeaders: true,
-      listConfig: TOP_10_LIST_CONFIG
+      listConfig: TOP_X_LIST_CONFIG
     })
 
     this.pm = practiceManager

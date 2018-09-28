@@ -24,7 +24,14 @@ export default class MPServer {
     const { app } = this
 
     // Middlewares
-    app.use(morgan('tiny'))
+    // app.use(morgan('tiny'))
+    app.use(morgan((tokens, req, res) => [
+      tokens.method(req, res).bold, tokens.url(req, res).bold,
+      '=>', tokens.status(req, res),
+      tokens.res(req, res, 'content-length'),
+      tokens['response-time'](req, res), 'ms'
+    ].join(' ')))
+
     app.use(cors())
     app.use(favicon(path.join(WWW_FOLDER, IMAGES_FOLDER, FAVICON)))
     app.use(serveStatic(path.join(WWW_FOLDER)))
