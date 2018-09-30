@@ -1,3 +1,5 @@
+import { Dictionary } from 'ika-datamart'
+
 import {
   DateHelper,
   StringHelper,
@@ -6,7 +8,6 @@ import {
 
 import {
   Report,
-  Dictionary,
   Customs
 } from '../../common'
 

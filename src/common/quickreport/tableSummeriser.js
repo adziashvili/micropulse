@@ -4,7 +4,7 @@ import {
   StringHelper as SH
 } from 'ika-helpers'
 
-import { Analyzer } from '..'
+import { Analyzer } from 'ika-datamart'
 
 export default class TableSummeriser {
   constructor({

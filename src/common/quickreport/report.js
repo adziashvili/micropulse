@@ -1,8 +1,8 @@
+import { Table } from 'ika-datamart'
 import { ExcelReader } from 'ika-helpers'
 import {
   ParserFactory,
   Modeler,
-  Table,
   Reporter
 } from '..'
 

@@ -1,4 +1,4 @@
-import BaseExcelParser from './baseExcelParser'
+import { BaseExcelParser } from 'ika-datamart'
 
 const REPORT_NAME_CELL = 'A1'
 const REPORT_DATE_CELL = 'A6'

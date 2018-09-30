@@ -1,4 +1,5 @@
-import BaseExcelParser from './baseExcelParser'
+import { BaseExcelParser } from 'ika-datamart'
+
 import SFDCExcelParser from './sfdcExcelParser'
 
 const PARSERS = [SFDCExcelParser, BaseExcelParser]

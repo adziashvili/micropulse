@@ -1,3 +1,5 @@
+import { Dictionary } from 'ika-datamart'
+
 import {
   StringHelper as SH,
   StringBuffer,
@@ -9,8 +11,7 @@ import {
 import {
   TableReporter,
   TableSummeriser,
-  Layout,
-  Dictionary
+  Layout
 }
 from '..'
 
